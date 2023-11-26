@@ -96,6 +96,27 @@ void translate(Mesh3D* pmesh, Point3D v){
     }
 }
 
+Mesh3D* prism(Mesh3D* pmesh, Point3D vect){
+    Mesh3D* pcapA = (Mesh3D*) malloc(sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    Mesh3D* pcapB = (Mesh3D*) malloc(sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    if (pcapA == NULL || pcapB == NULL){
+        fprintf(stderr, "Couldn't allocate memory for creating a prism\n");
+        exit(1);
+    }
+    memcpy(pcapA, pmesh, sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    memcpy(pcapB, pmesh, sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    translate(pcapB, vect);
+    Edge3D edge;
+    for (int i = 0; i < pmesh->size; i++){
+        edge.a = pcapA->edges[i].a;
+        edge.b = pcapB->edges[i].a;
+        pcapA = add_edge(pcapA, edge);
+    }
+    pcapA = add_mesh(pcapA, pcapB);
+    free(pcapB);
+    return pcapA;
+}
+
 // 3D primitives
 Mesh3D* box(float a, float b, float c){
     Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D) + 12 * sizeof(Edge3D));
@@ -225,9 +246,6 @@ void print_mesh(Mesh3D* pmesh){
 }
 
 int main(int argc, char **argv){
-    Mesh3D* pcube = box(10, 10, 10);
-    //print_mesh(pcube);
-
     // SDL Initialization
     SDL_Window* pwindow = NULL;
     SDL_Renderer* prenderer = NULL;
@@ -266,7 +284,9 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    pscene = polygon(10, 500);
+    Mesh3D* ppoly = polygon(10, 50);
+    Point3D vect = {0, 0, 30};
+    pscene = prism(ppoly, vect);
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
