@@ -18,7 +18,7 @@ typedef struct {
 
 typedef struct {
     int n;
-    edge2D edges[100];
+    edge2D edges[1000];
 } wireframe2D;
 
 typedef struct {
@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
     int n;
-    edge3D edges[100];
+    edge3D edges[1000];
 } wireframe3D;
 
 void addWf(wireframe3D *wf, wireframe3D *toAdd){
@@ -116,6 +116,42 @@ wireframe3D cube(float a, float b, float c){
     return res;
 };
 
+wireframe3D polygon(float radius, int n){
+    wireframe3D res;
+    res.n = n;
+    point3D curr_pt = {0, 0, 0}, prev_pt = {radius, 0, 0};
+    edge3D edge;
+
+    for (int i = 1; i < n; i++){
+        float x = radius * cosf(i * M_PI * 2 / n);
+        float y = radius * sinf(i * M_PI * 2 / n);
+        curr_pt.x = x;
+        curr_pt.y = y;
+        edge.a = prev_pt;
+        edge.b = curr_pt;
+        res.edges[i-1] = edge;
+        prev_pt = curr_pt;
+    }
+    edge.a = prev_pt;
+    edge.b = res.edges[0].a;
+    res.edges[n-1] = edge;
+    return res;
+}
+
+void extrude(wireframe3D* pwf, point3D vect){
+    wireframe3D cap;
+    memcpy(&cap, pwf, sizeof(*pwf));
+    translate(&cap, vect);
+    edge3D curr_edge;
+    for (int i = 0; i < cap.n; i++){
+        curr_edge.a = pwf->edges[i].a;
+        curr_edge.b = cap.edges[i].a;
+        pwf->edges[pwf->n] = curr_edge;
+        pwf->n += 1;
+    }
+    addWf(pwf, &cap);
+};
+
 point2D project_point(point3D pt, float zoom){
     float x = (pt.x * (FOCAL_LENGTH / (zoom + pt.z))) + (WIDTH / 2);
     float y = (pt.y * (FOCAL_LENGTH / (zoom + pt.z))) + (HEIGHT / 2);
@@ -195,17 +231,43 @@ int main (int argc, char **argv)
     float zoom = 100.;
     point3D vect;
 
-    wireframe3D cube3D = cube(50, 30, 20);
-    wireframe3D cube3D2 = cube(10, 20, 50);
-    wireframe3D cube3D3 = cube(10, 10, 10);
-    wireframe3D randomline = line(0, 10, 50, -10);
-    addWf(&cube3D, &randomline);
-    point3D v = {10, 0, 30};
-    translate(&cube3D2, v);
-    point3D r = {0.13, 0.5, 0.3};
-    rotate(&cube3D3, r);
-    addWf(&cube3D, &cube3D2);
-    addWf(&cube3D, &cube3D3);
+    wireframe3D scene;
+
+    // Line
+    //wireframe3D randomline = line(0, 10, 50, -10);
+    //addWf(&scene, &randomline);
+
+    // Prisms
+    point3D vect_ext;
+    wireframe3D poly1 = polygon(10, 6);
+    vect_ext.x = 0;
+    vect_ext.y = 0;
+    vect_ext.z = 50;
+    extrude(&poly1, vect_ext);
+
+    wireframe3D poly2 = polygon(10, 6);
+    vect_ext.z = 30;
+    extrude(&poly2, vect_ext);
+
+    vect_ext.x = 10 + 10 * sinf(M_PI / 6);
+    vect_ext.y = 10 * cosf(M_PI / 6);
+    vect_ext.z = 0;
+    translate(&poly2, vect_ext);
+
+    wireframe3D poly3 = polygon(10, 6);
+    vect_ext.x = 0;
+    vect_ext.y = 0;
+    vect_ext.z = 20;
+    extrude(&poly3, vect_ext);
+    vect_ext.x = 10 + 10 * sinf(M_PI / 6);
+    vect_ext.y = -10 * cosf(M_PI / 6);
+    vect_ext.z = 0;
+    translate(&poly3, vect_ext);
+
+    addWf(&scene, &poly1);
+    addWf(&scene, &poly2);
+    addWf(&scene, &poly3);
+
     wireframe2D projection;
 
     while (!is_stopped)
@@ -239,12 +301,12 @@ int main (int argc, char **argv)
                             vect.x = (float)(event.motion.x - prev_x)/5;
                             vect.y = (float)(event.motion.y - prev_y)/5;
                             vect.z = 0;
-                            translate(&cube3D, vect);
+                            translate(&scene, vect);
                         } else {
                             vect.x = 0;
                             vect.y = -(float)(event.motion.x - prev_x)/100;
                             vect.z = (float)(event.motion.y - prev_y)/100;
-                            rotate(&cube3D, vect); 
+                            rotate(&scene, vect); 
                         }
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
@@ -283,7 +345,7 @@ int main (int argc, char **argv)
                 100,
                 255);
 
-        projection = project_wireframe(cube3D, zoom);
+        projection = project_wireframe(scene, zoom);
         draw_wf2D(renderer, projection);
 
         //Displaying
