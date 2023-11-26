@@ -6,8 +6,8 @@
 #define WIDTH 800
 #define HEIGHT 600
 #define FPS 60
-#define CIRCLE_SEGMENTS 20
-#define SPHERE_SLICES 20
+#define CIRCLE_SEGMENTS 15
+#define SPHERE_SLICES 15
 
 // Structures
 // 2D
@@ -348,13 +348,34 @@ int main(int argc, char **argv){
     // Initializing main loop
     // Creating scene
     Mesh3D* pscene = (Mesh3D*) malloc(sizeof(Mesh3D));
+    pscene->size = 0;
     if (pscene == NULL){
         fprintf(stderr, "Couldn't allocate memory when creating the scene\n");
         return 1;
     }
 
     // --- MODIFY HERE ---
-    pscene = sphere(30);
+    Mesh3D* psphere = sphere(10);
+    Point3D v = {30, 20, 0};
+    translate(psphere, v);
+    Mesh3D* pbox2 = box(30, 30, 30);
+    v.x = M_PI/4;
+    v.y = M_PI/4;
+    v.z = 0;
+    rotate(pbox2, v);
+    v.x = 20;
+    v.y = 20;
+    v.z = -30;
+    translate(pbox2, v);
+    Mesh3D* ppentagon = polygon(15, 5);
+    v.x = 0;
+    v.y = 0;
+    v.z = 50;
+    Mesh3D* pprism = prism(ppentagon, v);
+    pscene = merge_meshes(pscene, psphere);
+    pscene = merge_meshes(pscene, pbox2);
+    pscene = merge_meshes(pscene, pprism);
+
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
