@@ -6,6 +6,8 @@
 #define WIDTH 800
 #define HEIGHT 600
 #define FPS 60
+#define CIRCLE_SEGMENTS 20
+#define SPHERE_SLICES 20
 
 // Structures
 // 2D
@@ -205,6 +207,59 @@ Mesh3D* line(float xa, float ya, float za, float xb, float yb, float zb){
     return pmesh;
 }
 
+Mesh3D* sphere(float radius){
+    Mesh3D* pres = malloc(sizeof(Mesh3D));
+    if (pres == NULL) {
+        fprintf(stderr, "Couldn't allocate memory to create a sphere\n");
+        exit(1);
+    }
+    pres->size = 0;
+    Point3D v = {0, 0, 0};
+    for (int i = 1; i <= SPHERE_SLICES; i++){
+        Mesh3D* pcircle = polygon(radius * sinf(i * M_PI / (1 + SPHERE_SLICES)), CIRCLE_SEGMENTS);
+        v.z = radius * cosf(i * M_PI / (1 + SPHERE_SLICES));
+        translate(pcircle, v);
+        pres = merge_meshes(pres, pcircle); // this frees pcircle
+        // Stitching
+        if (i > 1){
+            Edge3D edges[CIRCLE_SEGMENTS];
+            Edge3D curr_edge;
+            for (int j = 0; j < CIRCLE_SEGMENTS; j++){
+                curr_edge.a = pres->edges[pres->size - 1 - j].a;
+                curr_edge.b = pres->edges[pres->size - 1 - j - CIRCLE_SEGMENTS].a;
+                edges[j] = curr_edge;
+            }
+            for (int j = CIRCLE_SEGMENTS - 1; j >= 0; j--){
+                pres = add_edge(pres, edges[j]);
+            }
+        }
+    }
+    //Caps
+    Mesh3D* pcaptop = malloc(sizeof(Mesh3D));
+    Mesh3D* pcapbottom = malloc(sizeof(Mesh3D));
+    if (pcaptop == NULL || pcapbottom == NULL) {
+        fprintf(stderr, "Couldn't allocate memory to create the sphere caps\n");
+        exit(1);
+    }
+    pcaptop->size = pcapbottom->size = 0;
+    Point3D ptTop = {0, 0, radius};
+    Point3D ptBottom = {0, 0, -radius};
+    Edge3D edge;
+    for (int i = 0; i < CIRCLE_SEGMENTS; i++){
+        //Top cap
+        edge.a = ptTop;
+        edge.b = pres->edges[i].a;
+        pcaptop = add_edge(pcaptop, edge);
+        //Bottom cap
+        edge.a = ptBottom;
+        edge.b = pres->edges[pres->size - CIRCLE_SEGMENTS*2 + i].a;
+        pcapbottom = add_edge(pcapbottom, edge);
+    }
+    pres = merge_meshes(pres, pcaptop);
+    pres = merge_meshes(pres, pcapbottom);
+    return pres;
+}
+
 // 2D projection
 Point2D project_point(Point3D point, float dist, float focal_length){
     float x = (point.x * (focal_length / (dist + point.z))) + (WIDTH / 2);
@@ -298,9 +353,8 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    Mesh3D* ppoly = polygon(10, 1000);
-    Point3D vect = {0, 0, 20};
-    pscene = merge_meshes(box(10, 20, 30), prism(ppoly, vect));
+    // --- MODIFY HERE ---
+    pscene = sphere(30);
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
