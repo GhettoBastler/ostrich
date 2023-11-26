@@ -191,6 +191,20 @@ Mesh3D* polygon(float radius, int n){
     return pmesh;
 }
 
+Mesh3D* line(float xa, float ya, float za, float xb, float yb, float zb){
+    Mesh3D* pmesh = malloc(sizeof(Mesh3D) + sizeof(Edge3D));
+    if (pmesh == NULL) {
+        fprintf(stderr, "Couldn't allocate memory to create a line\n");
+        exit(1);
+    }
+    pmesh->size = 1;
+    Point3D ptA = {xa, ya, za};
+    Point3D ptB = {xb, yb, zb};
+    Edge3D edge = {ptA, ptB};
+    pmesh->edges[0] = edge;
+    return pmesh;
+}
+
 // 2D projection
 Point2D project_point(Point3D point, float dist, float focal_length){
     float x = (point.x * (focal_length / (dist + point.z))) + (WIDTH / 2);
@@ -284,9 +298,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    Mesh3D* ppoly = polygon(10, 50);
-    Point3D vect = {0, 0, 30};
-    pscene = prism(ppoly, vect);
+    pscene = line(10, 20, 0, -20, 5, 1.5);
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
