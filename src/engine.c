@@ -144,6 +144,32 @@ Mesh3D* box(float a, float b, float c){
     return pres;
 }
 
+Mesh3D* polygon(float radius, int n){
+    Mesh3D* pmesh = malloc(sizeof(Mesh3D) + n * sizeof(Edge3D));
+    if (pmesh == NULL) {
+        fprintf(stderr, "Couldn't allocate memory to create polygon\n");
+        exit(1);
+    }
+    pmesh->size = n;
+    Point3D curr_pt = {0, 0, 0}, prev_pt = {radius, 0, 0};
+    Edge3D edge;
+
+    for (int i = 1; i < n; i++){
+        float x = radius * cosf(i * M_PI * 2 / n);
+        float y = radius * sinf(i * M_PI * 2 / n);
+        curr_pt.x = x;
+        curr_pt.y = y;
+        edge.a = prev_pt;
+        edge.b = curr_pt;
+        pmesh->edges[i-1] = edge;
+        prev_pt = curr_pt;
+    }
+    edge.a = prev_pt;
+    edge.b = pmesh->edges[0].a;
+    pmesh->edges[n-1] = edge;
+    return pmesh;
+}
+
 // 2D projection
 Point2D project_point(Point3D point, float dist, float focal_length){
     float x = (point.x * (focal_length / (dist + point.z))) + (WIDTH / 2);
@@ -240,7 +266,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    pscene = box(20, 20, 20);
+    pscene = polygon(10, 500);
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
