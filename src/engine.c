@@ -394,7 +394,8 @@ int main(int argc, char **argv){
     bool shift_pressed = false;
     int prev_x, prev_y;
 
-    float zoom = 100.;
+    float dist = 100.;
+    float focal_length = 800.;
     Point3D rotation, translation;
 
 
@@ -445,16 +446,24 @@ int main(int argc, char **argv){
                 
                 case SDL_MOUSEWHEEL:
                     if (event.wheel.y > 0) {
-                        zoom += 1;
+                        if (shift_pressed){
+                            focal_length += 5;
+                        } else {
+                            dist += 1;
+                        }
                     } else {
-                        zoom -= 1;
+                        if (shift_pressed){
+                            focal_length -= 5;
+                        } else {
+                            dist -= 1;
+                        }
                     }
                     break;
             }
         }
 
         //Drawing
-        project_mesh(pbuffer, pscene, zoom, 800);
+        project_mesh(pbuffer, pscene, dist, focal_length);
         draw(pbuffer, prenderer);
 
         //FPS caping
