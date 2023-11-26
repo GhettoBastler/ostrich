@@ -384,7 +384,7 @@ int main(int argc, char **argv){
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
-        if (delta == 0 || 1000 / delta < FPS) {
+        if (delta == 0 || 1000 / delta > FPS) {
             SDL_Delay((1000 / FPS) - delta);
         }
     }
