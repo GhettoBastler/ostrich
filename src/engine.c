@@ -50,10 +50,11 @@ Mesh3D* add_edge(Mesh3D* pmesh, Edge3D edge){
     return pres;
 }
 
-Mesh3D* add_mesh(Mesh3D* pmesh1, Mesh3D* pmesh2){
+Mesh3D* merge_meshes(Mesh3D* pmesh1, Mesh3D* pmesh2){
     for (int i = 0; i < pmesh2->size; i++){
         pmesh1 = add_edge(pmesh1, pmesh2->edges[i]);
     }
+    free(pmesh2);
     return pmesh1;
 }
 
@@ -112,8 +113,7 @@ Mesh3D* prism(Mesh3D* pmesh, Point3D vect){
         edge.b = pcapB->edges[i].a;
         pcapA = add_edge(pcapA, edge);
     }
-    pcapA = add_mesh(pcapA, pcapB);
-    free(pcapB);
+    pcapA = merge_meshes(pcapA, pcapB);
     return pcapA;
 }
 
@@ -298,7 +298,9 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    pscene = line(10, 20, 0, -20, 5, 1.5);
+    Mesh3D* ppoly = polygon(10, 1000);
+    Point3D vect = {0, 0, 20};
+    pscene = merge_meshes(box(10, 20, 30), prism(ppoly, vect));
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
