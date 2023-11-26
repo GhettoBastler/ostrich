@@ -1,58 +1,63 @@
-#include <SDL2/SDL.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <math.h>
+#include <stdbool.h>
+#include <SDL2/SDL.h>
 
 #define WIDTH 800
-#define HEIGHT 800
-#define FOCAL_LENGTH 800
-#define FPS 60.0
+#define HEIGHT 600
+#define FPS 60
 
+// Structures
+// 2D
 typedef struct {
     float x, y;
-} point2D;
+} Point2D;
 
 typedef struct {
-    point2D a, b;
-} edge2D;
+    Point2D a, b;
+} Edge2D;
 
 typedef struct {
-    int n;
-    edge2D edges[1000];
-} wireframe2D;
+    int size;
+    Edge2D edges[];
+} Mesh2D;
+
+// 3D
+typedef struct {
+   float x, y, z; 
+} Point3D;
 
 typedef struct {
-    float x, y, z;
-} point3D;
+    Point3D a, b;
+} Edge3D;
 
 typedef struct {
-    point3D a, b;
-} edge3D;
+    int size;
+    Edge3D edges[];
+} Mesh3D;
 
-typedef struct {
-    int n;
-    edge3D edges[1000];
-} wireframe3D;
-
-void addWf(wireframe3D *wf, wireframe3D *toAdd){
-    for (int i = 0; i < toAdd->n; i++){
-        wf->edges[wf->n + i] = toAdd->edges[i];
+// Functions
+// Mesh transformations
+Mesh3D* add_edge(Mesh3D* pmesh, Edge3D edge){
+    //Allocating more memory to add the new edge
+    Mesh3D* pres = realloc(pmesh, sizeof(Mesh3D) + (pmesh->size + 1) * sizeof(Edge3D));
+    if (pres == NULL){
+        fprintf(stderr, "Couldn't allocate memory to add a new edge\n");
+        exit(1);
     }
-    wf->n += toAdd->n;
-};
+    pres->edges[pres->size] = edge;
+    pres->size += 1;
+    return pres;
+}
 
-void translate(wireframe3D *wf, point3D v){
-    for (int i = 0; i < wf->n; i++){
-        wf->edges[i].a.x += v.x;
-        wf->edges[i].a.y += v.y;
-        wf->edges[i].a.z += v.z;
-        wf->edges[i].b.x += v.x;
-        wf->edges[i].b.y += v.y;
-        wf->edges[i].b.z += v.z;
-    };
-};
+Mesh3D* add_mesh(Mesh3D* pmesh1, Mesh3D* pmesh2){
+    for (int i = 0; i < pmesh2->size; i++){
+        pmesh1 = add_edge(pmesh1, pmesh2->edges[i]);
+    }
+    return pmesh1;
+}
 
-void rotate(wireframe3D *wf, point3D r){
+void rotate(Mesh3D* pmesh, Point3D r){
     float c00 = cosf(r.x) * cosf(r.y);
     float c01 = cosf(r.x) * sinf(r.y) * sinf(r.z) - sinf(r.x) * cosf(r.z);
     float c02 = cosf(r.x) * sinf(r.y) * cosf(r.z) + sinf(r.x) * sinf(r.z);
@@ -63,223 +68,206 @@ void rotate(wireframe3D *wf, point3D r){
     float c21 = cosf(r.y) * sinf(r.z);
     float c22 = cosf(r.y) * cosf(r.z);
 
-    for (int i = 0; i < wf->n; i++){
-        float xa = wf->edges[i].a.x;
-        float ya = wf->edges[i].a.y;
-        float za = wf->edges[i].a.z;
-        float xb = wf->edges[i].b.x;
-        float yb = wf->edges[i].b.y;
-        float zb = wf->edges[i].b.z;
+    for (int i = 0; i < pmesh->size; i++){
+        float xa = pmesh->edges[i].a.x;
+        float ya = pmesh->edges[i].a.y;
+        float za = pmesh->edges[i].a.z;
+        float xb = pmesh->edges[i].b.x;
+        float yb = pmesh->edges[i].b.y;
+        float zb = pmesh->edges[i].b.z;
 
-        wf->edges[i].a.x = c00 * xa + c01 * ya + c02 * za;
-        wf->edges[i].a.y = c10 * xa + c11 * ya + c12 * za;
-        wf->edges[i].a.z = c20 * xa + c21 * ya + c22 * za;
-        wf->edges[i].b.x = c00 * xb + c01 * yb + c02 * zb;
-        wf->edges[i].b.y = c10 * xb + c11 * yb + c12 * zb;
-        wf->edges[i].b.z = c20 * xb + c21 * yb + c22 * zb;
+        pmesh->edges[i].a.x = c00 * xa + c01 * ya + c02 * za;
+        pmesh->edges[i].a.y = c10 * xa + c11 * ya + c12 * za;
+        pmesh->edges[i].a.z = c20 * xa + c21 * ya + c22 * za;
+        pmesh->edges[i].b.x = c00 * xb + c01 * yb + c02 * zb;
+        pmesh->edges[i].b.y = c10 * xb + c11 * yb + c12 * zb;
+        pmesh->edges[i].b.z = c20 * xb + c21 * yb + c22 * zb;
     };
-};
+}
 
-wireframe3D line(float xa, float ya, float xb, float yb){
-    point3D ptA = {xa, ya};
-    point3D ptB = {xb, yb};
-    edge3D e = {ptA, ptB};
-    wireframe3D res;
-    res.n = 1;
-    res.edges[0] = e;
+void translate(Mesh3D* pmesh, Point3D v){
+    for (int i = 0; i < pmesh->size; i++){
+        pmesh->edges[i].a.x += v.x;
+        pmesh->edges[i].a.y += v.y;
+        pmesh->edges[i].a.z += v.z;
+        pmesh->edges[i].b.x += v.x;
+        pmesh->edges[i].b.y += v.y;
+        pmesh->edges[i].b.z += v.z;
+    }
+}
+
+// 3D primitives
+Mesh3D* box(float a, float b, float c){
+    Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D) + 12 * sizeof(Edge3D));
+
+    if (pres == NULL){
+        fprintf(stderr, "Couldn't allocate memory for creating a box\n");
+        exit(1);
+    }
+
+    Point3D ptA = {-a/2, -b/2, -c/2};
+    Point3D ptB = {a/2, -b/2, -c/2};
+    Point3D ptC = {a/2, b/2, -c/2};
+    Point3D ptD = {-a/2, b/2, -c/2};
+    Point3D ptE = {-a/2, -b/2, c/2};
+    Point3D ptF = {a/2, -b/2, c/2};
+    Point3D ptG = {a/2, b/2, c/2};
+    Point3D ptH = {-a/2, b/2, c/2};
+    Edge3D edgeAB = {ptA, ptB};
+    Edge3D edgeBC = {ptB, ptC};
+    Edge3D edgeCD = {ptC, ptD};
+    Edge3D edgeDA = {ptD, ptA};
+    Edge3D edgeEF = {ptE, ptF};
+    Edge3D edgeFG = {ptF, ptG};
+    Edge3D edgeGH = {ptG, ptH};
+    Edge3D edgeHE = {ptH, ptE};
+    Edge3D edgeAE = {ptA, ptE};
+    Edge3D edgeBF = {ptB, ptF};
+    Edge3D edgeCG = {ptC, ptG};
+    Edge3D edgeDH = {ptD, ptH};
+
+    pres->edges[0] = edgeAB;
+    pres->edges[1] = edgeBC;
+    pres->edges[2] = edgeCD;
+    pres->edges[3] = edgeDA;
+    pres->edges[4] = edgeEF;
+    pres->edges[5] = edgeFG;
+    pres->edges[6] = edgeGH;
+    pres->edges[7] = edgeHE;
+    pres->edges[8] = edgeAE;
+    pres->edges[9] = edgeBF;
+    pres->edges[10] = edgeCG;
+    pres->edges[11] = edgeDH;
+
+    pres->size = 12;
+
+    return pres;
+}
+
+// 2D projection
+Point2D project_point(Point3D point, float dist, float focal_length){
+    float x = (point.x * (focal_length / (dist + point.z))) + (WIDTH / 2);
+    float y = (point.y * (focal_length / (dist + point.z))) + (HEIGHT / 2);
+    Point2D res = {x, y};
     return res;
 }
 
-wireframe3D cube(float a, float b, float c){
-    point3D ptA = {-a/2, -b/2, -c/2};
-    point3D ptB = {a/2, -b/2, -c/2};
-    point3D ptC = {a/2, b/2, -c/2};
-    point3D ptD = {-a/2, b/2, -c/2};
-    point3D ptE = {-a/2, -b/2, c/2};
-    point3D ptF = {a/2, -b/2, c/2};
-    point3D ptG = {a/2, b/2, c/2};
-    point3D ptH = {-a/2, b/2, c/2};
-    edge3D ab = {ptA, ptB};
-    edge3D bc = {ptB, ptC};
-    edge3D cd = {ptC, ptD};
-    edge3D da = {ptD, ptA};
-    edge3D ef = {ptE, ptF};
-    edge3D fg = {ptF, ptG};
-    edge3D gh = {ptG, ptH};
-    edge3D he = {ptH, ptE};
-    edge3D ae = {ptA, ptE};
-    edge3D bf = {ptB, ptF};
-    edge3D cg = {ptC, ptG};
-    edge3D dh = {ptD, ptH};
-
-    wireframe3D res = {12, {ab, bc, cd, da, ae, bf, cg, dh, ef, fg, gh, he}};
-    return res;
-};
-
-wireframe3D polygon(float radius, int n){
-    wireframe3D res;
-    res.n = n;
-    point3D curr_pt = {0, 0, 0}, prev_pt = {radius, 0, 0};
-    edge3D edge;
-
-    for (int i = 1; i < n; i++){
-        float x = radius * cosf(i * M_PI * 2 / n);
-        float y = radius * sinf(i * M_PI * 2 / n);
-        curr_pt.x = x;
-        curr_pt.y = y;
-        edge.a = prev_pt;
-        edge.b = curr_pt;
-        res.edges[i-1] = edge;
-        prev_pt = curr_pt;
-    }
-    edge.a = prev_pt;
-    edge.b = res.edges[0].a;
-    res.edges[n-1] = edge;
+Edge2D project_edge(Edge3D edge, float dist, float focal_length){
+    Point2D a = project_point(edge.a, dist, focal_length);
+    Point2D b = project_point(edge.b, dist, focal_length);
+    Edge2D res = {a, b};
     return res;
 }
 
-void extrude(wireframe3D* pwf, point3D vect){
-    wireframe3D cap;
-    memcpy(&cap, pwf, sizeof(*pwf));
-    translate(&cap, vect);
-    edge3D curr_edge;
-    for (int i = 0; i < cap.n; i++){
-        curr_edge.a = pwf->edges[i].a;
-        curr_edge.b = cap.edges[i].a;
-        pwf->edges[pwf->n] = curr_edge;
-        pwf->n += 1;
+void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, float dist, float focal_length){
+    for (int i = 0; i < pmesh->size; i++){
+        pbuffer->edges[i] = project_edge(pmesh->edges[i], dist, focal_length);
     }
-    addWf(pwf, &cap);
-};
+    pbuffer->size = pmesh->size;
+}
 
-point2D project_point(point3D pt, float zoom){
-    float x = (pt.x * (FOCAL_LENGTH / (zoom + pt.z))) + (WIDTH / 2);
-    float y = (pt.y * (FOCAL_LENGTH / (zoom + pt.z))) + (HEIGHT / 2);
-    point2D res = {x, y};
-    return res;
-};
-
-edge2D project_edge(edge3D edg, float zoom){
-    point2D a = project_point(edg.a, zoom);
-    point2D b = project_point(edg.b, zoom);
-    edge2D res = {a, b};
-    return res;
-};
-
-wireframe2D project_wireframe(wireframe3D wf, float zoom){
-    edge2D edges[100];
-    for (int i = 0; i < wf.n; i++){
-        edges[i] = project_edge(wf.edges[i], zoom);
+void draw(Mesh2D* pmesh, SDL_Renderer* prenderer){
+    //Clear screen
+    SDL_SetRenderDrawColor(prenderer, 10, 10, 10, 255);
+    SDL_RenderClear(prenderer);
+    //Draw 
+    SDL_SetRenderDrawColor(prenderer, 255, 100, 100, 255);
+    for (int i = 0; i < pmesh->size; i++){
+        SDL_RenderDrawLine(prenderer,
+            (int)pmesh->edges[i].a.x,
+            (int)pmesh->edges[i].a.y,
+            (int)pmesh->edges[i].b.x,
+            (int)pmesh->edges[i].b.y);
     }
-    wireframe2D res;
-    res.n= wf.n;
-    memcpy(res.edges, edges, sizeof(res.edges));
-    return res;
-};
+    SDL_RenderPresent(prenderer);
+}
 
-void draw_wf2D(SDL_Renderer *renderer, wireframe2D wf){
-    for (int i = 0; i < wf.n; i++){
-        SDL_RenderDrawLine(renderer,
-            (int)wf.edges[i].a.x,
-            (int)wf.edges[i].a.y,
-            (int)wf.edges[i].b.x,
-            (int)wf.edges[i].b.y
-        );
+// Test functions (to remove)
+void print_mesh(Mesh3D* pmesh){
+    printf("%i edges\n", pmesh->size);
+    for (int i = 0; i < pmesh->size; i++){
+        printf("%i: (%.1f,%.1f,%.1f) to (%.1f,%.1f,%.1f)\n",
+                i,
+                pmesh->edges[i].a.x,
+                pmesh->edges[i].a.y,
+                pmesh->edges[i].a.z,
+                pmesh->edges[i].b.x,
+                pmesh->edges[i].b.y,
+                pmesh->edges[i].b.z);
     }
-};
+    printf("\n");
+}
 
-int main (int argc, char **argv)
-{
-    //Initializing window
-    SDL_Window *window = NULL;
+int main(int argc, char **argv){
+    Mesh3D* pcube = box(10, 10, 10);
+    //print_mesh(pcube);
+
+    // SDL Initialization
+    SDL_Window* pwindow = NULL;
+    SDL_Renderer* prenderer = NULL;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0){
         fprintf(stderr, "SDL failed to initialize: %s\n", SDL_GetError());
         return 1;
     }
 
-    window = SDL_CreateWindow("SDL Example",
+    pwindow = SDL_CreateWindow("SDL Example",
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
             WIDTH,
             HEIGHT,
             0);
 
-    if (window == NULL) {
+    if (pwindow == NULL) {
         fprintf(stderr, "SDL window failed to initialize: %s\n", SDL_GetError());
         return 1;
     }
 
-    //Creating renderer
-    SDL_Renderer *renderer = NULL;
-
-    renderer = SDL_CreateRenderer(window,
+    prenderer = SDL_CreateRenderer(pwindow,
             -1,
             0);
 
-    if (renderer == NULL) {
+    if (prenderer == NULL) {
         fprintf(stderr, "SDL renderer failed to initialize: %s\n", SDL_GetError());
         return 1;
     }
 
-    //Main loop
+    // Initializing main loop
+    // Creating scene
+    Mesh3D* pscene = (Mesh3D*) malloc(sizeof(Mesh3D));
+    if (pscene == NULL){
+        fprintf(stderr, "Couldn't allocate memory when creating the scene\n");
+        return 1;
+    }
+
+    pscene = box(20, 20, 20);
+
+    // Creating a buffer for the 2D projection
+    Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
+    if (pbuffer == NULL){
+        fprintf(stderr, "Couldn't create the buffer for the 2D projection\n");
+        return 1;
+    }
+
+    // Main loop
+
     Uint32 time_start, delta;
+    SDL_Event event;
+
     bool is_stopped = false;
     bool button_pressed = false;
     bool shift_pressed = false;
     int prev_x, prev_y;
+
     float zoom = 100.;
-    point3D vect;
+    Point3D rotation, translation;
 
-    wireframe3D scene;
 
-    // Line
-    //wireframe3D randomline = line(0, 10, 50, -10);
-    //addWf(&scene, &randomline);
-
-    // Prisms
-    point3D vect_ext;
-    wireframe3D poly1 = polygon(10, 6);
-    vect_ext.x = 0;
-    vect_ext.y = 0;
-    vect_ext.z = 50;
-    extrude(&poly1, vect_ext);
-
-    wireframe3D poly2 = polygon(10, 6);
-    vect_ext.z = 30;
-    extrude(&poly2, vect_ext);
-
-    vect_ext.x = 10 + 10 * sinf(M_PI / 6);
-    vect_ext.y = 10 * cosf(M_PI / 6);
-    vect_ext.z = 0;
-    translate(&poly2, vect_ext);
-
-    wireframe3D poly3 = polygon(10, 6);
-    vect_ext.x = 0;
-    vect_ext.y = 0;
-    vect_ext.z = 20;
-    extrude(&poly3, vect_ext);
-    vect_ext.x = 10 + 10 * sinf(M_PI / 6);
-    vect_ext.y = -10 * cosf(M_PI / 6);
-    vect_ext.z = 0;
-    translate(&poly3, vect_ext);
-
-    addWf(&scene, &poly1);
-    addWf(&scene, &poly2);
-    addWf(&scene, &poly3);
-
-    wireframe2D projection;
-
-    while (!is_stopped)
-    {
+    while (!is_stopped){
         time_start = SDL_GetTicks();
-        //Event processing
-        SDL_Event event;
-
-        while (SDL_PollEvent(&event))
-        {
-            switch(event.type)
-            {
+        //Processing inputs
+        while (SDL_PollEvent(&event)){
+            switch(event.type){
                 case SDL_QUIT:
                     is_stopped = true;
                     break;
@@ -298,15 +286,15 @@ int main (int argc, char **argv)
                 case SDL_MOUSEMOTION:
                     if (button_pressed){
                         if (shift_pressed){
-                            vect.x = (float)(event.motion.x - prev_x)/5;
-                            vect.y = (float)(event.motion.y - prev_y)/5;
-                            vect.z = 0;
-                            translate(&scene, vect);
+                            translation.x = (float)(event.motion.x - prev_x)/5;
+                            translation.y = (float)(event.motion.y - prev_y)/5;
+                            translation.z = 0;
+                            translate(pscene, translation);
                         } else {
-                            vect.x = 0;
-                            vect.y = -(float)(event.motion.x - prev_x)/100;
-                            vect.z = (float)(event.motion.y - prev_y)/100;
-                            rotate(&scene, vect); 
+                            rotation.x = 0;
+                            rotation.y = -(float)(event.motion.x - prev_x)/100;
+                            rotation.z = (float)(event.motion.y - prev_y)/100;
+                            rotate(pscene, rotation);
                         }
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
@@ -325,42 +313,24 @@ int main (int argc, char **argv)
                         zoom += 1;
                     } else {
                         zoom -= 1;
-                }
+                    }
+                    break;
             }
         }
 
         //Drawing
-        //Background
-        SDL_SetRenderDrawColor(renderer, 
-                10,
-                10,
-                10,
-                255);
-        SDL_RenderClear(renderer);
+        project_mesh(pbuffer, pscene, zoom, 800);
+        draw(pbuffer, prenderer);
 
-        //Line
-        SDL_SetRenderDrawColor(renderer,
-                255,
-                100,
-                100,
-                255);
-
-        projection = project_wireframe(scene, zoom);
-        draw_wf2D(renderer, projection);
-
-        //Displaying
-        SDL_RenderPresent(renderer);
-
-        //FPS
+        //FPS caping
         delta = SDL_GetTicks() - time_start;
         if (delta == 0 || 1000 / delta < FPS) {
             SDL_Delay((1000 / FPS) - delta);
         }
     }
 
-    //Freeing
-    SDL_DestroyWindow(window);
+    // Freeing
+    SDL_DestroyWindow(pwindow);
     SDL_Quit();
-
     return 0;
-};
+}
