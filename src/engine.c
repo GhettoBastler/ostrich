@@ -8,6 +8,7 @@
 #define FPS 60
 #define CIRCLE_SEGMENTS 15
 #define SPHERE_SLICES 15
+#define EXPORT_PATH "export.bmp"
 
 // Structures
 // 2D
@@ -282,6 +283,8 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, float dist, float focal_length
     pbuffer->size = pmesh->size;
 }
 
+// Interface
+
 void draw(Mesh2D* pmesh, SDL_Renderer* prenderer){
     //Clear screen
     SDL_SetRenderDrawColor(prenderer, 10, 10, 10, 255);
@@ -296,6 +299,19 @@ void draw(Mesh2D* pmesh, SDL_Renderer* prenderer){
             (int)pmesh->edges[i].b.y);
     }
     SDL_RenderPresent(prenderer);
+}
+
+void export(SDL_Renderer* prenderer){
+    //https://discourse.libsdl.org/t/save-image-from-render/21009/2
+    SDL_Surface* psshot = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, 32, 0, 0, 0, 0);
+    if (psshot == NULL){
+        fprintf(stderr, "Couldn't create a surface to export image\n");
+    } else {
+        SDL_RenderReadPixels(prenderer, NULL, 0, psshot->pixels, psshot->pitch);
+        SDL_SaveBMP(psshot, EXPORT_PATH);
+        printf("File exported as %s\n", EXPORT_PATH);
+        SDL_FreeSurface(psshot);
+    }
 }
 
 // Test functions (to remove)
@@ -441,6 +457,8 @@ int main(int argc, char **argv){
                 case SDL_KEYUP:
                     if (event.key.keysym.sym == SDLK_LSHIFT) {
                         shift_pressed = event.key.state == SDL_PRESSED;
+                    } else if (event.key.keysym.sym == SDLK_e && event.key.type == SDL_KEYDOWN){
+                        export(prenderer);
                     }
                     break;
                 
