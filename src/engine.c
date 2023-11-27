@@ -314,22 +314,6 @@ void export(SDL_Renderer* prenderer){
     }
 }
 
-// Test functions (to remove)
-void print_mesh(Mesh3D* pmesh){
-    printf("%i edges\n", pmesh->size);
-    for (int i = 0; i < pmesh->size; i++){
-        printf("%i: (%.1f,%.1f,%.1f) to (%.1f,%.1f,%.1f)\n",
-                i,
-                pmesh->edges[i].a.x,
-                pmesh->edges[i].a.y,
-                pmesh->edges[i].a.z,
-                pmesh->edges[i].b.x,
-                pmesh->edges[i].b.y,
-                pmesh->edges[i].b.z);
-    }
-    printf("\n");
-}
-
 int main(int argc, char **argv){
     // SDL Initialization
     SDL_Window* pwindow = NULL;
