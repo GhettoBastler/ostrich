@@ -335,12 +335,12 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
             // A is hidden, B is visible
             a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
             a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
-            a.z = 0;
+            a.z = -1;
         } else if (b_hidden){
             // B is hidden, A is visible
             b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
             b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
-            b.z = 0;
+            b.z = -1;
         } // If both are visible, we do nothing
 
         Edge3D new_edge = {a, b};
