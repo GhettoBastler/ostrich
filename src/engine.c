@@ -46,6 +46,37 @@ typedef struct {
 } Camera;
 
 // Functions
+// Point transformation
+Point3D rotate_point(Point3D point, Point3D angles){
+    Point3D res;
+
+    float c00 = cosf(angles.x) * cosf(angles.y);
+    float c01 = cosf(angles.x) * sinf(angles.y) * sinf(angles.z) - sinf(angles.x) * cosf(angles.z);
+    float c02 = cosf(angles.x) * sinf(angles.y) * cosf(angles.z) + sinf(angles.x) * sinf(angles.z);
+    float c10 = sinf(angles.x) * cosf(angles.y);
+    float c11 = sinf(angles.x) * sinf(angles.y) * sinf(angles.z) + cosf(angles.x) * cosf(angles.z);
+    float c12 = sinf(angles.x) * sinf(angles.y) * cosf(angles.z) - cosf(angles.x) * sinf(angles.z);
+    float c20 = -sinf(angles.y);
+    float c21 = cosf(angles.y) * sinf(angles.z);
+    float c22 = cosf(angles.y) * cosf(angles.z);
+
+    res.x = c00 * point.x + c01 * point.y + c02 * point.z;
+    res.y = c10 * point.x + c11 * point.y + c12 * point.z;
+    res.z = c20 * point.x + c21 * point.y + c22 * point.z;
+
+    return res;
+}
+
+Point3D translate_point(Point3D point, Point3D vector){
+    Point3D res;
+
+    res.x = point.x + vector.x;
+    res.y = point.y + vector.y;
+    res.z = point.z + vector.z;
+
+    return res;
+}
+
 // Mesh transformations
 Mesh3D* add_edge(Mesh3D* pmesh, Edge3D edge){
     //Allocating more memory to add the new edge
@@ -284,20 +315,28 @@ Edge2D project_edge(Edge3D edge, float dist, float focal_length){
 
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     // Temporary buffer for testing purposes
-    Mesh3D* ptransformed;
-    ptransformed = (Mesh3D*) malloc(sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
-    if (ptransformed == NULL){
-        fprintf(stderr, "Couldn't allocate memory for projection\n");
-        exit(1);
+    //Mesh3D* ptransformed;
+    //ptransformed = (Mesh3D*) malloc(sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    //if (ptransformed == NULL){
+    //    fprintf(stderr, "Couldn't allocate memory for projection\n");
+    //    exit(1);
+    //}
+    //memcpy(ptransformed, pmesh, sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    //rotate(ptransformed, pcam->rotation);
+    //translate(ptransformed, pcam->translation);
+    //for (int i = 0; i < ptransformed->size; i++){
+    for (int i = 0; i < pmesh->size; i++){
+        Point3D a_trans, b_trans;
+        a_trans = rotate_point(pmesh->edges[i].a, pcam->rotation);
+        b_trans = rotate_point(pmesh->edges[i].b, pcam->rotation);
+        a_trans = translate_point(a_trans, pcam->translation);
+        b_trans = translate_point(b_trans, pcam->translation);
+        Edge3D new_edge = {a_trans, b_trans};
+        //pbuffer->edges[i] = project_edge(ptransformed->edges[i], pcam->translation.z, pcam->focal_length);
+        pbuffer->edges[i] = project_edge(new_edge, pcam->translation.z, pcam->focal_length);
     }
-    memcpy(ptransformed, pmesh, sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
-    rotate(ptransformed, pcam->rotation);
-    translate(ptransformed, pcam->translation);
-    for (int i = 0; i < ptransformed->size; i++){
-        pbuffer->edges[i] = project_edge(ptransformed->edges[i], pcam->translation.z, pcam->focal_length);
-    }
-    pbuffer->size = ptransformed->size;
-    free(ptransformed);
+    pbuffer->size = pmesh->size;
+    //free(ptransformed);
 }
 
 // Interface
