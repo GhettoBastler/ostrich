@@ -39,6 +39,12 @@ typedef struct {
     Edge3D edges[];
 } Mesh3D;
 
+// Camera
+typedef struct {
+    Point3D translation, rotation;
+    float focal_length;
+} Camera;
+
 // Functions
 // Mesh transformations
 Mesh3D* add_edge(Mesh3D* pmesh, Edge3D edge){
@@ -276,11 +282,22 @@ Edge2D project_edge(Edge3D edge, float dist, float focal_length){
     return res;
 }
 
-void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, float dist, float focal_length){
-    for (int i = 0; i < pmesh->size; i++){
-        pbuffer->edges[i] = project_edge(pmesh->edges[i], dist, focal_length);
+void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
+    // Temporary buffer for testing purposes
+    Mesh3D* ptransformed;
+    ptransformed = (Mesh3D*) malloc(sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    if (ptransformed == NULL){
+        fprintf(stderr, "Couldn't allocate memory for projection\n");
+        exit(1);
     }
-    pbuffer->size = pmesh->size;
+    memcpy(ptransformed, pmesh, sizeof(Mesh3D) + pmesh->size * sizeof(Edge3D));
+    rotate(ptransformed, pcam->rotation);
+    translate(ptransformed, pcam->translation);
+    for (int i = 0; i < ptransformed->size; i++){
+        pbuffer->edges[i] = project_edge(ptransformed->edges[i], pcam->translation.z, pcam->focal_length);
+    }
+    pbuffer->size = ptransformed->size;
+    free(ptransformed);
 }
 
 // Interface
@@ -354,6 +371,16 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    // Initializing camera
+    Camera cam;
+    cam.translation.x = 0;
+    cam.translation.y = 0;
+    cam.translation.z = 0;
+    cam.rotation.x = 0;
+    cam.rotation.y = 0;
+    cam.rotation.z = 0;
+    cam.focal_length = 800;
+
     // --- MODIFY HERE ---
     Mesh3D* psphere = sphere(10);
     Point3D v = {30, 20, 0};
@@ -422,15 +449,19 @@ int main(int argc, char **argv){
                 case SDL_MOUSEMOTION:
                     if (button_pressed){
                         if (shift_pressed){
-                            translation.x = (float)(event.motion.x - prev_x)/5;
-                            translation.y = (float)(event.motion.y - prev_y)/5;
-                            translation.z = 0;
-                            translate(pscene, translation);
+                            //translation.x = (float)(event.motion.x - prev_x)/5;
+                            //translation.y = (float)(event.motion.y - prev_y)/5;
+                            //translation.z = 0;
+                            //translate(pscene, translation);
+                            cam.translation.x -= (float)(event.motion.x - prev_x)/5;
+                            cam.translation.y -= (float)(event.motion.y - prev_y)/5;
                         } else {
-                            rotation.x = 0;
-                            rotation.y = -(float)(event.motion.x - prev_x)/100;
-                            rotation.z = (float)(event.motion.y - prev_y)/100;
-                            rotate(pscene, rotation);
+                            //rotation.x = 0;
+                            //rotation.y = -(float)(event.motion.x - prev_x)/100;
+                            //rotation.z = (float)(event.motion.y - prev_y)/100;
+                            //rotate(pscene, rotation);
+                            cam.rotation.y += -(float)(event.motion.x - prev_x)/100;
+                            cam.rotation.z += (float)(event.motion.y - prev_y)/100;
                         }
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
@@ -449,15 +480,19 @@ int main(int argc, char **argv){
                 case SDL_MOUSEWHEEL:
                     if (event.wheel.y > 0) {
                         if (shift_pressed){
-                            focal_length += 5;
+                            //focal_length += 5;
+                            cam.focal_length += 5;
                         } else {
-                            dist += 1;
+                            //dist += 1;
+                            cam.translation.z += 1;
                         }
                     } else {
                         if (shift_pressed){
-                            focal_length -= 5;
+                            //focal_length -= 5;
+                            cam.focal_length -= 5;
                         } else {
-                            dist -= 1;
+                            //dist -= 1;
+                            cam.translation.z -= 1;
                         }
                     }
                     break;
@@ -465,7 +500,8 @@ int main(int argc, char **argv){
         }
 
         //Drawing
-        project_mesh(pbuffer, pscene, dist, focal_length);
+        //project_mesh(pbuffer, pscene, dist, focal_length);
+        project_mesh(pbuffer, pscene, &cam);
         draw(pbuffer, prenderer);
 
         //FPS caping
