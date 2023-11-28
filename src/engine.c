@@ -300,8 +300,8 @@ Mesh3D* sphere(float radius){
 
 // 2D projection
 Point2D project_point(Point3D point, float dist, float focal_length){
-    float x = (point.x * (focal_length / (dist + point.z))) + (WIDTH / 2);
-    float y = (point.y * (focal_length / (dist + point.z))) + (HEIGHT / 2);
+    float x = (point.x * (focal_length / (point.z))) + (WIDTH / 2);
+    float y = (point.y * (focal_length / (point.z))) + (HEIGHT / 2);
     Point2D res = {x, y};
     return res;
 }
@@ -314,16 +314,40 @@ Edge2D project_edge(Edge3D edge, float dist, float focal_length){
 }
 
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
+    int n = 0;
     for (int i = 0; i < pmesh->size; i++){
         Point3D a_trans, b_trans;
-        a_trans = rotate_point(pmesh->edges[i].a, pcam->rotation);
-        b_trans = rotate_point(pmesh->edges[i].b, pcam->rotation);
-        a_trans = translate_point(a_trans, pcam->translation);
-        b_trans = translate_point(b_trans, pcam->translation);
-        Edge3D new_edge = {a_trans, b_trans};
-        pbuffer->edges[i] = project_edge(new_edge, pcam->translation.z, pcam->focal_length);
+        Point3D a = rotate_point(pmesh->edges[i].a, pcam->rotation);
+        a = translate_point(a, pcam->translation);
+        Point3D b = rotate_point(pmesh->edges[i].b, pcam->rotation);
+        b = translate_point(b, pcam->translation);
+
+        // Check visibility
+        bool a_hidden, b_hidden;
+        a_hidden = a.z <= 0;
+        b_hidden = b.z <= 0;
+
+        if (a_hidden && b_hidden){
+            // Both points are hidden
+            // Skip this edge
+            continue;
+        } else if (a_hidden){
+            // A is hidden, B is visible
+            a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
+            a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
+            a.z = 0;
+        } else if (b_hidden){
+            // B is hidden, A is visible
+            b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
+            b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
+            b.z = 0;
+        } // If both are visible, we do nothing
+
+        Edge3D new_edge = {a, b};
+        pbuffer->edges[n] = project_edge(new_edge, pcam->translation.z, pcam->focal_length);
+        n += 1;
     }
-    pbuffer->size = pmesh->size;
+    pbuffer->size = n;
 }
 
 // Interface
@@ -475,8 +499,8 @@ int main(int argc, char **argv){
                 case SDL_MOUSEMOTION:
                     if (button_pressed){
                         if (shift_pressed){
-                            cam.translation.x -= (float)(event.motion.x - prev_x)/5;
-                            cam.translation.y -= (float)(event.motion.y - prev_y)/5;
+                            cam.translation.x += (float)(event.motion.x - prev_x)/5;
+                            cam.translation.y += (float)(event.motion.y - prev_y)/5;
                         } else {
                             cam.rotation.y += -(float)(event.motion.x - prev_x)/100;
                             cam.rotation.z += (float)(event.motion.y - prev_y)/100;
