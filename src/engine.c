@@ -298,6 +298,45 @@ Mesh3D* sphere(float radius){
     return pres;
 }
 
+Mesh3D* grid(float width, float length, int n_div_x, int n_div_y){
+    Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D) + (4 + n_div_x + n_div_y) * sizeof(Edge3D));
+    Point3D a = {-width/2, -length/2, 0};
+    Point3D b = {width/2, -length/2, 0};
+    Point3D c = {width/2, length/2, 0};
+    Point3D d = {-width/2, length/2, 0};
+    Edge3D ab = {a, b};
+    Edge3D bc = {b, c};
+    Edge3D cd = {c, d};
+    Edge3D da = {d, a};
+    pres->edges[0] = ab;
+    pres->edges[1] = bc;
+    pres->edges[2] = cd;
+    pres->edges[3] = da;
+    pres->size = 4;
+    Edge3D curr_edge;
+    Point3D curr_a, curr_b;
+    curr_a.z = curr_b.z = 0;
+    for (int i=1; i<=n_div_x; i++){
+        curr_a.x = curr_b.x = -width/2 + i*width/(1+n_div_x);
+        curr_a.y = -length/2;
+        curr_b.y = length/2;
+        curr_edge.a = curr_a;
+        curr_edge.b = curr_b;
+        pres->edges[pres->size] = curr_edge;
+        pres->size += 1;
+    }
+    for (int i=1; i<=n_div_y; i++){
+        curr_a.y = curr_b.y = -width/2 + i*width/(1+n_div_y);
+        curr_a.x = -length/2;
+        curr_b.x = length/2;
+        curr_edge.a = curr_a;
+        curr_edge.b = curr_b;
+        pres->edges[pres->size] = curr_edge;
+        pres->size += 1;
+    }
+    return pres;
+}
+
 // 2D projection
 Point2D project_point(Point3D point, float dist, float focal_length){
     float x = (point.x * (focal_length / (point.z))) + (WIDTH / 2);
@@ -449,8 +488,10 @@ int main(int argc, char **argv){
     v.y = 0;
     v.z = 50;
     Mesh3D* pprism = prism(ppentagon, v);
-    pscene = merge_meshes(pscene, psphere);
-    pscene = merge_meshes(pscene, pbox2);
+    Mesh3D* pgrid = grid(1000, 1000, 20, 20);
+    pscene = merge_meshes(pscene, pgrid);
+    //pscene = merge_meshes(pscene, psphere);
+    //pscene = merge_meshes(pscene, pbox2);
     pscene = merge_meshes(pscene, pprism);
 
 
