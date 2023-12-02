@@ -6,3 +6,6 @@ clean:
 
 run: engine
 	./bin/engine
+
+profiling: clean
+	gcc src/engine.c -lSDL2 -lm -o bin/engine_prof -pg
