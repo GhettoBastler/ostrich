@@ -425,6 +425,7 @@ void export(SDL_Renderer* prenderer){
 
 int main(int argc, char **argv){
     // SDL Initialization
+    SDL_SetHint("SDL_RENDER_LINE_METHOD", "2");
     SDL_Window* pwindow = NULL;
     SDL_Renderer* prenderer = NULL;
 
