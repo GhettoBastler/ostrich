@@ -43,26 +43,17 @@ typedef struct {
 typedef struct {
     Point3D translation, rotation;
     float focal_length;
+    float rot_mat[9];
 } Camera;
 
 // Functions
 // Point transformation
-Point3D rotate_point(Point3D point, Point3D angles){
+Point3D rotate_point(Point3D point, Camera* pcam){
     Point3D res;
 
-    float c00 = cosf(angles.x) * cosf(angles.y);
-    float c01 = cosf(angles.x) * sinf(angles.y) * sinf(angles.z) - sinf(angles.x) * cosf(angles.z);
-    float c02 = cosf(angles.x) * sinf(angles.y) * cosf(angles.z) + sinf(angles.x) * sinf(angles.z);
-    float c10 = sinf(angles.x) * cosf(angles.y);
-    float c11 = sinf(angles.x) * sinf(angles.y) * sinf(angles.z) + cosf(angles.x) * cosf(angles.z);
-    float c12 = sinf(angles.x) * sinf(angles.y) * cosf(angles.z) - cosf(angles.x) * sinf(angles.z);
-    float c20 = -sinf(angles.y);
-    float c21 = cosf(angles.y) * sinf(angles.z);
-    float c22 = cosf(angles.y) * cosf(angles.z);
-
-    res.x = c00 * point.x + c01 * point.y + c02 * point.z;
-    res.y = c10 * point.x + c11 * point.y + c12 * point.z;
-    res.z = c20 * point.x + c21 * point.y + c22 * point.z;
+    res.x = pcam->rot_mat[0] * point.x + pcam->rot_mat[1] * point.y + pcam->rot_mat[2] * point.z;
+    res.y = pcam->rot_mat[3] * point.x + pcam->rot_mat[4] * point.y + pcam->rot_mat[5] * point.z;
+    res.z = pcam->rot_mat[6] * point.x + pcam->rot_mat[7] * point.y + pcam->rot_mat[8] * point.z;
 
     return res;
 }
@@ -356,9 +347,9 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     int n = 0;
     for (int i = 0; i < pmesh->size; i++){
         Point3D a_trans, b_trans;
-        Point3D a = rotate_point(pmesh->edges[i].a, pcam->rotation);
+        Point3D a = rotate_point(pmesh->edges[i].a, pcam);
         a = translate_point(a, pcam->translation);
-        Point3D b = rotate_point(pmesh->edges[i].b, pcam->rotation);
+        Point3D b = rotate_point(pmesh->edges[i].b, pcam);
         b = translate_point(b, pcam->translation);
 
         // Check visibility
@@ -390,6 +381,18 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
 }
 
 // Interface
+void update_rotation_matrix(Camera* pcam){
+    Point3D r = pcam->rotation;
+    pcam->rot_mat[0] = cosf(r.x) * cosf(r.y);
+    pcam->rot_mat[1] = cosf(r.x) * sinf(r.y) * sinf(r.z) - sinf(r.x) * cosf(r.z);
+    pcam->rot_mat[2] = cosf(r.x) * sinf(r.y) * cosf(r.z) + sinf(r.x) * sinf(r.z);
+    pcam->rot_mat[3] = sinf(r.x) * cosf(r.y);
+    pcam->rot_mat[4] = sinf(r.x) * sinf(r.y) * sinf(r.z) + cosf(r.x) * cosf(r.z);
+    pcam->rot_mat[5] = sinf(r.x) * sinf(r.y) * cosf(r.z) - cosf(r.x) * sinf(r.z);
+    pcam->rot_mat[6] = -sinf(r.y);
+    pcam->rot_mat[7] = cosf(r.y) * sinf(r.z);
+    pcam->rot_mat[8] = cosf(r.y) * cosf(r.z);
+}
 
 void draw(Mesh2D* pmesh, SDL_Renderer* prenderer){
     //Clear screen
@@ -515,6 +518,7 @@ int main(int argc, char **argv){
     float dist = 100.;
     float focal_length = 800.;
     Point3D rotation, translation;
+    update_rotation_matrix(&cam);
 
 
     while (!is_stopped){
@@ -545,6 +549,8 @@ int main(int argc, char **argv){
                         } else {
                             cam.rotation.y += -(float)(event.motion.x - prev_x)/100;
                             cam.rotation.z += (float)(event.motion.y - prev_y)/100;
+                            // Update matrix components
+                            update_rotation_matrix(&cam);
                         }
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
