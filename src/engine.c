@@ -5,7 +5,7 @@
 
 #define WIDTH 800
 #define HEIGHT 600
-#define FPS 60
+#define FPS 30
 #define CIRCLE_SEGMENTS 15
 #define SPHERE_SLICES 15
 #define EXPORT_PATH "export.bmp"
@@ -422,16 +422,18 @@ void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* p
     //Clear screen
     SDL_SetRenderDrawColor(prenderer, 10, 10, 10, 255);
     SDL_RenderClear(prenderer);
+    int pitch = WIDTH * sizeof(Uint32);
+    SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixel buffer
     for (int i = 0; i < HEIGHT * WIDTH; i++){
         ppixels[i] = 0x00000000;
     }
     //Draw 
-    //SDL_SetRenderDrawColor(prenderer, 255, 100, 100, 255);
     for (int i = 0; i < pmesh->size; i++){
         draw_line(ppixels, pmesh->edges[i]);
     }
-    SDL_UpdateTexture(ptexture, NULL, ppixels, WIDTH * sizeof(Uint32));
+    SDL_UnlockTexture(ptexture);
+    //SDL_UpdateTexture(ptexture, NULL, ppixels, WIDTH * sizeof(Uint32));
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
     SDL_RenderPresent(prenderer);
 }
