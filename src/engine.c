@@ -419,21 +419,17 @@ void draw_line(Uint32* ppixels, Edge2D edge){
 }
 
 void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* prenderer){
-    //Clear screen
-    SDL_SetRenderDrawColor(prenderer, 10, 10, 10, 255);
-    SDL_RenderClear(prenderer);
     int pitch = WIDTH * sizeof(Uint32);
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
-    //Clear pixel buffer
+    //Clear pixels
     for (int i = 0; i < HEIGHT * WIDTH; i++){
         ppixels[i] = 0x00000000;
     }
-    //Draw 
+    //Draw lines
     for (int i = 0; i < pmesh->size; i++){
         draw_line(ppixels, pmesh->edges[i]);
     }
     SDL_UnlockTexture(ptexture);
-    //SDL_UpdateTexture(ptexture, NULL, ppixels, WIDTH * sizeof(Uint32));
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
     SDL_RenderPresent(prenderer);
 }
@@ -453,7 +449,6 @@ void export(SDL_Renderer* prenderer){
 
 int main(int argc, char **argv){
     // SDL initialization
-    //SDL_SetHint("SDL_RENDER_LINE_METHOD", "2");
     SDL_Window* pwindow = NULL;
     SDL_Renderer* prenderer = NULL;
     SDL_Texture* ptexture = NULL;
