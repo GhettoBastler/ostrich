@@ -394,19 +394,45 @@ void update_rotation_matrix(Camera* pcam){
     pcam->rot_mat[8] = cosf(r.y) * cosf(r.z);
 }
 
-void draw(Mesh2D* pmesh, SDL_Renderer* prenderer){
+void draw_line(Uint32* ppixels, Edge2D edge){
+    // http://members.chello.at/~easyfilter/bresenham.html
+    int x0 = (int) edge.a.x,
+        y0 = (int) edge.a.y,
+        x1 = (int) edge.b.x,
+        y1 = (int) edge.b.y;
+    int dx = abs(x1 - x0);
+    int sx = x0 < x1 ? 1 : -1;
+    int dy = -abs(y1 - y0);
+    int sy = y0 < y1 ? 1 : -1;
+    int err = dx+dy,
+        e2;
+
+    for (;;){
+        if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
+            ppixels[x0 + WIDTH * y0] = 0xFFFFFFFF;
+
+        if (x0 == x1 && y0 == y1) break;
+        e2 = 2*err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+}
+
+void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* prenderer){
     //Clear screen
     SDL_SetRenderDrawColor(prenderer, 10, 10, 10, 255);
     SDL_RenderClear(prenderer);
-    //Draw 
-    SDL_SetRenderDrawColor(prenderer, 255, 100, 100, 255);
-    for (int i = 0; i < pmesh->size; i++){
-        SDL_RenderDrawLine(prenderer,
-            (int)pmesh->edges[i].a.x,
-            (int)pmesh->edges[i].a.y,
-            (int)pmesh->edges[i].b.x,
-            (int)pmesh->edges[i].b.y);
+    //Clear pixel buffer
+    for (int i = 0; i < HEIGHT * WIDTH; i++){
+        ppixels[i] = 0x00000000;
     }
+    //Draw 
+    //SDL_SetRenderDrawColor(prenderer, 255, 100, 100, 255);
+    for (int i = 0; i < pmesh->size; i++){
+        draw_line(ppixels, pmesh->edges[i]);
+    }
+    SDL_UpdateTexture(ptexture, NULL, ppixels, WIDTH * sizeof(Uint32));
+    SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
     SDL_RenderPresent(prenderer);
 }
 
@@ -424,10 +450,11 @@ void export(SDL_Renderer* prenderer){
 }
 
 int main(int argc, char **argv){
-    // SDL Initialization
-    SDL_SetHint("SDL_RENDER_LINE_METHOD", "2");
+    // SDL initialization
+    //SDL_SetHint("SDL_RENDER_LINE_METHOD", "2");
     SDL_Window* pwindow = NULL;
     SDL_Renderer* prenderer = NULL;
+    SDL_Texture* ptexture = NULL;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0){
         fprintf(stderr, "SDL failed to initialize: %s\n", SDL_GetError());
@@ -455,7 +482,21 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+
+    if (ptexture == NULL) {
+        fprintf(stderr, "SDL texture failed to initialize: %s\n", SDL_GetError());
+        return 1;
+    }
+
     // Initializing main loop
+    Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
+
+    if (ppixels == NULL){
+        fprintf(stderr, "Couldn't allocate memory for frame buffer\n");
+        return 1;
+    }
+
     // Creating scene
     Mesh3D* pscene = (Mesh3D*) malloc(sizeof(Mesh3D));
     pscene->size = 0;
@@ -587,7 +628,7 @@ int main(int argc, char **argv){
 
         //Drawing
         project_mesh(pbuffer, pscene, &cam);
-        draw(pbuffer, prenderer);
+        draw(ppixels, pbuffer, ptexture, prenderer);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
@@ -597,6 +638,8 @@ int main(int argc, char **argv){
     }
 
     // Freeing
+    SDL_DestroyTexture(ptexture);
+    SDL_DestroyRenderer(prenderer);
     SDL_DestroyWindow(pwindow);
     SDL_Quit();
     return 0;
