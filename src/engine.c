@@ -5,7 +5,7 @@
 
 #define WIDTH 800
 #define HEIGHT 600
-#define FPS 30
+#define FPS 60
 #define CIRCLE_SEGMENTS 15
 #define SPHERE_SLICES 15
 #define EXPORT_PATH "export.bmp"
@@ -554,6 +554,7 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
+    bool should_draw;
     bool is_stopped = false;
     bool button_pressed = false;
     bool shift_pressed = false;
@@ -564,8 +565,11 @@ int main(int argc, char **argv){
     Point3D rotation, translation;
     update_rotation_matrix(&cam);
 
+    project_mesh(pbuffer, pscene, &cam);
+    draw(ppixels, pbuffer, ptexture, prenderer);
 
     while (!is_stopped){
+        should_draw = false;
         time_start = SDL_GetTicks();
         //Processing inputs
         while (SDL_PollEvent(&event)){
@@ -598,6 +602,7 @@ int main(int argc, char **argv){
                         }
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
+                        should_draw = true;
                     }
                     break;
 
@@ -624,13 +629,16 @@ int main(int argc, char **argv){
                             cam.translation.z -= 1;
                         }
                     }
+                    should_draw = true;
                     break;
             }
         }
 
         //Drawing
-        project_mesh(pbuffer, pscene, &cam);
-        draw(ppixels, pbuffer, ptexture, prenderer);
+        if (should_draw){
+            project_mesh(pbuffer, pscene, &cam);
+            draw(ppixels, pbuffer, ptexture, prenderer);
+        }
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
