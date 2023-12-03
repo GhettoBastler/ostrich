@@ -395,7 +395,6 @@ void update_rotation_matrix(Camera* pcam){
 }
 
 void draw_line(Uint32* ppixels, Edge2D edge){
-    // http://members.chello.at/~easyfilter/bresenham.html
     int x0 = (int) edge.a.x,
         y0 = (int) edge.a.y,
         x1 = (int) edge.b.x,
@@ -409,12 +408,18 @@ void draw_line(Uint32* ppixels, Edge2D edge){
 
     for (;;){
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
-            ppixels[x0 + WIDTH * y0] = 0xFFFFFFFF;
+            ppixels[x0 + WIDTH * y0] = 0xFF000000;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
-        if (e2 >= dy) { err += dy; x0 += sx; }
-        if (e2 <= dx) { err += dx; y0 += sy; }
+        if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+        }
     }
 }
 
@@ -423,7 +428,7 @@ void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* p
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixels
     for (int i = 0; i < HEIGHT * WIDTH; i++){
-        ppixels[i] = 0x00000000;
+        ppixels[i] = 0xFFFFFFFF;
     }
     //Draw lines
     for (int i = 0; i < pmesh->size; i++){
@@ -479,7 +484,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+    ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
     if (ptexture == NULL) {
         fprintf(stderr, "SDL texture failed to initialize: %s\n", SDL_GetError());
@@ -530,10 +535,10 @@ int main(int argc, char **argv){
     v.y = 0;
     v.z = 50;
     Mesh3D* pprism = prism(ppentagon, v);
-    Mesh3D* pgrid = grid(1000, 1000, 20, 20);
-    pscene = merge_meshes(pscene, pgrid);
-    //pscene = merge_meshes(pscene, psphere);
-    //pscene = merge_meshes(pscene, pbox2);
+    //Mesh3D* pgrid = grid(1000, 1000, 20, 20);
+    //pscene = merge_meshes(pscene, pgrid);
+    pscene = merge_meshes(pscene, psphere);
+    pscene = merge_meshes(pscene, pbox2);
     pscene = merge_meshes(pscene, pprism);
 
 
