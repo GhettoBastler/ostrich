@@ -4,6 +4,8 @@
 
 For [December Adventures](https://eli.li/december-adventure) 2023 I decided to finally learn some C by making a 3D projector inspired by [moogle](https://wiki.xxiivv.com/site/moogle.html) and [pinhole](https://git.sr.ht/~bellinitte/pinhole).
 
+The full log is available [here](https://ghettobastler.com/december_adventure_2023.html).
+
 ## Things I'd like to try
 
 - Generate models from a separate input file
