@@ -4,7 +4,19 @@
 
 #include "camera.h"
 
-// Functions
+Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length){
+    Camera cam;
+    cam.translation.x = x;
+    cam.translation.y = y;
+    cam.translation.z = z;
+    cam.rotation.x = rx;
+    cam.rotation.y = ry;
+    cam.rotation.z = rz;
+    cam.focal_length = focal_length;
+
+    return cam;
+}
+
 // Point transformation
 Point3D rotate_point(Point3D point, Camera* pcam){
     Point3D res;
@@ -44,7 +56,6 @@ Edge2D project_edge(Edge3D edge, float dist, float focal_length){
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     int n = 0;
     for (int i = 0; i < pmesh->size; i++){
-        Point3D a_trans, b_trans;
         Point3D a = rotate_point(pmesh->edges[i].a, pcam);
         a = translate_point(a, pcam->translation);
         Point3D b = rotate_point(pmesh->edges[i].b, pcam);

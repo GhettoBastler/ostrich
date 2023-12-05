@@ -12,6 +12,7 @@ typedef struct {
     float rot_mat[9];
 } Camera;
 
+Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length);
 Point3D rotate_point(Point3D point, Camera* pcam);
 Point3D translate_point(Point3D point, Point3D vector);
 Point2D project_point(Point3D point, float dist, float focal_length);

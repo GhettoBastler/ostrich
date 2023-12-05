@@ -39,6 +39,7 @@ void draw_line(Uint32* ppixels, Edge2D edge){
         }
     }
 }
+
 void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* prenderer){
     int pitch = WIDTH * sizeof(Uint32);
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
@@ -116,18 +117,10 @@ int main(int argc, char **argv){
     }
 
     // Creating scene
-
     Mesh3D* pscene = make_scene();
 
     // Initializing camera
-    Camera cam;
-    cam.translation.x = 0;
-    cam.translation.y = 0;
-    cam.translation.z = 0;
-    cam.rotation.x = 0;
-    cam.rotation.y = 0;
-    cam.rotation.z = 0;
-    cam.focal_length = 800;
+    Camera cam = make_camera(0, 0, 100, M_PI/6, 0, 0, 800);
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
@@ -137,7 +130,6 @@ int main(int argc, char **argv){
     }
 
     // Main loop
-
     Uint32 time_start, delta;
     SDL_Event event;
 
@@ -235,6 +227,10 @@ int main(int argc, char **argv){
     }
 
     // Freeing
+    free(ppixels);
+    free(pbuffer);
+    free(pscene);
+
     SDL_DestroyTexture(ptexture);
     SDL_DestroyRenderer(prenderer);
     SDL_DestroyWindow(pwindow);
