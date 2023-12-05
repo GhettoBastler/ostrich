@@ -25,7 +25,7 @@ void draw_line(Uint32* ppixels, Edge2D edge){
 
     for (;;){
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
-            ppixels[x0 + WIDTH * y0] = 0xFF000000;
+            ppixels[x0 + WIDTH * y0] = 0xFFBF0000;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
@@ -45,7 +45,7 @@ void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* p
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixels
     for (int i = 0; i < HEIGHT * WIDTH; i++){
-        ppixels[i] = 0xFFFFFFFF;
+        ppixels[i] = 0xFF111111;
     }
     //Draw lines
     for (int i = 0; i < pmesh->size; i++){

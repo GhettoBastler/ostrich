@@ -2,6 +2,9 @@
 #include "transforms.h"
 #include "primitives.h"
 
+#define SIZE 4
+#define SPACING 40
+
 Mesh3D* make_scene(){
     // Create a new mesh for the scene
     Mesh3D* pscene = (Mesh3D*) malloc(sizeof(Mesh3D));
@@ -13,10 +16,13 @@ Mesh3D* make_scene(){
     // Adding elements
 
     // A BUNCH OF CUBES
-    Mesh3D* cubes[100];
-    for (int i = 0; i < 100; i++){
+    Mesh3D* cubes[(int)pow(SIZE, 3)];
+    for (int i = 0; i < pow(SIZE, 3); i++){
         Mesh3D* pnew_cube = box(10, 10, 10);
-        Point3D vector = {30 * (i % 10), 30 * floor(i / 10), 0};
+        int a = i % SIZE,
+            b = floor((i % (int)pow(SIZE, 2)) / SIZE),
+            c = floor(i / pow(SIZE, 2));
+        Point3D vector = {SPACING * a, SPACING * b, SPACING * c};
         translate(pnew_cube, vector);
         pscene = merge_meshes(pscene, pnew_cube);
     }
