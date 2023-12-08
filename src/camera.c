@@ -84,15 +84,25 @@ void calculate_transform_matrix(float* matrix,
 
     float r0, r1, r2, r3, r4, r5, r6, r7, r8;
 
-    r0 = cosf(r_x) * cosf(r_y);
-    r1 = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
+//    r0 = cosf(r_x) * cosf(r_y);
+//    r1 = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
+//    r2 = cosf(r_x) * sinf(r_y) * cosf(r_z) + sinf(r_x) * sinf(r_z);
+//    r3 = sinf(r_x) * cosf(r_y);
+//    r4 = sinf(r_x) * sinf(r_y) * sinf(r_z) + cosf(r_x) * cosf(r_z);
+//    r5 = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
+//    r6 = -sinf(r_y);
+//    r7 = cosf(r_y) * sinf(r_z);
+//    r8 = cosf(r_y) * cosf(r_z);
+
+    r0 = cosf(r_y) * cosf(r_z);
+    r1 = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
     r2 = cosf(r_x) * sinf(r_y) * cosf(r_z) + sinf(r_x) * sinf(r_z);
-    r3 = sinf(r_x) * cosf(r_y);
+    r3 = cosf(r_y) * sinf(r_z);
     r4 = sinf(r_x) * sinf(r_y) * sinf(r_z) + cosf(r_x) * cosf(r_z);
-    r5 = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
+    r5 = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
     r6 = -sinf(r_y);
-    r7 = cosf(r_y) * sinf(r_z);
-    r8 = cosf(r_y) * cosf(r_z);
+    r7 = sinf(r_x) * cosf(r_y);
+    r8 = cosf(r_x) * cosf(r_y);
 
     matrix[0] = r0;
     matrix[1] = r1;
@@ -112,7 +122,7 @@ void calculate_transform_matrix(float* matrix,
     matrix[15] = 1;
 }
 
-void multiply_matrix(float* matA, float* matB){
+void multiply_matrix(float* matB, float* matA){
     float res[16];
     res[0] = matA[0] * matB[0] + matA[1] * matB[4] + matA[2] * matB[8] + matA[3] * matB[12];
     res[1] = matA[0] * matB[1] + matA[1] * matB[5] + matA[2] * matB[9] + matA[3] * matB[13];
@@ -131,7 +141,7 @@ void multiply_matrix(float* matA, float* matB){
     res[14] = matA[12] * matB[2] + matA[13] * matB[6] + matA[14] * matB[10] + matA[15] * matB[14];
     res[15] = matA[12] * matB[3] + matA[13] * matB[7] + matA[14] * matB[11] + matA[15] * matB[15];
 
-    memcpy(matA, res, sizeof(float) * 16);
+    memcpy(matB, res, sizeof(float) * 16);
 }
 
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){

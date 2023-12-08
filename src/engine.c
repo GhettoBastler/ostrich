@@ -187,8 +187,8 @@ int main(int argc, char **argv){
                             cam.translation.x = (float)(event.motion.x - prev_x)/5;
                             cam.translation.y = (float)(event.motion.y - prev_y)/5;
                         } else {
-                            cam.rotation.y = -(float)(event.motion.x - prev_x)/100;
-                            cam.rotation.z = (float)(event.motion.y - prev_y)/100;
+                            cam.rotation.y = (float)(event.motion.x - prev_x)/100;
+                            cam.rotation.x = -(float)(event.motion.y - prev_y)/100;
                             // Update matrix components
                             update_rotation_matrix(&cam); // not needed anymore, normally
                         }
