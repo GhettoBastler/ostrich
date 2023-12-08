@@ -54,41 +54,6 @@ Edge2D project_edge(Edge3D edge, float dist, float focal_length){
     return res;
 }
 
-void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
-    int n = 0;
-    for (int i = 0; i < pmesh->size; i++){
-        Point3D a = rotate_point(pmesh->edges[i].a, pcam);
-        a = translate_point(a, pcam->translation);
-        Point3D b = rotate_point(pmesh->edges[i].b, pcam);
-        b = translate_point(b, pcam->translation);
-
-        // Check visibility
-        bool a_hidden, b_hidden;
-        a_hidden = a.z <= 0;
-        b_hidden = b.z <= 0;
-
-        if (a_hidden && b_hidden){
-            // Both points are hidden
-            // Skip this edge
-            continue;
-        } else if (a_hidden){
-            // A is hidden, B is visible
-            a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
-            a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
-            a.z = -1;
-        } else if (b_hidden){
-            // B is hidden, A is visible
-            b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
-            b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
-            b.z = -1;
-        } // If both are visible, we do nothing
-
-        Edge3D new_edge = {a, b};
-        pbuffer->edges[n] = project_edge(new_edge, pcam->translation.z, pcam->focal_length);
-        n += 1;
-    }
-    pbuffer->size = n;
-}
 
 // Interface
 void update_rotation_matrix(Camera* pcam){
@@ -157,14 +122,52 @@ void multiply_matrix(float* matA, float* matB){
     res[5] = matA[4] * matB[1] + matA[5] * matB[5] + matA[6] * matB[9] + matA[7] * matB[13];
     res[6] = matA[4] * matB[2] + matA[5] * matB[6] + matA[6] * matB[10] + matA[7] * matB[14];
     res[7] = matA[8] * matB[3] + matA[5] * matB[7] + matA[6] * matB[11] + matA[7] * matB[15];
-    res[4] = matA[8] * matB[0] + matA[9] * matB[4] + matA[10] * matB[8] + matA[11] * matB[12];
-    res[5] = matA[8] * matB[1] + matA[9] * matB[5] + matA[10] * matB[9] + matA[11] * matB[13];
-    res[6] = matA[8] * matB[2] + matA[9] * matB[6] + matA[10] * matB[10] + matA[11] * matB[14];
-    res[7] = matA[8] * matB[3] + matA[9] * matB[7] + matA[10] * matB[11] + matA[11] * matB[15];
-    res[4] = matA[12] * matB[0] + matA[13] * matB[4] + matA[14] * matB[8] + matA[15] * matB[12];
-    res[5] = matA[12] * matB[1] + matA[13] * matB[5] + matA[14] * matB[9] + matA[15] * matB[13];
-    res[6] = matA[12] * matB[2] + matA[13] * matB[6] + matA[14] * matB[10] + matA[15] * matB[14];
-    res[7] = matA[12] * matB[3] + matA[13] * matB[7] + matA[14] * matB[11] + matA[15] * matB[15];
+    res[8] = matA[8] * matB[0] + matA[9] * matB[4] + matA[10] * matB[8] + matA[11] * matB[12];
+    res[9] = matA[8] * matB[1] + matA[9] * matB[5] + matA[10] * matB[9] + matA[11] * matB[13];
+    res[10] = matA[8] * matB[2] + matA[9] * matB[6] + matA[10] * matB[10] + matA[11] * matB[14];
+    res[11] = matA[8] * matB[3] + matA[9] * matB[7] + matA[10] * matB[11] + matA[11] * matB[15];
+    res[12] = matA[12] * matB[0] + matA[13] * matB[4] + matA[14] * matB[8] + matA[15] * matB[12];
+    res[13] = matA[12] * matB[1] + matA[13] * matB[5] + matA[14] * matB[9] + matA[15] * matB[13];
+    res[14] = matA[12] * matB[2] + matA[13] * matB[6] + matA[14] * matB[10] + matA[15] * matB[14];
+    res[15] = matA[12] * matB[3] + matA[13] * matB[7] + matA[14] * matB[11] + matA[15] * matB[15];
 
     memcpy(matA, res, sizeof(float) * 16);
+}
+
+void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
+    int n = 0;
+    for (int i = 0; i < pmesh->size; i++){
+        // Point3D a = rotate_point(pmesh->edges[i].a, pcam);
+        // a = translate_point(a, pcam->translation);
+        // Point3D b = rotate_point(pmesh->edges[i].b, pcam);
+        // b = translate_point(b, pcam->translation);
+        Point3D a = transform_point(pcam->transform_mat, pmesh->edges[i].a);
+        Point3D b = transform_point(pcam->transform_mat, pmesh->edges[i].b);
+
+        // Check visibility
+        bool a_hidden, b_hidden;
+        a_hidden = a.z <= 0;
+        b_hidden = b.z <= 0;
+
+        if (a_hidden && b_hidden){
+            // Both points are hidden
+            // Skip this edge
+            continue;
+        } else if (a_hidden){
+            // A is hidden, B is visible
+            a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
+            a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
+            a.z = -1;
+        } else if (b_hidden){
+            // B is hidden, A is visible
+            b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
+            b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
+            b.z = -1;
+        } // If both are visible, we do nothing
+
+        Edge3D new_edge = {a, b};
+        pbuffer->edges[n] = project_edge(new_edge, pcam->translation.z, pcam->focal_length);
+        n += 1;
+    }
+    pbuffer->size = n;
 }

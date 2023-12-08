@@ -120,7 +120,7 @@ int main(int argc, char **argv){
     Mesh3D* pscene = make_scene();
 
     // Initializing camera
-    Camera cam = make_camera(0, 0, 100, M_PI/6, 0, 0, 800);
+    Camera cam = make_camera(0, 0, 0, 0, 0, 0, 800);
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
@@ -139,15 +139,28 @@ int main(int argc, char **argv){
     bool shift_pressed = false;
     int prev_x, prev_y;
 
+
     float dist = 100.;
     float focal_length = 800.;
     Point3D rotation, translation;
-    update_rotation_matrix(&cam);
-
+    //update_rotation_matrix(&cam);
+    // TRANSFORM MATRIX
+    for (int i = 0; i < 16; i++)
+        cam.transform_mat[i] = 0;
+    cam.transform_mat[0] = cam.transform_mat[5]
+                            = cam.transform_mat[10]
+                            = cam.transform_mat[15] = 1;
     project_mesh(pbuffer, pscene, &cam);
+    printf("First draw call\n");
     draw(ppixels, pbuffer, ptexture, prenderer);
 
     while (!is_stopped){
+        cam.translation.x = 0;
+        cam.translation.y = 0;
+        cam.translation.z = 0;
+        cam.rotation.x = 0;
+        cam.rotation.y = 0;
+        cam.rotation.z = 0;
         should_draw = false;
         time_start = SDL_GetTicks();
         //Processing inputs
@@ -171,13 +184,13 @@ int main(int argc, char **argv){
                 case SDL_MOUSEMOTION:
                     if (button_pressed){
                         if (shift_pressed){
-                            cam.translation.x += (float)(event.motion.x - prev_x)/5;
-                            cam.translation.y += (float)(event.motion.y - prev_y)/5;
+                            cam.translation.x = (float)(event.motion.x - prev_x)/5;
+                            cam.translation.y = (float)(event.motion.y - prev_y)/5;
                         } else {
-                            cam.rotation.y += -(float)(event.motion.x - prev_x)/100;
-                            cam.rotation.z += (float)(event.motion.y - prev_y)/100;
+                            cam.rotation.y = -(float)(event.motion.x - prev_x)/100;
+                            cam.rotation.z = (float)(event.motion.y - prev_y)/100;
                             // Update matrix components
-                            update_rotation_matrix(&cam);
+                            update_rotation_matrix(&cam); // not needed anymore, normally
                         }
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
@@ -199,13 +212,13 @@ int main(int argc, char **argv){
                         if (shift_pressed){
                             cam.focal_length += 5;
                         } else {
-                            cam.translation.z += 1;
+                            cam.translation.z = 1;
                         }
                     } else {
                         if (shift_pressed){
                             cam.focal_length -= 5;
                         } else {
-                            cam.translation.z -= 1;
+                            cam.translation.z = -1;
                         }
                     }
                     should_draw = true;
@@ -215,6 +228,12 @@ int main(int argc, char **argv){
 
         //Drawing
         if (should_draw){
+            // update transformation matrix
+            float new_mat[16];
+            calculate_transform_matrix(new_mat,
+                   cam.rotation.x, cam.rotation.y, cam.rotation.z,
+                   cam.translation.x, cam.translation.y, cam.translation.z);
+            multiply_matrix(cam.transform_mat, new_mat);
             project_mesh(pbuffer, pscene, &cam);
             draw(ppixels, pbuffer, ptexture, prenderer);
         }
