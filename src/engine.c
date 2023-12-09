@@ -201,7 +201,6 @@ int main(int argc, char **argv){
 
     float dist = 100.;
     float focal_length = 800.;
-    Point3D rotation, translation;
 
     // TRANSFORM MATRIX
     for (int i = 0; i < 16; i++)
@@ -243,8 +242,8 @@ int main(int argc, char **argv){
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
         if (mousestate && SDL_BUTTON_LEFT){
-            cam.rotation.y = (float)(mouse_x - prev_x)/100;
-            cam.rotation.x = -(float)(mouse_y - prev_y)/100;
+            cam.rotation.y = -(float)(mouse_x - prev_x)/200;
+            cam.rotation.x = -(float)(mouse_y - prev_y)/200;
             should_draw = true;
         }
         prev_x = mouse_x;
@@ -254,10 +253,10 @@ int main(int argc, char **argv){
         shift_pressed = (bool) kbstate[SDL_SCANCODE_LSHIFT];
 
         if (kbstate[SDL_SCANCODE_W]) {
-            cam.translation.z = -1;
+            cam.translation.z = -0.5;
             should_draw = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
-            cam.translation.z = 1;
+            cam.translation.z = 0.5;
             should_draw = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
