@@ -160,7 +160,12 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    // Keyboard
     const Uint8* kbstate = SDL_GetKeyboardState(NULL);
+
+    // Mouse
+    Uint32 mousestate;
+    int mouse_x, mouse_y;
 
     // Initializing main loop
     Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
@@ -205,7 +210,6 @@ int main(int argc, char **argv){
                             = cam.transform_mat[10]
                             = cam.transform_mat[15] = 1;
     project_mesh(pbuffer, pscene, &cam);
-    printf("First draw call\n");
     draw(ppixels, pbuffer, ptexture, prenderer);
 
     while (!is_stopped){
@@ -224,27 +228,6 @@ int main(int argc, char **argv){
                     is_stopped = true;
                     break;
 
-                case SDL_MOUSEBUTTONDOWN:
-                case SDL_MOUSEBUTTONUP:
-                    if (event.button.button == SDL_BUTTON_LEFT){
-                        button_pressed = event.button.state == SDL_PRESSED;
-                        if (button_pressed){
-                            prev_x = event.button.x;
-                            prev_y = event.button.y;
-                        }
-                    }
-                    break;
-
-                case SDL_MOUSEMOTION:
-                    if (button_pressed){
-                        cam.rotation.y = (float)(event.motion.x - prev_x)/100;
-                        cam.rotation.x = -(float)(event.motion.y - prev_y)/100;
-                        prev_x = event.motion.x;
-                        prev_y = event.motion.y;
-                        should_draw = true;
-                    }
-                    break;
-
                 case SDL_MOUSEWHEEL:
                     if (event.wheel.y > 0) {
                         cam.focal_length += 5;
@@ -256,6 +239,16 @@ int main(int argc, char **argv){
             }
 
         }
+
+        // Mouse
+        mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
+        if (mousestate && SDL_BUTTON_LEFT){
+            cam.rotation.y = (float)(mouse_x - prev_x)/100;
+            cam.rotation.x = -(float)(mouse_y - prev_y)/100;
+            should_draw = true;
+        }
+        prev_x = mouse_x;
+        prev_y = mouse_y;
 
         // Keyboard
         shift_pressed = (bool) kbstate[SDL_SCANCODE_LSHIFT];
