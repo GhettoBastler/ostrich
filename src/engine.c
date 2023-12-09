@@ -237,15 +237,8 @@ int main(int argc, char **argv){
 
                 case SDL_MOUSEMOTION:
                     if (button_pressed){
-                        if (shift_pressed){
-                            cam.translation.x = (float)(event.motion.x - prev_x)/5;
-                            cam.translation.y = (float)(event.motion.y - prev_y)/5;
-                        } else {
-                            cam.rotation.y = (float)(event.motion.x - prev_x)/100;
-                            cam.rotation.x = -(float)(event.motion.y - prev_y)/100;
-                            // Update matrix components
-                            update_rotation_matrix(&cam); // not needed anymore, normally
-                        }
+                        cam.rotation.y = (float)(event.motion.x - prev_x)/100;
+                        cam.rotation.x = -(float)(event.motion.y - prev_y)/100;
                         prev_x = event.motion.x;
                         prev_y = event.motion.y;
                         should_draw = true;
@@ -254,17 +247,9 @@ int main(int argc, char **argv){
 
                 case SDL_MOUSEWHEEL:
                     if (event.wheel.y > 0) {
-                        if (shift_pressed){
-                            cam.focal_length += 5;
-                        } else {
-                            cam.translation.z = 1;
-                        }
+                        cam.focal_length += 5;
                     } else {
-                        if (shift_pressed){
-                            cam.focal_length -= 5;
-                        } else {
-                            cam.translation.z = -1;
-                        }
+                        cam.focal_length -= 5;
                     }
                     should_draw = true;
                     break;
