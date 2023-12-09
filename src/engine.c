@@ -160,6 +160,8 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    const Uint8* kbstate = SDL_GetKeyboardState(NULL);
+
     // Initializing main loop
     Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
 
@@ -195,7 +197,7 @@ int main(int argc, char **argv){
     float dist = 100.;
     float focal_length = 800.;
     Point3D rotation, translation;
-    //update_rotation_matrix(&cam);
+
     // TRANSFORM MATRIX
     for (int i = 0; i < 16; i++)
         cam.transform_mat[i] = 0;
@@ -250,15 +252,6 @@ int main(int argc, char **argv){
                     }
                     break;
 
-                case SDL_KEYDOWN:
-                case SDL_KEYUP:
-                    if (event.key.keysym.sym == SDLK_LSHIFT) {
-                        shift_pressed = event.key.state == SDL_PRESSED;
-                    } else if (event.key.keysym.sym == SDLK_e && event.key.type == SDL_KEYDOWN){
-                        export(prenderer);
-                    }
-                    break;
-                
                 case SDL_MOUSEWHEEL:
                     if (event.wheel.y > 0) {
                         if (shift_pressed){
@@ -276,6 +269,25 @@ int main(int argc, char **argv){
                     should_draw = true;
                     break;
             }
+
+        }
+
+        // Keyboard
+        shift_pressed = (bool) kbstate[SDL_SCANCODE_LSHIFT];
+
+        if (kbstate[SDL_SCANCODE_W]) {
+            cam.translation.z = -1;
+            should_draw = true;
+        } else if (kbstate[SDL_SCANCODE_S]) {
+            cam.translation.z = 1;
+            should_draw = true;
+        }
+        if (kbstate[SDL_SCANCODE_A]) {
+            cam.translation.x = 1;
+            should_draw = true;
+        } else if (kbstate[SDL_SCANCODE_D]) {
+            cam.translation.x = -1;
+            should_draw = true;
         }
 
         //Drawing
