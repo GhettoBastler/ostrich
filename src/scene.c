@@ -15,16 +15,16 @@ Mesh3D* make_scene(){
     }
     // Adding elements
 
-    // A BUNCH OF CUBES
-    Mesh3D* cubes[(int)pow(SIZE, 3)];
+    // A BUNCH OF SPHERES
+    Mesh3D* spheres[(int)pow(SIZE, 3)];
     for (int i = 0; i < pow(SIZE, 3); i++){
-        Mesh3D* pnew_cube = box(10, 10, 10);
+        Mesh3D* pnew_sphere = sphere(10);
         int a = i % SIZE,
             b = floor((i % (int)pow(SIZE, 2)) / SIZE),
             c = floor(i / pow(SIZE, 2));
         Point3D vector = {SPACING * a, SPACING * b, SPACING * c};
-        translate(pnew_cube, vector);
-        pscene = merge_meshes(pscene, pnew_cube);
+        translate(pnew_sphere, vector);
+        pscene = merge_meshes(pscene, pnew_sphere);
     }
     
     return pscene;
