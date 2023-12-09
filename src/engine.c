@@ -11,11 +11,63 @@
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
 
+Edge2D cap_edge(Edge2D edge){
+    Point2D a = edge.a;
+    Point2D b = edge.b;
+    // Point A
+    if (a.x != b.x){
+        if (a.x < 0){
+            a.y = (a.x / (a.x - b.x)) * (b.y - a.y) + a.y;
+            a.x = 0;
+        } else if (a.x > WIDTH){
+            a.y = ((a.x - WIDTH) / (a.x - b.x)) * (b.y - a.y) + a.y;
+            a.x = WIDTH;
+        }
+    }
+    
+    if (a.y != b.y){
+        if (a.y < 0){
+            a.x = (a.y / (a.y - b.y)) * (b.x - a.x) + a.x;
+            a.y = 0;
+        } else if (a.y > HEIGHT){
+            a.x = ((a.y - HEIGHT) / (a.y - b.y)) * (b.x - a.x) + a.x;
+            a.y = HEIGHT;
+        }
+    }
+
+    // Point B
+    if (a.x != b.x){
+        if (b.x < 0){
+            b.y = (b.x / (b.x - a.x)) * (a.y - b.y) + b.y;
+            b.x = 0;
+        } else if (b.x > WIDTH){
+            b.y = ((b.x - WIDTH) / (b.x - a.x)) * (a.y - b.y) + b.y;
+            b.x = WIDTH;
+        }
+    }
+
+    if (a.y != b.y){
+        if (b.y < 0){
+            b.x = (b.y / (b.y - a.y)) * (a.x - b.x) + b.x;
+            b.y = 0;
+        } else if (b.y > HEIGHT){
+            b.x = ((b.y - HEIGHT) / (b.y - a.y)) * (a.x - b.x) + b.x;
+            b.y = HEIGHT;
+        }
+    }
+
+    Edge2D res = {a, b};
+    return res;
+}
+
 void draw_line(Uint32* ppixels, Edge2D edge){
-    int x0 = (int) edge.a.x,
-        y0 = (int) edge.a.y,
-        x1 = (int) edge.b.x,
-        y1 = (int) edge.b.y;
+
+    Edge2D caped = cap_edge(edge);
+
+    int x0 = (int) caped.a.x,
+        y0 = (int) caped.a.y,
+        x1 = (int) caped.b.x,
+        y1 = (int) caped.b.y;
     int dx = abs(x1 - x0);
     int sx = x0 < x1 ? 1 : -1;
     int dy = -abs(y1 - y0);
