@@ -77,7 +77,7 @@ void draw_line(Uint32* ppixels, Edge2D edge){
 
     for (;;){
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
-            ppixels[x0 + WIDTH * y0] = 0xFFBF0000;
+            ppixels[x0 + WIDTH * y0] = 0xFFFCE46C;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
