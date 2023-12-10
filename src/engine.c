@@ -10,6 +10,8 @@
 
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
+#define LINE_COLOR 0xFFFCE46C
+#define BG_COLOR 0xFF111111
 
 Edge2D cap_edge(Edge2D edge){
     Point2D a = edge.a;
@@ -62,12 +64,12 @@ Edge2D cap_edge(Edge2D edge){
 
 void draw_line(Uint32* ppixels, Edge2D edge){
 
-    Edge2D caped = cap_edge(edge);
+    Edge2D capped = cap_edge(edge);
 
-    int x0 = (int) caped.a.x,
-        y0 = (int) caped.a.y,
-        x1 = (int) caped.b.x,
-        y1 = (int) caped.b.y;
+    int x0 = (int) capped.a.x,
+        y0 = (int) capped.a.y,
+        x1 = (int) capped.b.x,
+        y1 = (int) capped.b.y;
     int dx = abs(x1 - x0);
     int sx = x0 < x1 ? 1 : -1;
     int dy = -abs(y1 - y0);
@@ -77,7 +79,7 @@ void draw_line(Uint32* ppixels, Edge2D edge){
 
     for (;;){
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
-            ppixels[x0 + WIDTH * y0] = 0xFFFCE46C;
+            ppixels[x0 + WIDTH * y0] = LINE_COLOR;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
@@ -92,20 +94,30 @@ void draw_line(Uint32* ppixels, Edge2D edge){
     }
 }
 
-void draw(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture, SDL_Renderer* prenderer){
+void update_texture(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture){
     int pitch = WIDTH * sizeof(Uint32);
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixels
     for (int i = 0; i < HEIGHT * WIDTH; i++){
-        ppixels[i] = 0xFF111111;
+        ppixels[i] = BG_COLOR;
     }
     //Draw lines
     for (int i = 0; i < pmesh->size; i++){
         draw_line(ppixels, pmesh->edges[i]);
     }
     SDL_UnlockTexture(ptexture);
+}
+
+void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
     SDL_RenderPresent(prenderer);
+}
+
+void check_allocation(void* pointer, char* message){
+    if (pointer == NULL){
+        fprintf(stderr, message);
+        exit(1);
+    }
 }
 
 void export(SDL_Renderer* prenderer){
@@ -139,41 +151,23 @@ int main(int argc, char **argv){
             HEIGHT,
             0);
 
-    if (pwindow == NULL) {
-        fprintf(stderr, "SDL window failed to initialize: %s\n", SDL_GetError());
-        return 1;
-    }
+    check_allocation(pwindow, "SDL window failed to initialize\n");
 
-    prenderer = SDL_CreateRenderer(pwindow,
-            -1,
-            0);
-
-    if (prenderer == NULL) {
-        fprintf(stderr, "SDL renderer failed to initialize: %s\n", SDL_GetError());
-        return 1;
-    }
+    prenderer = SDL_CreateRenderer(pwindow, -1, 0);
+    check_allocation(prenderer, "SDL renderer failed to initialize\n");
 
     ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
-
-    if (ptexture == NULL) {
-        fprintf(stderr, "SDL texture failed to initialize: %s\n", SDL_GetError());
-        return 1;
-    }
+    check_allocation(ptexture, "SDL texture failed to initialize\n");
 
     // Keyboard
     const Uint8* kbstate = SDL_GetKeyboardState(NULL);
-
     // Mouse
     Uint32 mousestate;
     int mouse_x, mouse_y;
-
     // Initializing main loop
     Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
 
-    if (ppixels == NULL){
-        fprintf(stderr, "Couldn't allocate memory for frame buffer\n");
-        return 1;
-    }
+    check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
 
     // Creating scene
     Mesh3D* pscene = make_scene();
@@ -183,22 +177,16 @@ int main(int argc, char **argv){
 
     // Creating a buffer for the 2D projection
     Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
-    if (pbuffer == NULL){
-        fprintf(stderr, "Couldn't create the buffer for the 2D projection\n");
-        return 1;
-    }
+    check_allocation(pbuffer, "Couldn\'t allocate memory for 2D projection buffer\n");
 
     // Main loop
     Uint32 time_start, delta;
     SDL_Event event;
 
-    bool should_draw;
+    bool redraw;
     bool is_stopped = false;
-    bool button_pressed = false;
     int prev_x, prev_y;
 
-
-    float dist = 100.;
     float focal_length = 800.;
 
     // TRANSFORM MATRIX
@@ -207,8 +195,10 @@ int main(int argc, char **argv){
     cam.transform_mat[0] = cam.transform_mat[5]
                             = cam.transform_mat[10]
                             = cam.transform_mat[15] = 1;
+
     project_mesh(pbuffer, pscene, &cam);
-    draw(ppixels, pbuffer, ptexture, prenderer);
+    update_texture(ppixels, pbuffer, ptexture);
+    draw(ptexture, prenderer);
 
     while (!is_stopped){
         cam.translation.x = 0;
@@ -217,8 +207,9 @@ int main(int argc, char **argv){
         cam.rotation.x = 0;
         cam.rotation.y = 0;
         cam.rotation.z = 0;
-        should_draw = false;
+        redraw = false;
         time_start = SDL_GetTicks();
+        
         //Processing inputs
         while (SDL_PollEvent(&event)){
             switch(event.type){
@@ -232,7 +223,7 @@ int main(int argc, char **argv){
                     } else {
                         cam.focal_length -= 5;
                     }
-                    should_draw = true;
+                    redraw = true;
                     break;
             }
 
@@ -240,13 +231,13 @@ int main(int argc, char **argv){
 
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
-        if (mousestate & SDL_BUTTON_LMASK){
+        if (mousestate & SDL_BUTTON(1)){
             cam.rotation.y = -(float)(mouse_x - prev_x)/200;
             cam.rotation.x = -(float)(mouse_y - prev_y)/200;
-            should_draw = true;
-        } else if (mousestate & SDL_BUTTON_RMASK){
+            redraw = true;
+        } else if (mousestate & SDL_BUTTON(2)){
             cam.rotation.z = (float)(mouse_x - prev_x)/200;
-            should_draw = true;
+            redraw = true;
         }
         prev_x = mouse_x;
         prev_y = mouse_y;
@@ -255,28 +246,28 @@ int main(int argc, char **argv){
 
         if (kbstate[SDL_SCANCODE_W]) {
             cam.translation.z = -0.5;
-            should_draw = true;
+            redraw = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
             cam.translation.z = 0.5;
-            should_draw = true;
+            redraw = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
             cam.translation.x = 1;
-            should_draw = true;
+            redraw = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
             cam.translation.x = -1;
-            should_draw = true;
+            redraw = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
             cam.translation.y = 1;
-            should_draw = true;
+            redraw = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
             cam.translation.y = -1;
-            should_draw = true;
+            redraw = true;
         }
 
-        //Drawing
-        if (should_draw){
+        //Projecting
+        if (redraw){
             // update transformation matrix
             float new_mat[16];
             calculate_transform_matrix(new_mat,
@@ -284,8 +275,11 @@ int main(int argc, char **argv){
                    cam.translation.x, cam.translation.y, cam.translation.z);
             multiply_matrix(cam.transform_mat, new_mat);
             project_mesh(pbuffer, pscene, &cam);
-            draw(ppixels, pbuffer, ptexture, prenderer);
+            update_texture(ppixels, pbuffer, ptexture);
         }
+
+        //Drawing
+        draw(ptexture, prenderer);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
