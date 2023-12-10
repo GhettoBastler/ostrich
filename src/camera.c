@@ -15,58 +15,28 @@ Camera make_camera(float x, float y, float z, float rx, float ry, float rz, floa
     cam.rotation.z = rz;
     cam.focal_length = focal_length;
 
+    for (int i = 0; i < 16; i++)
+        cam.transform_mat[i] = 0;
+    cam.transform_mat[0] = cam.transform_mat[5]
+                         = cam.transform_mat[10]
+                         = cam.transform_mat[15] = 1;
+
     return cam;
 }
 
-// Point transformation
-Point3D rotate_point(Point3D point, Camera* pcam){
-    Point3D res;
-
-    res.x = pcam->rot_mat[0] * point.x + pcam->rot_mat[1] * point.y + pcam->rot_mat[2] * point.z;
-    res.y = pcam->rot_mat[3] * point.x + pcam->rot_mat[4] * point.y + pcam->rot_mat[5] * point.z;
-    res.z = pcam->rot_mat[6] * point.x + pcam->rot_mat[7] * point.y + pcam->rot_mat[8] * point.z;
-
-    return res;
-}
-
-Point3D translate_point(Point3D point, Point3D vector){
-    Point3D res;
-
-    res.x = point.x + vector.x;
-    res.y = point.y + vector.y;
-    res.z = point.z + vector.z;
-
-    return res;
-}
-
 // 2D projection
-Point2D project_point(Point3D point, float dist, float focal_length){
+Point2D project_point(Point3D point, float focal_length){
     float x = (point.x * (focal_length / (point.z))) + (WIDTH / 2);
     float y = (point.y * (focal_length / (point.z))) + (HEIGHT / 2);
     Point2D res = {x, y};
     return res;
 }
 
-Edge2D project_edge(Edge3D edge, float dist, float focal_length){
-    Point2D a = project_point(edge.a, dist, focal_length);
-    Point2D b = project_point(edge.b, dist, focal_length);
+Edge2D project_edge(Edge3D edge, float focal_length){
+    Point2D a = project_point(edge.a, focal_length);
+    Point2D b = project_point(edge.b, focal_length);
     Edge2D res = {a, b};
     return res;
-}
-
-
-// Interface
-void update_rotation_matrix(Camera* pcam){
-    Point3D r = pcam->rotation;
-    pcam->rot_mat[0] = cosf(r.x) * cosf(r.y);
-    pcam->rot_mat[1] = cosf(r.x) * sinf(r.y) * sinf(r.z) - sinf(r.x) * cosf(r.z);
-    pcam->rot_mat[2] = cosf(r.x) * sinf(r.y) * cosf(r.z) + sinf(r.x) * sinf(r.z);
-    pcam->rot_mat[3] = sinf(r.x) * cosf(r.y);
-    pcam->rot_mat[4] = sinf(r.x) * sinf(r.y) * sinf(r.z) + cosf(r.x) * cosf(r.z);
-    pcam->rot_mat[5] = sinf(r.x) * sinf(r.y) * cosf(r.z) - cosf(r.x) * sinf(r.z);
-    pcam->rot_mat[6] = -sinf(r.y);
-    pcam->rot_mat[7] = cosf(r.y) * sinf(r.z);
-    pcam->rot_mat[8] = cosf(r.y) * cosf(r.z);
 }
 
 // Homogeneous coordinates transforms
@@ -83,16 +53,6 @@ void calculate_transform_matrix(float* matrix,
                                 float t_x, float t_y, float t_z){
 
     float r0, r1, r2, r3, r4, r5, r6, r7, r8;
-
-//    r0 = cosf(r_x) * cosf(r_y);
-//    r1 = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
-//    r2 = cosf(r_x) * sinf(r_y) * cosf(r_z) + sinf(r_x) * sinf(r_z);
-//    r3 = sinf(r_x) * cosf(r_y);
-//    r4 = sinf(r_x) * sinf(r_y) * sinf(r_z) + cosf(r_x) * cosf(r_z);
-//    r5 = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
-//    r6 = -sinf(r_y);
-//    r7 = cosf(r_y) * sinf(r_z);
-//    r8 = cosf(r_y) * cosf(r_z);
 
     r0 = cosf(r_y) * cosf(r_z);
     r1 = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
@@ -147,10 +107,6 @@ void multiply_matrix(float* matB, float* matA){
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     int n = 0;
     for (int i = 0; i < pmesh->size; i++){
-        // Point3D a = rotate_point(pmesh->edges[i].a, pcam);
-        // a = translate_point(a, pcam->translation);
-        // Point3D b = rotate_point(pmesh->edges[i].b, pcam);
-        // b = translate_point(b, pcam->translation);
         Point3D a = transform_point(pcam->transform_mat, pmesh->edges[i].a);
         Point3D b = transform_point(pcam->transform_mat, pmesh->edges[i].b);
 
@@ -176,7 +132,7 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
         } // If both are visible, we do nothing
 
         Edge3D new_edge = {a, b};
-        pbuffer->edges[n] = project_edge(new_edge, pcam->translation.z, pcam->focal_length);
+        pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
         n += 1;
     }
     pbuffer->size = n;

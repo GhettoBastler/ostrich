@@ -187,15 +187,6 @@ int main(int argc, char **argv){
     bool is_stopped = false;
     int prev_x, prev_y;
 
-    float focal_length = 800.;
-
-    // TRANSFORM MATRIX
-    for (int i = 0; i < 16; i++)
-        cam.transform_mat[i] = 0;
-    cam.transform_mat[0] = cam.transform_mat[5]
-                            = cam.transform_mat[10]
-                            = cam.transform_mat[15] = 1;
-
     project_mesh(pbuffer, pscene, &cam);
     update_texture(ppixels, pbuffer, ptexture);
     draw(ptexture, prenderer);
