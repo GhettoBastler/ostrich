@@ -16,44 +16,42 @@
 Edge2D cap_edge(Edge2D edge){
     Point2D a = edge.a;
     Point2D b = edge.b;
-    // Point A
-    if (a.x != b.x){
+
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+
+    if (dx != 0){
         if (a.x < 0){
-            a.y = (a.x / (a.x - b.x)) * (b.y - a.y) + a.y;
+            a.y = -(a.x / dx) * dy + a.y;
             a.x = 0;
         } else if (a.x > WIDTH){
-            a.y = ((a.x - WIDTH) / (a.x - b.x)) * (b.y - a.y) + a.y;
+            a.y = -((a.x - WIDTH) / dx) * dy + a.y;
             a.x = WIDTH;
         }
-    }
-    
-    if (a.y != b.y){
-        if (a.y < 0){
-            a.x = (a.y / (a.y - b.y)) * (b.x - a.x) + a.x;
-            a.y = 0;
-        } else if (a.y > HEIGHT){
-            a.x = ((a.y - HEIGHT) / (a.y - b.y)) * (b.x - a.x) + a.x;
-            a.y = HEIGHT;
-        }
-    }
 
-    // Point B
-    if (a.x != b.x){
         if (b.x < 0){
-            b.y = (b.x / (b.x - a.x)) * (a.y - b.y) + b.y;
+            b.y = -(b.x / dx) * dy + b.y;
             b.x = 0;
         } else if (b.x > WIDTH){
-            b.y = ((b.x - WIDTH) / (b.x - a.x)) * (a.y - b.y) + b.y;
+            b.y = -((b.x - WIDTH) / dx) * dy + b.y;
             b.x = WIDTH;
         }
     }
+    
+    if (dy != 0){
+        if (a.y < 0){
+            a.x = -(a.y / dy) * dx + a.x;
+            a.y = 0;
+        } else if (a.y > HEIGHT){
+            a.x = -((a.y - HEIGHT) / dy) * dx + a.x;
+            a.y = HEIGHT;
+        }
 
-    if (a.y != b.y){
         if (b.y < 0){
-            b.x = (b.y / (b.y - a.y)) * (a.x - b.x) + b.x;
+            b.x = -(b.y / dy) * dx + b.x;
             b.y = 0;
         } else if (b.y > HEIGHT){
-            b.x = ((b.y - HEIGHT) / (b.y - a.y)) * (a.x - b.x) + b.x;
+            b.x = -((b.y - HEIGHT) / dy) * dx + b.x;
             b.y = HEIGHT;
         }
     }
@@ -159,16 +157,17 @@ int main(int argc, char **argv){
     ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
     check_allocation(ptexture, "SDL texture failed to initialize\n");
 
+    Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
+    check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
+
     // Keyboard
     const Uint8* kbstate = SDL_GetKeyboardState(NULL);
+ 
     // Mouse
     Uint32 mousestate;
     int mouse_x, mouse_y;
+
     // Initializing main loop
-    Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
-
-    check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
-
     // Creating scene
     Mesh3D* pscene = make_scene();
 
