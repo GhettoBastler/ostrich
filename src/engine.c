@@ -195,7 +195,6 @@ int main(int argc, char **argv){
     bool should_draw;
     bool is_stopped = false;
     bool button_pressed = false;
-    bool shift_pressed = false;
     int prev_x, prev_y;
 
 
@@ -241,16 +240,18 @@ int main(int argc, char **argv){
 
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
-        if (mousestate && SDL_BUTTON_LEFT){
+        if (mousestate & SDL_BUTTON_LMASK){
             cam.rotation.y = -(float)(mouse_x - prev_x)/200;
             cam.rotation.x = -(float)(mouse_y - prev_y)/200;
+            should_draw = true;
+        } else if (mousestate & SDL_BUTTON_RMASK){
+            cam.rotation.z = (float)(mouse_x - prev_x)/200;
             should_draw = true;
         }
         prev_x = mouse_x;
         prev_y = mouse_y;
 
         // Keyboard
-        shift_pressed = (bool) kbstate[SDL_SCANCODE_LSHIFT];
 
         if (kbstate[SDL_SCANCODE_W]) {
             cam.translation.z = -0.5;
@@ -264,6 +265,13 @@ int main(int argc, char **argv){
             should_draw = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
             cam.translation.x = -1;
+            should_draw = true;
+        }
+        if (kbstate[SDL_SCANCODE_Q]) {
+            cam.translation.y = 1;
+            should_draw = true;
+        } else if (kbstate[SDL_SCANCODE_E]) {
+            cam.translation.y = -1;
             should_draw = true;
         }
 
