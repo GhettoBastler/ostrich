@@ -7,12 +7,6 @@
 
 Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length){
     Camera cam;
-    cam.translation.x = x;
-    cam.translation.y = y;
-    cam.translation.z = z;
-    cam.rotation.x = rx;
-    cam.rotation.y = ry;
-    cam.rotation.z = rz;
     cam.focal_length = focal_length;
 
     for (int i = 0; i < 16; i++)
@@ -49,8 +43,15 @@ Point3D transform_point(float* matrix, Point3D point){
 }
 
 void calculate_transform_matrix(float* matrix,
-                                float r_x, float r_y, float r_z, 
-                                float t_x, float t_y, float t_z){
+                                Point3D rotation,
+                                Point3D translation){
+
+    float r_x = rotation.x,
+          r_y = rotation.y,
+          r_z = rotation.z,
+          t_x = translation.x,
+          t_y = translation.y,
+          t_z = translation.z;
 
     float r0, r1, r2, r3, r4, r5, r6, r7, r8;
 
@@ -102,6 +103,14 @@ void multiply_matrix(float* matB, float* matA){
     res[15] = matA[12] * matB[3] + matA[13] * matB[7] + matA[14] * matB[11] + matA[15] * matB[15];
 
     memcpy(matB, res, sizeof(float) * 16);
+}
+
+void update_transform_matrix(float* mat, Point3D rotation, Point3D translation){
+    float new_mat[16];
+    calculate_transform_matrix(new_mat,
+           rotation,
+           translation);
+    multiply_matrix(mat, new_mat);
 }
 
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){

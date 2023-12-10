@@ -183,7 +183,7 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
-    bool redraw;
+    bool reproject;
     bool is_stopped = false;
     int prev_x, prev_y;
 
@@ -191,14 +191,12 @@ int main(int argc, char **argv){
     update_texture(ppixels, pbuffer, ptexture);
     draw(ptexture, prenderer);
 
+    Point3D rotation, translation;
+
     while (!is_stopped){
-        cam.translation.x = 0;
-        cam.translation.y = 0;
-        cam.translation.z = 0;
-        cam.rotation.x = 0;
-        cam.rotation.y = 0;
-        cam.rotation.z = 0;
-        redraw = false;
+        translation.x = translation.y = translation.z = 0;
+        rotation.x = rotation.y = rotation.z = 0;
+        reproject = false;
         time_start = SDL_GetTicks();
         
         //Processing inputs
@@ -214,7 +212,7 @@ int main(int argc, char **argv){
                     } else {
                         cam.focal_length -= 5;
                     }
-                    redraw = true;
+                    reproject = true;
                     break;
             }
 
@@ -223,12 +221,12 @@ int main(int argc, char **argv){
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
         if (mousestate & SDL_BUTTON(1)){
-            cam.rotation.y = -(float)(mouse_x - prev_x)/200;
-            cam.rotation.x = -(float)(mouse_y - prev_y)/200;
-            redraw = true;
+            rotation.y = -(float)(mouse_x - prev_x)/200;
+            rotation.x = -(float)(mouse_y - prev_y)/200;
+            reproject = true;
         } else if (mousestate & SDL_BUTTON(2)){
-            cam.rotation.z = (float)(mouse_x - prev_x)/200;
-            redraw = true;
+            rotation.z = (float)(mouse_x - prev_x)/200;
+            reproject = true;
         }
         prev_x = mouse_x;
         prev_y = mouse_y;
@@ -236,35 +234,30 @@ int main(int argc, char **argv){
         // Keyboard
 
         if (kbstate[SDL_SCANCODE_W]) {
-            cam.translation.z = -0.5;
-            redraw = true;
+            translation.z = -0.5;
+            reproject = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
-            cam.translation.z = 0.5;
-            redraw = true;
+            translation.z = 0.5;
+            reproject = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
-            cam.translation.x = 1;
-            redraw = true;
+            translation.x = 1;
+            reproject = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
-            cam.translation.x = -1;
-            redraw = true;
+            translation.x = -1;
+            reproject = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
-            cam.translation.y = 1;
-            redraw = true;
+            translation.y = 1;
+            reproject = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
-            cam.translation.y = -1;
-            redraw = true;
+            translation.y = -1;
+            reproject = true;
         }
 
         //Projecting
-        if (redraw){
-            // update transformation matrix
-            float new_mat[16];
-            calculate_transform_matrix(new_mat,
-                   cam.rotation.x, cam.rotation.y, cam.rotation.z,
-                   cam.translation.x, cam.translation.y, cam.translation.z);
-            multiply_matrix(cam.transform_mat, new_mat);
+        if (reproject){
+            update_transform_matrix(cam.transform_mat, rotation, translation);
             project_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture);
         }
