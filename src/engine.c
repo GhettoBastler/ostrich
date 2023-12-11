@@ -223,11 +223,11 @@ int main(int argc, char **argv){
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
         if (mousestate & SDL_BUTTON(1)){
-            rotation.y = -(float)(mouse_x - prev_x)/200;
-            rotation.x = -(float)(mouse_y - prev_y)/200;
+            rotation.y = -(float)(mouse_x - prev_x)/500;
+            rotation.x = -(float)(mouse_y - prev_y)/500;
             reproject = true;
         } else if (mousestate & SDL_BUTTON(2)){
-            rotation.z = (float)(mouse_x - prev_x)/200;
+            rotation.z = (float)(mouse_x - prev_x)/500;
             reproject = true;
         }
         prev_x = mouse_x;
