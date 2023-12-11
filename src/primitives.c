@@ -208,3 +208,63 @@ Mesh3D* grid(float width, float length, int n_div_x, int n_div_y){
     }
     return pres;
 }
+
+TriangleMesh* tri_cube(float size){
+    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh) + 12 * sizeof(Triangle));
+    pres->size = 12;
+
+//    Point3D a = {0, 0, 1};
+//    Point3D b = {1, 0, 1};
+//    Point3D c = {1, 0, 0};
+//    Point3D d = {0, 0, 0};
+//    Point3D e = {0, 1, 1};
+//    Point3D f = {1, 1, 1};
+//    Point3D g = {1, 1, 0};
+//    Point3D h = {0, 1, 0};
+    Point3D a = {0, 0, 0};
+    Point3D b = {1, 0, 0};
+    Point3D c = {1, 1, 0};
+    Point3D d = {0, 1, 0};
+    Point3D e = {0, 0, 1};
+    Point3D f = {1, 0, 1};
+    Point3D g = {1, 1, 1};
+    Point3D h = {0, 1, 1};
+
+    Triangle abc = {a, b, c};
+    Triangle cda = {c, d, a};
+
+    Triangle bfg = {b, f, g};
+    Triangle gcb = {g, c, b};
+
+    Triangle cgh = {c, g, h};
+    Triangle hdc = {h, d, c};
+
+    Triangle ead = {e, a, d};
+    Triangle dhe = {d, h, e};
+
+    Triangle feh = {f, e, h};
+    Triangle hgf = {h, g, f};
+
+    Triangle efb = {e, f, b};
+    Triangle bae = {b, a, e};
+
+    pres->triangles[0] = abc;
+    pres->triangles[1] = cda;
+
+    pres->triangles[2] = bfg;
+    pres->triangles[3] = gcb;
+
+    pres->triangles[4] = cgh;
+    pres->triangles[5] = hdc;
+
+    pres->triangles[6] = ead;
+    pres->triangles[7] = dhe;
+
+    pres->triangles[8] = feh;
+    pres->triangles[9] = hgf;
+
+    pres->triangles[10] = efb;
+    pres->triangles[11] = bae;
+
+    return pres;
+}

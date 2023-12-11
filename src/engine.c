@@ -169,13 +169,15 @@ int main(int argc, char **argv){
 
     // Initializing main loop
     // Creating scene
-    Mesh3D* pscene = make_scene();
+    //Mesh3D* pscene = make_scene();
+    TriangleMesh* pscene = tri_make_scene();
 
     // Initializing camera
     Camera cam = make_camera(0, 0, 0, 0, 0, 0, 800);
 
     // Creating a buffer for the 2D projection
-    Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
+    // Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
+    Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D) * 3);
     check_allocation(pbuffer, "Couldn\'t allocate memory for 2D projection buffer\n");
 
     // Main loop
@@ -186,7 +188,8 @@ int main(int argc, char **argv){
     bool is_stopped = false;
     int prev_x, prev_y;
 
-    project_mesh(pbuffer, pscene, &cam);
+    //project_mesh(pbuffer, pscene, &cam);
+    project_tri_mesh(pbuffer, pscene, &cam);
     update_texture(ppixels, pbuffer, ptexture);
     draw(ptexture, prenderer);
 
@@ -233,31 +236,32 @@ int main(int argc, char **argv){
         // Keyboard
 
         if (kbstate[SDL_SCANCODE_W]) {
-            translation.z = -0.5;
+            translation.z = -0.05;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
-            translation.z = 0.5;
+            translation.z = 0.05;
             reproject = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
-            translation.x = 1;
+            translation.x = 0.05;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
-            translation.x = -1;
+            translation.x = -0.05;
             reproject = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
-            translation.y = 1;
+            translation.y = 0.05;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
-            translation.y = -1;
+            translation.y = -0.05;
             reproject = true;
         }
 
         //Projecting
         if (reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation);
-            project_mesh(pbuffer, pscene, &cam);
+            //project_mesh(pbuffer, pscene, &cam);
+            project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture);
         }
 

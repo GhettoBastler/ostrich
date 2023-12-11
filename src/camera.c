@@ -1,9 +1,11 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
 #include <string.h>
 
 #include "camera.h"
+#include "transforms.h"
 
 Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length){
     Camera cam;
@@ -118,6 +120,11 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     for (int i = 0; i < pmesh->size; i++){
         Point3D a = transform_point(pcam->transform_mat, pmesh->edges[i].a);
         Point3D b = transform_point(pcam->transform_mat, pmesh->edges[i].b);
+        // Add camera offset
+        a.x += WIDTH / 2;
+        a.y += HEIGHT / 2;
+        b.x += WIDTH / 2;
+        b.y += HEIGHT / 2;
 
         // Check visibility
         bool a_hidden, b_hidden;
@@ -145,4 +152,97 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
         n += 1;
     }
     pbuffer->size = n;
+}
+
+Point3D cross_product(Point3D a, Point3D b){
+    float res_x = a.y * b.z - a.z * b.y;
+    float res_y = a.z * b.x - a.x * b.z;
+    float res_z = a.x * b.y - a.y * b.x;
+    Point3D res = {res_x, res_y, res_z};
+    return res;
+}
+
+bool facing_camera(Triangle tri){
+    Point3D vect_1, vect_2;
+    vect_1.x = tri.b.x - tri.a.x;
+    vect_1.y = tri.b.y - tri.a.y;
+    vect_1.z = tri.b.z - tri.a.z;
+    vect_2.x = tri.c.x - tri.b.x;
+    vect_2.y = tri.c.y - tri.b.y;
+    vect_2.z = tri.c.z - tri.b.z;
+    Point3D normal = cross_product(vect_1, vect_2);
+    Point3D center = {(tri.a.x + tri.b.x + tri.c.x / 3),
+                      (tri.a.y + tri.b.y + tri.c.y / 3),
+                      (tri.a.z + tri.b.z + tri.c.z / 3)};
+
+    float dot_product = center.x * normal.x + center.y * normal.y + center.z * normal.z;
+    return (dot_product >= 0);
+}
+
+Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
+    Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D));
+    pres->size = 0;
+    Point3D trans_a, trans_b, trans_c;
+    Triangle trans_tri;
+    Edge3D ab, bc, ca;
+
+    for (int i = 0; i < ptri->size; i++){
+        trans_a = transform_point(matrix, ptri->triangles[i].a);
+        trans_b = transform_point(matrix, ptri->triangles[i].b);
+        trans_c = transform_point(matrix, ptri->triangles[i].c);
+
+        trans_tri.a = trans_a;
+        trans_tri.b = trans_b;
+        trans_tri.c = trans_c;
+
+        if (facing_camera(trans_tri)){
+            ab.a = trans_a;
+            ab.b = trans_b;
+            bc.a = trans_b;
+            bc.b = trans_c;
+            ca.a = trans_c;
+            ca.b = trans_a;
+
+            pres = add_edge(pres, ab);
+            pres = add_edge(pres, bc);
+            pres = add_edge(pres, ca);
+        }
+    }
+    return pres;
+}
+
+void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
+    Mesh3D* pculled = bface_cull(pcam->transform_mat, ptri_mesh);
+    int n = 0;
+    for (int i = 0; i < pculled->size; i++){
+        Point3D a = pculled->edges[i].a;
+        Point3D b = pculled->edges[i].b;
+
+        // Check visibility
+        bool a_hidden, b_hidden;
+        a_hidden = a.z <= 0;
+        b_hidden = b.z <= 0;
+
+        if (a_hidden && b_hidden){
+            // Both points are hidden
+            // Skip this edge
+            continue;
+        } else if (a_hidden){
+            // A is hidden, B is visible
+            a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
+            a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
+            a.z = -1;
+        } else if (b_hidden){
+            // B is hidden, A is visible
+            b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
+            b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
+            b.z = -1;
+        } // If both are visible, we do nothing
+
+        Edge3D new_edge = {a, b};
+        pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
+        n += 1;
+    }
+    pbuffer->size = n;
+    free(pculled);
 }

@@ -47,3 +47,7 @@ Mesh3D* make_scene(){
     
     return pscene;
 }
+
+TriangleMesh* tri_make_scene(){
+    return tri_cube(20);
+}
