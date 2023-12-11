@@ -203,9 +203,12 @@ Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
             ca.a = trans_c;
             ca.b = trans_a;
 
-            pres = add_edge(pres, ab);
-            pres = add_edge(pres, bc);
-            pres = add_edge(pres, ca);
+            if (ptri->triangles[i].visible[0])
+                pres = add_edge(pres, ab);
+            if (ptri->triangles[i].visible[1])
+                pres = add_edge(pres, bc);
+            if (ptri->triangles[i].visible[2])
+                pres = add_edge(pres, ca);
         }
     }
     return pres;

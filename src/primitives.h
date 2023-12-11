@@ -1,6 +1,8 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
 
+#include <stdbool.h>
+
 // STRUCTS
 // 2D
 typedef struct {
@@ -33,6 +35,7 @@ typedef struct {
 // TRIANGULATED MESH
 typedef struct {
     Point3D a, b, c;
+    bool visible[3]; // Tell if AB/BC/CD is visible or not
 } Triangle;
 
 typedef struct {
