@@ -12,56 +12,111 @@
 #define LINE_COLOR 0xFFFCE46C
 #define BG_COLOR 0xFF111111
 
-Edge2D cap_edge(Edge2D edge){
-    Point2D a = edge.a;
-    Point2D b = edge.b;
+//Edge2D cap_edge(Edge2D edge){
+ProjectedEdge cap_edge(ProjectedEdge edge){
+    Point2D a = edge.edge2D.a;
+    Point2D b = edge.edge2D.b;
+
+    Point3D a3 = edge.edge3D.a;
+    Point3D b3 = edge.edge3D.b;
+    float dx3 = b3.x - a3.x;
+    float dy3 = b3.y - a3.y;
+    float dz3 = b3.z - a3.z;
 
     float dx = b.x - a.x;
     float dy = b.y - a.y;
 
+    float ratio;
+
     if (dx != 0){
         if (a.x < 0){
+            ratio = -(a.x / dx);
             a.y = -(a.x / dx) * dy + a.y;
             a.x = 0;
+
+            a3.x = ratio * dx3 + a3.x;
+            a3.y = ratio * dy3 + a3.y;
+            a3.z = ratio * dz3 + a3.z;
         } else if (a.x > WIDTH){
+            ratio = -(a.x - WIDTH)/ dx;
             a.y = -((a.x - WIDTH) / dx) * dy + a.y;
             a.x = WIDTH;
+
+            a3.x = ratio * dx3 + a3.x;
+            a3.y = ratio * dy3 + a3.y;
+            a3.z = ratio * dz3 + a3.z;
         }
 
         if (b.x < 0){
+            ratio = -b.x / dx;
             b.y = -(b.x / dx) * dy + b.y;
             b.x = 0;
+
+            b3.x = ratio * dx3 + b3.x;
+            b3.y = ratio * dy3 + b3.y;
+            b3.z = ratio * dz3 + b3.z;
         } else if (b.x > WIDTH){
+            ratio = -(b.x - WIDTH)/ dx;
             b.y = -((b.x - WIDTH) / dx) * dy + b.y;
             b.x = WIDTH;
+
+            b3.x = ratio * dx3 + b3.x;
+            b3.y = ratio * dy3 + b3.y;
+            b3.z = ratio * dz3 + b3.z;
         }
     }
     
     if (dy != 0){
         if (a.y < 0){
+            ratio = -(a.y / dy);
             a.x = -(a.y / dy) * dx + a.x;
             a.y = 0;
+
+            a3.x = ratio * dx3 + a3.x;
+            a3.y = ratio * dy3 + a3.y;
+            a3.z = ratio * dz3 + a3.z;
         } else if (a.y > HEIGHT){
+            ratio = -(a.y - HEIGHT) / dy;
             a.x = -((a.y - HEIGHT) / dy) * dx + a.x;
             a.y = HEIGHT;
+
+            a3.x = ratio * dx3 + a3.x;
+            a3.y = ratio * dy3 + a3.y;
+            a3.z = ratio * dz3 + a3.z;
         }
 
         if (b.y < 0){
+            ratio = -b.y/ dy;
             b.x = -(b.y / dy) * dx + b.x;
             b.y = 0;
+
+            b3.x = ratio * dx3 + b3.x;
+            b3.y = ratio * dy3 + b3.y;
+            b3.z = ratio * dz3 + b3.z;
         } else if (b.y > HEIGHT){
+            ratio = -(b.y - HEIGHT) / dy;
             b.x = -((b.y - HEIGHT) / dy) * dx + b.x;
             b.y = HEIGHT;
+
+            b3.x = ratio * dx3 + b3.x;
+            b3.y = ratio * dy3 + b3.y;
+            b3.z = ratio * dz3 + b3.z;
         }
     }
 
-    Edge2D res = {a, b};
+    //Edge2D res = {a, b};
+    Edge2D res2D = {a, b};
+    Edge3D res3D = {a3, b3};
+    ProjectedEdge res = {res2D, res3D};
     return res;
 }
 
-void draw_line(Uint32* ppixels, Edge2D edge){
+//void draw_line(Uint32* ppixels, Edge2D edge){
+void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh){
 
-    Edge2D capped = cap_edge(edge);
+    //Edge2D capped = cap_edge(edge.edge2D);
+    ProjectedEdge proj_capped = cap_edge(edge);
+    Edge2D capped = proj_capped.edge2D;
 
     int x0 = (int) capped.a.x,
         y0 = (int) capped.a.y,
@@ -74,9 +129,16 @@ void draw_line(Uint32* ppixels, Edge2D edge){
     int err = dx+dy,
         e2;
 
+    float ratio;
+    float span = sqrt(pow(dx, 2) + pow(dy, 2));
+    int x_init = x0;
+    int y_init = y0;
+
     for (;;){
+        ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
-            ppixels[x0 + WIDTH * y0] = LINE_COLOR;
+            if (point_is_visible(proj_capped.edge3D, ratio, pmesh))
+                ppixels[x0 + WIDTH * y0] = LINE_COLOR;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
@@ -91,7 +153,7 @@ void draw_line(Uint32* ppixels, Edge2D edge){
     }
 }
 
-void update_texture(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture){
+void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh){
     int pitch = WIDTH * sizeof(Uint32);
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixels
@@ -100,7 +162,7 @@ void update_texture(Uint32* ppixels, Mesh2D* pmesh, SDL_Texture* ptexture){
     }
     //Draw lines
     for (int i = 0; i < pmesh->size; i++){
-        draw_line(ppixels, pmesh->edges[i]);
+        draw_line(ppixels, pmesh->edges[i], ptri_mesh);
     }
     SDL_UnlockTexture(ptexture);
 }
@@ -159,6 +221,7 @@ int main(int argc, char **argv){
     Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
     check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
 
+
     // Keyboard
     const Uint8* kbstate = SDL_GetKeyboardState(NULL);
  
@@ -170,13 +233,15 @@ int main(int argc, char **argv){
     // Creating scene
     //Mesh3D* pscene = make_scene();
     TriangleMesh* pscene = tri_make_scene();
+    TriangleMesh* pculled_tri;
 
     // Initializing camera
     Camera cam = make_camera(0, 0, 0, 0, 0, 0, 800);
 
     // Creating a buffer for the 2D projection
     // Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
-    Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D) * 3);
+    // Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D) * 3);
+    ProjectedMesh* pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
     check_allocation(pbuffer, "Couldn\'t allocate memory for 2D projection buffer\n");
 
     // Main loop
@@ -188,8 +253,9 @@ int main(int argc, char **argv){
     int prev_x, prev_y;
 
     //project_mesh(pbuffer, pscene, &cam);
-    project_tri_mesh(pbuffer, pscene, &cam);
-    update_texture(ppixels, pbuffer, ptexture);
+    pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
+    update_texture(ppixels, pbuffer, ptexture, pculled_tri);
+    free(pculled_tri);
     draw(ptexture, prenderer);
 
     Point3D rotation, translation;
@@ -235,24 +301,24 @@ int main(int argc, char **argv){
         // Keyboard
 
         if (kbstate[SDL_SCANCODE_W]) {
-            translation.z = -0.05;
+            translation.z = -1;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
-            translation.z = 0.05;
+            translation.z = 1;
             reproject = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
-            translation.x = 0.05;
+            translation.x = 1;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
-            translation.x = -0.05;
+            translation.x = -1;
             reproject = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
-            translation.y = 0.05;
+            translation.y = 1;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
-            translation.y = -0.05;
+            translation.y = -1;
             reproject = true;
         }
 
@@ -260,8 +326,11 @@ int main(int argc, char **argv){
         if (reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation);
             //project_mesh(pbuffer, pscene, &cam);
-            project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture);
+            //project_tri_mesh(pbuffer, pscene, &cam);
+            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
+            //update_texture(ppixels, pbuffer, ptexture, pscene);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri);
+            free(pculled_tri);
         }
 
         //Drawing

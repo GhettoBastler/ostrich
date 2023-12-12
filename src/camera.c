@@ -228,7 +228,8 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     return pres;
 }
 
-void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
+//void project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
+TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     //Mesh3D* pculled = bface_cull(pcam->transform_mat, ptri_mesh);
     TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
     Mesh3D* pculled = (Mesh3D*) malloc(sizeof(Mesh3D));
@@ -281,12 +282,13 @@ void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
         //pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
         curr_proj_edge = project_edge(new_edge, pcam->focal_length);
         curr_proj_edge.edge3D = new_edge;
-        pbuffer->edges[n] = curr_proj_edge.edge2D;
+        pbuffer->edges[n] = curr_proj_edge;
         n += 1;
     }
     pbuffer->size = n;
-    free(pculled_tri);
+    //free(pculled_tri);
     free(pculled);
+    return pculled_tri;
 }
 
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
@@ -299,9 +301,9 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
 
     *inter = pt_mul(q, point);
 
-    return (dot_product(normal, cross_product(pt_diff(*inter, tri.a), ab)) >= 0 &&
-            dot_product(normal, cross_product(pt_diff(*inter, tri.b), bc)) >= 0 &&
-            dot_product(normal, cross_product(pt_diff(*inter, tri.c), ca)));
+    return (dot_product(normal, cross_product(pt_diff(*inter, tri.a), ab)) < 0 &&
+            dot_product(normal, cross_product(pt_diff(*inter, tri.b), bc)) < 0 &&
+            dot_product(normal, cross_product(pt_diff(*inter, tri.c), ca)) < 0);
 }
 
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
@@ -312,9 +314,11 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
     Point3D intersect;
     for (int i = 0; i<ptri_mesh->size; i++){
         curr_tri = ptri_mesh->triangles[i];
-        if (ray_tri_intersect(&intersect, pt_obj, curr_tri))
-            if (intersect.z < pt_obj.z)
+        if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
+            if (intersect.z < pt_obj.z){
                 return false;
+            }
+        }
     }
     return true;
 }

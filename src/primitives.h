@@ -50,6 +50,12 @@ typedef struct {
     Triangle triangles[];
 } TriangleMesh;
 
+// PROJECTED EDGES
+typedef struct {
+    int size;
+    ProjectedEdge edges[];
+} ProjectedMesh;
+
 // 3D MESHES
 Mesh3D* prism(Mesh3D* pmesh, Point3D vect);
 Mesh3D* box(float a, float b, float c);

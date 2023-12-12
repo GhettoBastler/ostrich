@@ -214,13 +214,13 @@ TriangleMesh* tri_cube(float size){
     pres->size = 12;
 
     Point3D a = {0, 0, 0};
-    Point3D b = {1, 0, 0};
-    Point3D c = {1, 1, 0};
-    Point3D d = {0, 1, 0};
-    Point3D e = {0, 0, 1};
-    Point3D f = {1, 0, 1};
-    Point3D g = {1, 1, 1};
-    Point3D h = {0, 1, 1};
+    Point3D b = {size, 0, 0};
+    Point3D c = {size, size, 0};
+    Point3D d = {0, size, 0};
+    Point3D e = {0, 0, size};
+    Point3D f = {size, 0, size};
+    Point3D g = {size, size, size};
+    Point3D h = {0, size, size};
 
     Triangle abc = {a, b, c};
     Triangle cda = {c, d, a};
