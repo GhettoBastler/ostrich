@@ -6,6 +6,7 @@
 
 #include "camera.h"
 #include "transforms.h"
+#include "vect.h"
 
 Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length){
     Camera cam;
@@ -154,13 +155,13 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     pbuffer->size = n;
 }
 
-Point3D cross_product(Point3D a, Point3D b){
-    float res_x = a.y * b.z - a.z * b.y;
-    float res_y = a.z * b.x - a.x * b.z;
-    float res_z = a.x * b.y - a.y * b.x;
-    Point3D res = {res_x, res_y, res_z};
-    return res;
-}
+// Point3D cross_product(Point3D a, Point3D b){
+//     float res_x = a.y * b.z - a.z * b.y;
+//    float res_y = a.z * b.x - a.x * b.z;
+//    float res_z = a.x * b.y - a.y * b.x;
+//    Point3D res = {res_x, res_y, res_z};
+//    return res;
+//}
 
 bool facing_camera(Triangle tri){
     Point3D vect_1, vect_2;
