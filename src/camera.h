@@ -16,5 +16,6 @@ Camera make_camera(float x, float y, float z, float rx, float ry, float rz, floa
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam);
 void update_transform_matrix(float* mat, Point3D rotation, Point3D translation);
 void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* pmesh, Camera* pcam);
+bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* pmesh);
 
 #endif

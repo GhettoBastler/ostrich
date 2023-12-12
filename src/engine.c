@@ -2,7 +2,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
-
 #include "transforms.h"
 #include "primitives.h"
 #include "scene.h"

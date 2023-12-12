@@ -62,3 +62,16 @@ void translate(Mesh3D* pmesh, Point3D v){
         pmesh->edges[i].b.z += v.z;
     }
 }
+
+// TRIANGLE MESH
+TriangleMesh* add_triangle(TriangleMesh* pmesh, Triangle tri){
+    //Allocating more memory to add the new triangle
+    TriangleMesh* pres = realloc(pmesh, sizeof(TriangleMesh) + (pmesh->size + 1) * sizeof(Triangle));
+    if (pres == NULL){
+        fprintf(stderr, "Couldn't allocate memory to add a new triangle\n");
+        exit(1);
+    }
+    pres->triangles[pres->size] = tri;
+    pres->size += 1;
+    return pres;
+}

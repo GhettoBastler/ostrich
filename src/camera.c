@@ -190,8 +190,10 @@ bool facing_camera(Triangle tri){
     return (dot_product >= 0);
 }
 
-Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
-    Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D));
+//Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
+TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
+    //Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D));
+    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
     pres->size = 0;
     Point3D trans_a, trans_b, trans_c;
     Triangle trans_tri;
@@ -207,26 +209,47 @@ Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
         trans_tri.c = trans_c;
 
         if (facing_camera(trans_tri)){
-            ab.a = trans_a;
-            ab.b = trans_b;
-            bc.a = trans_b;
-            bc.b = trans_c;
-            ca.a = trans_c;
-            ca.b = trans_a;
+            //ab.a = trans_a;
+            //ab.b = trans_b;
+            //bc.a = trans_b;
+            //bc.b = trans_c;
+            //ca.a = trans_c;
+            //ca.b = trans_a;
 
-            if (ptri->triangles[i].visible[0])
-                pres = add_edge(pres, ab);
-            if (ptri->triangles[i].visible[1])
-                pres = add_edge(pres, bc);
-            if (ptri->triangles[i].visible[2])
-                pres = add_edge(pres, ca);
+            //if (ptri->triangles[i].visible[0])
+            //    pres = add_edge(pres, ab);
+            //if (ptri->triangles[i].visible[1])
+            //    pres = add_edge(pres, bc);
+            //if (ptri->triangles[i].visible[2])
+            //    pres = add_edge(pres, ca);
+            pres = add_triangle(pres, trans_tri);
         }
     }
     return pres;
 }
 
 void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
-    Mesh3D* pculled = bface_cull(pcam->transform_mat, ptri_mesh);
+    //Mesh3D* pculled = bface_cull(pcam->transform_mat, ptri_mesh);
+    TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
+    Mesh3D* pculled = (Mesh3D*) malloc(sizeof(Mesh3D));
+    pculled->size = 0;
+    Edge3D ab, bc, ca;
+    for (int j = 0; j < pculled_tri->size; j++){
+        // Convert each triangle into three edges
+        ab.a = pculled_tri->triangles[j].a;
+        ab.b = pculled_tri->triangles[j].b;
+        bc.a = pculled_tri->triangles[j].b;
+        bc.b = pculled_tri->triangles[j].c;
+        ca.a = pculled_tri->triangles[j].c;
+        ca.b = pculled_tri->triangles[j].a;
+
+        if (pculled_tri->triangles[j].visible[0])
+            pculled = add_edge(pculled, ab);
+        if (pculled_tri->triangles[j].visible[1])
+            pculled = add_edge(pculled, bc);
+        if (pculled_tri->triangles[j].visible[2])
+            pculled = add_edge(pculled, ca);
+    }
     int n = 0;
     ProjectedEdge curr_proj_edge;
     for (int i = 0; i < pculled->size; i++){
@@ -262,6 +285,7 @@ void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
         n += 1;
     }
     pbuffer->size = n;
+    free(pculled_tri);
     free(pculled);
 }
 
