@@ -29,10 +29,15 @@ Point2D project_point(Point3D point, float focal_length){
     return res;
 }
 
-Edge2D project_edge(Edge3D edge, float focal_length){
+//Edge2D project_edge(Edge3D edge, float focal_length){
+ProjectedEdge project_edge(Edge3D edge, float focal_length){
+    ProjectedEdge res;
     Point2D a = project_point(edge.a, focal_length);
     Point2D b = project_point(edge.b, focal_length);
-    Edge2D res = {a, b};
+    res.edge3D = edge;
+    res.edge2D.a = a;
+    res.edge2D.b = b;
+
     return res;
 }
 
@@ -118,6 +123,8 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation){
 
 void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
     int n = 0;
+    ProjectedEdge curr_proj_edge;
+
     for (int i = 0; i < pmesh->size; i++){
         Point3D a = transform_point(pcam->transform_mat, pmesh->edges[i].a);
         Point3D b = transform_point(pcam->transform_mat, pmesh->edges[i].b);
@@ -149,7 +156,10 @@ void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
         } // If both are visible, we do nothing
 
         Edge3D new_edge = {a, b};
-        pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
+        // pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
+        curr_proj_edge = project_edge(new_edge, pcam->focal_length);
+        curr_proj_edge.edge3D = new_edge;
+        pbuffer->edges[n] = curr_proj_edge.edge2D;
         n += 1;
     }
     pbuffer->size = n;
@@ -218,6 +228,7 @@ Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
 void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     Mesh3D* pculled = bface_cull(pcam->transform_mat, ptri_mesh);
     int n = 0;
+    ProjectedEdge curr_proj_edge;
     for (int i = 0; i < pculled->size; i++){
         Point3D a = pculled->edges[i].a;
         Point3D b = pculled->edges[i].b;
@@ -244,7 +255,10 @@ void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
         } // If both are visible, we do nothing
 
         Edge3D new_edge = {a, b};
-        pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
+        //pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
+        curr_proj_edge = project_edge(new_edge, pcam->focal_length);
+        curr_proj_edge.edge3D = new_edge;
+        pbuffer->edges[n] = curr_proj_edge.edge2D;
         n += 1;
     }
     pbuffer->size = n;

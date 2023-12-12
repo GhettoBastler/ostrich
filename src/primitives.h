@@ -32,6 +32,13 @@ typedef struct {
     Edge3D edges[];
 } Mesh3D;
 
+// For hidden lines
+typedef struct {
+    Edge2D edge2D;
+    Edge3D edge3D;
+} ProjectedEdge;
+
+
 // TRIANGULATED MESH
 typedef struct {
     Point3D a, b, c;
@@ -42,7 +49,6 @@ typedef struct {
     int size;
     Triangle triangles[];
 } TriangleMesh;
-
 
 // 3D MESHES
 Mesh3D* prism(Mesh3D* pmesh, Point3D vect);
