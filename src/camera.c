@@ -279,3 +279,18 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
             dot_product(normal, cross_product(pt_diff(*inter, tri.b), bc)) >= 0 &&
             dot_product(normal, cross_product(pt_diff(*inter, tri.c), ca)));
 }
+
+bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
+    Point3D pt_obj = pt_add(pt_mul(ratio, edge.b),
+                            pt_mul((1-ratio), edge.a));
+
+    Triangle curr_tri;
+    Point3D intersect;
+    for (int i = 0; i<ptri_mesh->size; i++){
+        curr_tri = ptri_mesh->triangles[i];
+        if (ray_tri_intersect(&intersect, pt_obj, curr_tri))
+            if (intersect.z < pt_obj.z)
+                return false;
+    }
+    return true;
+}

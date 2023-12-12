@@ -3,6 +3,15 @@
 
 #include "primitives.h"
 
+Point3D pt_add(Point3D a, Point3D b){
+    Point3D res = {
+        a.x + b.x,
+        a.y + b.y,
+        a.z + b.z
+    };
+    return res;
+}
+
 Point3D pt_diff(Point3D a, Point3D b){
     Point3D res = {
         a.x - b.x,
