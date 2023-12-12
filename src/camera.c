@@ -264,3 +264,18 @@ void project_tri_mesh(Mesh2D* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     pbuffer->size = n;
     free(pculled);
 }
+
+bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
+    Point3D ab = pt_diff(tri.b, tri.a),
+            bc = pt_diff(tri.c, tri.b),
+            ca = pt_diff(tri.a, tri.c),
+            normal = cross_product(ab, bc);
+
+    float q = dot_product(normal, tri.a) / dot_product(normal, point);
+
+    *inter = pt_mul(q, point);
+
+    return (dot_product(normal, cross_product(pt_diff(*inter, tri.a), ab)) >= 0 &&
+            dot_product(normal, cross_product(pt_diff(*inter, tri.b), bc)) >= 0 &&
+            dot_product(normal, cross_product(pt_diff(*inter, tri.c), ca)));
+}
