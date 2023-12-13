@@ -9,7 +9,8 @@
 
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
-#define LINE_COLOR 0xFFFCE46C
+#define LINE_COLOR_1 0xFFF4115D
+#define LINE_COLOR_2 0xFF0296F2
 #define BG_COLOR 0xFF111111
 
 //Edge2D cap_edge(Edge2D edge){
@@ -138,9 +139,9 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool dr
         ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
             if (draw_hidden)
-                ppixels[x0 + WIDTH * y0] = LINE_COLOR;
+                ppixels[x0 + WIDTH * y0] = LINE_COLOR_1;
             else if (point_is_visible(proj_capped.edge3D, ratio, pmesh))
-                    ppixels[x0 + WIDTH * y0] = LINE_COLOR;
+                    ppixels[x0 + WIDTH * y0] = LINE_COLOR_2;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
@@ -230,7 +231,6 @@ int main(int argc, char **argv){
     // Mouse
     Uint32 mousestate;
     int mouse_x, mouse_y;
-    bool was_moving;
 
     // Initializing main loop
     // Creating scene
@@ -249,8 +249,7 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
-    was_moving = false;
-    bool reproject;
+    bool reproject, do_hidden;
     bool is_stopped = false;
     int prev_x, prev_y;
 
@@ -260,6 +259,7 @@ int main(int argc, char **argv){
     draw(ptexture, prenderer);
 
     Point3D rotation, translation;
+    do_hidden = false;
 
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
@@ -275,7 +275,6 @@ int main(int argc, char **argv){
                     break;
 
                 case SDL_MOUSEWHEEL:
-                    was_moving = true;
                     if (event.wheel.y > 0) {
                         cam.focal_length += 5;
                     } else {
@@ -293,11 +292,9 @@ int main(int argc, char **argv){
             rotation.y = -(float)(mouse_x - prev_x)/500;
             rotation.x = -(float)(mouse_y - prev_y)/500;
             reproject = true;
-            was_moving = true;
         } else if (mousestate & SDL_BUTTON(2)){
             rotation.z = (float)(mouse_x - prev_x)/500;
             reproject = true;
-            was_moving = true;
         }
 
         prev_x = mouse_x;
@@ -308,43 +305,40 @@ int main(int argc, char **argv){
         if (kbstate[SDL_SCANCODE_W]) {
             translation.z = -1;
             reproject = true;
-            was_moving = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
             translation.z = 1;
             reproject = true;
-            was_moving = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
             translation.x = 1;
             reproject = true;
-            was_moving = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
             translation.x = -1;
             reproject = true;
-            was_moving = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
             translation.y = 1;
             reproject = true;
-            was_moving = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
             translation.y = -1;
             reproject = true;
-            was_moving = true;
+        }
+        if (kbstate[SDL_SCANCODE_R]) {
+            do_hidden = true;
         }
 
         //Projecting
-        if (reproject){
-            update_transform_matrix(cam.transform_mat, rotation, translation);
-            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
-            free(pculled_tri);
-        } else if (was_moving) {
+        if (do_hidden){
+            do_hidden = false;
             update_transform_matrix(cam.transform_mat, rotation, translation);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, false);
             free(pculled_tri);
-            was_moving = false;
+        } else if (reproject) {
+            update_transform_matrix(cam.transform_mat, rotation, translation);
+            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
+            free(pculled_tri);
         }
 
         //Drawing
