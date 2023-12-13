@@ -121,58 +121,6 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation){
     multiply_matrix(mat, new_mat);
 }
 
-void project_mesh(Mesh2D* pbuffer, Mesh3D* pmesh, Camera* pcam){
-    int n = 0;
-    ProjectedEdge curr_proj_edge;
-
-    for (int i = 0; i < pmesh->size; i++){
-        Point3D a = transform_point(pcam->transform_mat, pmesh->edges[i].a);
-        Point3D b = transform_point(pcam->transform_mat, pmesh->edges[i].b);
-        // Add camera offset
-        a.x += WIDTH / 2;
-        a.y += HEIGHT / 2;
-        b.x += WIDTH / 2;
-        b.y += HEIGHT / 2;
-
-        // Check visibility
-        bool a_hidden, b_hidden;
-        a_hidden = a.z <= 0;
-        b_hidden = b.z <= 0;
-
-        if (a_hidden && b_hidden){
-            // Both points are hidden
-            // Skip this edge
-            continue;
-        } else if (a_hidden){
-            // A is hidden, B is visible
-            a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
-            a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
-            a.z = -1;
-        } else if (b_hidden){
-            // B is hidden, A is visible
-            b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
-            b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
-            b.z = -1;
-        } // If both are visible, we do nothing
-
-        Edge3D new_edge = {a, b};
-        // pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
-        curr_proj_edge = project_edge(new_edge, pcam->focal_length);
-        curr_proj_edge.edge3D = new_edge;
-        pbuffer->edges[n] = curr_proj_edge.edge2D;
-        n += 1;
-    }
-    pbuffer->size = n;
-}
-
-// Point3D cross_product(Point3D a, Point3D b){
-//     float res_x = a.y * b.z - a.z * b.y;
-//    float res_y = a.z * b.x - a.x * b.z;
-//    float res_z = a.x * b.y - a.y * b.x;
-//    Point3D res = {res_x, res_y, res_z};
-//    return res;
-//}
-
 bool facing_camera(Triangle tri){
     Point3D vect_1, vect_2;
     vect_1.x = tri.b.x - tri.a.x;
@@ -209,19 +157,6 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
         trans_tri.c = trans_c;
 
         if (facing_camera(trans_tri)){
-            //ab.a = trans_a;
-            //ab.b = trans_b;
-            //bc.a = trans_b;
-            //bc.b = trans_c;
-            //ca.a = trans_c;
-            //ca.b = trans_a;
-
-            //if (ptri->triangles[i].visible[0])
-            //    pres = add_edge(pres, ab);
-            //if (ptri->triangles[i].visible[1])
-            //    pres = add_edge(pres, bc);
-            //if (ptri->triangles[i].visible[2])
-            //    pres = add_edge(pres, ca);
             pres = add_triangle(pres, trans_tri);
         }
     }
