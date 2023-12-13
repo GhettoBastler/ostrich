@@ -239,8 +239,6 @@ int main(int argc, char **argv){
     Camera cam = make_camera(0, 0, 0, 0, 0, 0, 800);
 
     // Creating a buffer for the 2D projection
-    // Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D));
-    // Mesh2D* pbuffer = (Mesh2D*) malloc(sizeof(Mesh2D) + pscene->size * sizeof(Edge2D) * 3);
     ProjectedMesh* pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
     check_allocation(pbuffer, "Couldn\'t allocate memory for 2D projection buffer\n");
 
@@ -252,7 +250,6 @@ int main(int argc, char **argv){
     bool is_stopped = false;
     int prev_x, prev_y;
 
-    //project_mesh(pbuffer, pscene, &cam);
     pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
     update_texture(ppixels, pbuffer, ptexture, pculled_tri);
     free(pculled_tri);
@@ -325,10 +322,7 @@ int main(int argc, char **argv){
         //Projecting
         if (reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation);
-            //project_mesh(pbuffer, pscene, &cam);
-            //project_tri_mesh(pbuffer, pscene, &cam);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            //update_texture(ppixels, pbuffer, ptexture, pscene);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri);
             free(pculled_tri);
         }

@@ -138,9 +138,26 @@ bool facing_camera(Triangle tri){
     return (dot_product >= 0);
 }
 
-//Mesh3D* bface_cull(float* matrix, TriangleMesh* ptri){
+int comp_tri_z(const void* ptri_a, const void* ptri_b){
+    Point3D tri_a_a = ((Triangle*) ptri_a)->a,
+            tri_a_b = ((Triangle*) ptri_a)->b,
+            tri_a_c = ((Triangle*) ptri_a)->c,
+            tri_b_a = ((Triangle*) ptri_b)->a,
+            tri_b_b = ((Triangle*) ptri_b)->b,
+            tri_b_c = ((Triangle*) ptri_b)->c;
+
+    float min_z_a = fminf(fminf(tri_a_a.z, tri_a_b.z), tri_a_c.z),
+          min_z_b = fminf(fminf(tri_b_a.z, tri_b_b.z), tri_b_c.z);
+
+    if (min_z_a < min_z_b)
+        return -1;
+    else if (min_z_a == min_z_b)
+        return 0;
+    else
+        return 1;
+}
+
 TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
-    //Mesh3D* pres = (Mesh3D*) malloc(sizeof(Mesh3D));
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
     pres->size = 0;
     Point3D trans_a, trans_b, trans_c;
@@ -160,12 +177,13 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
             pres = add_triangle(pres, trans_tri);
         }
     }
+
+    // Z-sort triangles
+    qsort(pres->triangles, pres->size, sizeof(Triangle), comp_tri_z);
     return pres;
 }
 
-//void project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
-    //Mesh3D* pculled = bface_cull(pcam->transform_mat, ptri_mesh);
     TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
     Mesh3D* pculled = (Mesh3D*) malloc(sizeof(Mesh3D));
     pculled->size = 0;
@@ -250,7 +268,7 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
     for (int i = 0; i<ptri_mesh->size; i++){
         curr_tri = ptri_mesh->triangles[i];
         if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
-            if (intersect.z < pt_obj.z){
+            if (intersect.z + 0.0001 < pt_obj.z){ // Adding an arbitrary value to make sure that edges don't intersect their own faces
                 return false;
             }
         }
