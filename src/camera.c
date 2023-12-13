@@ -122,20 +122,11 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation){
 }
 
 bool facing_camera(Triangle tri){
-    Point3D vect_1, vect_2;
-    vect_1.x = tri.b.x - tri.a.x;
-    vect_1.y = tri.b.y - tri.a.y;
-    vect_1.z = tri.b.z - tri.a.z;
-    vect_2.x = tri.c.x - tri.b.x;
-    vect_2.y = tri.c.y - tri.b.y;
-    vect_2.z = tri.c.z - tri.b.z;
+    Point3D vect_1 = pt_diff(tri.b, tri.a),
+            vect_2 = pt_diff(tri.a, tri.c);
     Point3D normal = cross_product(vect_1, vect_2);
-    Point3D center = {(tri.a.x + tri.b.x + tri.c.x / 3),
-                      (tri.a.y + tri.b.y + tri.c.y / 3),
-                      (tri.a.z + tri.b.z + tri.c.z / 3)};
-
-    float dot_product = center.x * normal.x + center.y * normal.y + center.z * normal.z;
-    return (dot_product >= 0);
+    Point3D center = pt_mul((float)1/3, pt_add(pt_add(tri.a, tri.b), tri.c));
+    return (dot_product(center, normal) >= 0);
 }
 
 int comp_tri_z(const void* ptri_a, const void* ptri_b){
@@ -172,6 +163,7 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
         trans_tri.a = trans_a;
         trans_tri.b = trans_b;
         trans_tri.c = trans_c;
+        memcpy(trans_tri.visible, ptri->triangles[i].visible, 3);
 
         if (facing_camera(trans_tri)){
             pres = add_triangle(pres, trans_tri);
