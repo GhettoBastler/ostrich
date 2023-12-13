@@ -112,7 +112,7 @@ ProjectedEdge cap_edge(ProjectedEdge edge){
 }
 
 //void draw_line(Uint32* ppixels, Edge2D edge){
-void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh){
+void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden){
 
     //Edge2D capped = cap_edge(edge.edge2D);
     ProjectedEdge proj_capped = cap_edge(edge);
@@ -137,8 +137,10 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh){
     for (;;){
         ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
-            if (point_is_visible(proj_capped.edge3D, ratio, pmesh))
+            if (draw_hidden)
                 ppixels[x0 + WIDTH * y0] = LINE_COLOR;
+            else if (point_is_visible(proj_capped.edge3D, ratio, pmesh))
+                    ppixels[x0 + WIDTH * y0] = LINE_COLOR;
 
         if (x0 == x1 && y0 == y1) break;
         e2 = 2*err;
@@ -153,7 +155,7 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh){
     }
 }
 
-void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh){
+void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden){
     int pitch = WIDTH * sizeof(Uint32);
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixels
@@ -162,7 +164,7 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
     }
     //Draw lines
     for (int i = 0; i < pmesh->size; i++){
-        draw_line(ppixels, pmesh->edges[i], ptri_mesh);
+        draw_line(ppixels, pmesh->edges[i], ptri_mesh, draw_hidden);
     }
     SDL_UnlockTexture(ptexture);
 }
@@ -228,6 +230,7 @@ int main(int argc, char **argv){
     // Mouse
     Uint32 mousestate;
     int mouse_x, mouse_y;
+    bool was_moving;
 
     // Initializing main loop
     // Creating scene
@@ -246,12 +249,13 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
+    was_moving = false;
     bool reproject;
     bool is_stopped = false;
     int prev_x, prev_y;
 
     pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-    update_texture(ppixels, pbuffer, ptexture, pculled_tri);
+    update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
     free(pculled_tri);
     draw(ptexture, prenderer);
 
@@ -271,6 +275,7 @@ int main(int argc, char **argv){
                     break;
 
                 case SDL_MOUSEWHEEL:
+                    was_moving = true;
                     if (event.wheel.y > 0) {
                         cam.focal_length += 5;
                     } else {
@@ -288,10 +293,13 @@ int main(int argc, char **argv){
             rotation.y = -(float)(mouse_x - prev_x)/500;
             rotation.x = -(float)(mouse_y - prev_y)/500;
             reproject = true;
+            was_moving = true;
         } else if (mousestate & SDL_BUTTON(2)){
             rotation.z = (float)(mouse_x - prev_x)/500;
             reproject = true;
+            was_moving = true;
         }
+
         prev_x = mouse_x;
         prev_y = mouse_y;
 
@@ -300,31 +308,43 @@ int main(int argc, char **argv){
         if (kbstate[SDL_SCANCODE_W]) {
             translation.z = -1;
             reproject = true;
+            was_moving = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
             translation.z = 1;
             reproject = true;
+            was_moving = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
             translation.x = 1;
             reproject = true;
+            was_moving = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
             translation.x = -1;
             reproject = true;
+            was_moving = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
             translation.y = 1;
             reproject = true;
+            was_moving = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
             translation.y = -1;
             reproject = true;
+            was_moving = true;
         }
 
         //Projecting
         if (reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
             free(pculled_tri);
+        } else if (was_moving) {
+            update_transform_matrix(cam.transform_mat, rotation, translation);
+            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri, false);
+            free(pculled_tri);
+            was_moving = false;
         }
 
         //Drawing
