@@ -1,7 +1,9 @@
-#ifndef VECT_H
-#define VECT_H
+#include "vect.h"
 
-#include "primitives.h"
+
+bool pt_equ(Point3D a, Point3D b){
+    return ((a.x == b.x) && (a.y == b.y) && (a.z == b.z));
+}
 
 Point3D pt_add(Point3D a, Point3D b){
     Point3D res = {
@@ -42,5 +44,3 @@ Point3D cross_product(Point3D a, Point3D b){
 float dot_product(Point3D a, Point3D b){
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
-
-#endif
