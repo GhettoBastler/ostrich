@@ -249,7 +249,7 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
-    bool reproject, do_hidden;
+    bool reproject, do_hidden, captured;
     bool is_stopped = false;
     int prev_x, prev_y;
 
@@ -325,6 +325,17 @@ int main(int argc, char **argv){
         }
         if (kbstate[SDL_SCANCODE_R]) {
             do_hidden = true;
+        }
+        if (kbstate[SDL_SCANCODE_R]) {
+            do_hidden = true;
+        }
+        if (kbstate[SDL_SCANCODE_SPACE]) {
+            if (!captured){
+                export(prenderer);
+                captured = true;
+            }
+        } else {
+            captured = false;
         }
 
         //Projecting
