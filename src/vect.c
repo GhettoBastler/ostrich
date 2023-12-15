@@ -44,3 +44,22 @@ Point3D cross_product(Point3D a, Point3D b){
 float dot_product(Point3D a, Point3D b){
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
+
+Point3D pt_min(Point3D a, Point3D b){
+    Point3D res = {
+        fminf(a.x, b.x),
+        fminf(a.y, b.y),
+        fminf(a.z, b.z)
+    };
+    return res;
+}
+
+Point3D pt_max(Point3D a, Point3D b){
+    Point3D res = {
+        fmaxf(a.x, b.x),
+        fmaxf(a.y, b.y),
+        fmaxf(a.z, b.z)
+    };
+    return res;
+}
+

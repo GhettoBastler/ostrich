@@ -257,8 +257,23 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
 
     Triangle curr_tri;
     Point3D intersect;
+    Point3D bbox_min, bbox_max;
+
     for (int i = 0; i<ptri_mesh->size; i++){
         curr_tri = ptri_mesh->triangles[i];
+        bbox_min = pt_min(pt_min(curr_tri.a, curr_tri.b), curr_tri.c);
+        bbox_max = pt_max(pt_max(curr_tri.a, curr_tri.b), curr_tri.c);
+        // If point is totally in front of curr_tri, it doesn't intersect it
+        if (pt_obj.z < bbox_min.z)
+            return true;
+        
+        // If point is projected outside of the triangle bounding box, it doesn't hide it
+        if (pt_obj.x * bbox_max.z / pt_obj.z < bbox_min.x ||
+            pt_obj.x * bbox_max.z / pt_obj.z > bbox_max.x ||
+            pt_obj.y * bbox_max.z / pt_obj.z < bbox_min.y ||
+            pt_obj.y * bbox_max.z / pt_obj.z > bbox_max.y)
+            continue;
+
         if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
             if (intersect.z + 0.0001 < pt_obj.z){ // Adding an arbitrary value to make sure that edges don't intersect their own faces
                 return false;
