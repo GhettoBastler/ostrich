@@ -15,6 +15,6 @@ typedef struct {
 Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length);
 void update_transform_matrix(float* mat, Point3D rotation, Point3D translation);
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* pmesh, Camera* pcam);
-bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* pmesh);
+bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* pmesh, int start_idx);
 
 #endif

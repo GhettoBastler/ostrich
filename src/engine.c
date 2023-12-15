@@ -6,6 +6,7 @@
 #include "primitives.h"
 #include "scene.h"
 #include "camera.h"
+#include "vect.h"
 
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
@@ -115,7 +116,6 @@ ProjectedEdge cap_edge(ProjectedEdge edge){
 //void draw_line(Uint32* ppixels, Edge2D edge){
 void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden){
 
-    //Edge2D capped = cap_edge(edge.edge2D);
     ProjectedEdge proj_capped = cap_edge(edge);
     Edge2D capped = proj_capped.edge2D;
 
@@ -135,12 +135,49 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool dr
     int x_init = x0;
     int y_init = y0;
 
+    int i=0;
+
+    if (!draw_hidden){
+        // Check when the line's bounding box gets obstructed
+        Point3D tri_bbox_min, tri_bbox_max,
+                edge_bbox_min = pt_min(edge.edge3D.a, edge.edge3D.b),
+                edge_bbox_max = pt_max(edge.edge3D.a, edge.edge3D.b);
+        Triangle curr_tri;
+
+        for (i=0; i < pmesh->size; i++){
+            curr_tri = pmesh->triangles[i];
+
+            tri_bbox_min = pt_min(pt_min(curr_tri.a, curr_tri.b), curr_tri.c);
+            tri_bbox_max = pt_max(pt_max(curr_tri.a, curr_tri.b), curr_tri.c);
+
+            // If the edge's bbox is completely in front of this triangle's bounding box,
+            // it is not hidden by this triangle, nor by any other
+            if (edge_bbox_max.z < tri_bbox_min.z){
+                i = pmesh->size - 1;
+                break;
+            }
+
+            // If edge's bbox is projected completely outside of the triangle bounding box,
+            // the triangle doesn't hide it
+            if (edge_bbox_max.x * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.x ||
+                edge_bbox_min.x * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.x ||
+                edge_bbox_max.y * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.y ||
+                edge_bbox_min.y * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.y)
+                continue;
+
+            // At this point, we know that the edge's bounding box is in the shadow of
+            // this triangle's bounding box. Then we do the modified Bresenham with
+            // the triangle list starting from this point
+            break;
+        }
+    };
+
     for (;;){
         ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
             if (draw_hidden)
                 ppixels[x0 + WIDTH * y0] = LINE_COLOR_1;
-            else if (point_is_visible(proj_capped.edge3D, ratio, pmesh))
+            else if (point_is_visible(proj_capped.edge3D, ratio, pmesh, i))
                     ppixels[x0 + WIDTH * y0] = LINE_COLOR_2;
 
         if (x0 == x1 && y0 == y1) break;

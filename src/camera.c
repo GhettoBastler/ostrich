@@ -251,7 +251,7 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
             dot_product(normal, cross_product(pt_diff(*inter, tri.c), ca)) < 0);
 }
 
-bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
+bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int start_idx){
     Point3D pt_obj = pt_add(pt_mul(ratio, edge.b),
                             pt_mul((1-ratio), edge.a));
 
@@ -259,10 +259,11 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh){
     Point3D intersect;
     Point3D bbox_min, bbox_max;
 
-    for (int i = 0; i<ptri_mesh->size; i++){
+    for (int i = start_idx; i<ptri_mesh->size; i++){
         curr_tri = ptri_mesh->triangles[i];
         bbox_min = pt_min(pt_min(curr_tri.a, curr_tri.b), curr_tri.c);
         bbox_max = pt_max(pt_max(curr_tri.a, curr_tri.b), curr_tri.c);
+
         // If point is totally in front of curr_tri, it doesn't intersect it
         if (pt_obj.z < bbox_min.z)
             return true;
