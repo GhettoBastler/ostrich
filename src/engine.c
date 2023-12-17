@@ -279,6 +279,7 @@ int main(int argc, char **argv){
     float orbit_radius = 0;
     bool orbit_pressed = false;
     bool orbit = false;
+    bool shift_pressed = false;
 
     // Creating a buffer for the 2D projection
     ProjectedMesh* pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
@@ -328,8 +329,13 @@ int main(int argc, char **argv){
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
         if (mousestate & SDL_BUTTON(1)){
-            rotation.y = -(float)(mouse_x - prev_x)/500;
-            rotation.x = (float)(mouse_y - prev_y)/500;
+            if (shift_pressed){
+                translation.x = (float)(mouse_x - prev_x)/2;
+                translation.y = (float)(mouse_y - prev_y)/2;
+            } else {
+                rotation.y = -(float)(mouse_x - prev_x)/500;
+                rotation.x = (float)(mouse_y - prev_y)/500;
+            }
             reproject = true;
         } else if (mousestate & SDL_BUTTON(3)){
             rotation.z = (float)(mouse_x - prev_x)/500;
@@ -384,6 +390,7 @@ int main(int argc, char **argv){
         } else {
             captured = false;
         }
+        shift_pressed = kbstate[SDL_SCANCODE_LSHIFT];
 
         //Projecting
         if (do_hidden){
