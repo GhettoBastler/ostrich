@@ -6,7 +6,7 @@
 #include "stl.h"
 
 #define STL_FILE "input.stl"
-#define SCALE 20
+#define SCALE 1
 
 TriangleMesh* tri_make_scene(){
     FILE* pfile = fopen(STL_FILE, "r");

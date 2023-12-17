@@ -158,10 +158,21 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool dr
 
             // If edge's bbox is projected completely outside of the triangle bounding box,
             // the triangle doesn't hide it
-            if (edge_bbox_max.x * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.x ||
-                edge_bbox_min.x * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.x ||
-                edge_bbox_max.y * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.y ||
-                edge_bbox_min.y * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.y)
+            if (
+                (
+                 (edge_bbox_max.x * tri_bbox_min.z / edge_bbox_max.z < tri_bbox_min.x) &&
+                 (edge_bbox_max.x * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.x)
+                ) || (
+                 (edge_bbox_min.x * tri_bbox_min.z / edge_bbox_max.z > tri_bbox_max.x) &&
+                 (edge_bbox_min.x * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.x)
+                ) || (
+                 (edge_bbox_max.y * tri_bbox_min.z / edge_bbox_max.z < tri_bbox_min.y) &&
+                 (edge_bbox_max.y * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.y)
+                ) || (
+                 (edge_bbox_min.y * tri_bbox_min.z / edge_bbox_max.z > tri_bbox_max.y) &&
+                 (edge_bbox_min.y * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.y)
+                )
+            )
                 continue;
 
             // At this point, we know that the edge's bounding box is in the shadow of

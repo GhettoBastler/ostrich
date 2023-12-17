@@ -271,9 +271,9 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
 
     *inter = pt_mul(q, point);
 
-    return (dot_product(normal, cross_product(pt_diff(*inter, tri.a), ab)) < 0 &&
-            dot_product(normal, cross_product(pt_diff(*inter, tri.b), bc)) < 0 &&
-            dot_product(normal, cross_product(pt_diff(*inter, tri.c), ca)) < 0);
+    return (cross_product(pt_diff(*inter, tri.a), ab).z > 0 &&
+            cross_product(pt_diff(*inter, tri.b), bc).z > 0 &&
+            cross_product(pt_diff(*inter, tri.c), ca).z > 0);
 }
 
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int start_idx){
@@ -294,10 +294,21 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int sta
             return true;
         
         // If point is projected outside of the triangle bounding box, it doesn't hide it
-        if (pt_obj.x * bbox_max.z / pt_obj.z < bbox_min.x ||
-            pt_obj.x * bbox_max.z / pt_obj.z > bbox_max.x ||
-            pt_obj.y * bbox_max.z / pt_obj.z < bbox_min.y ||
-            pt_obj.y * bbox_max.z / pt_obj.z > bbox_max.y)
+        if (
+           (
+            (pt_obj.x * bbox_max.z / pt_obj.z < bbox_min.x) &&
+            (pt_obj.x * bbox_min.z / pt_obj.z < bbox_min.x)
+           ) || (
+            (pt_obj.x * bbox_max.z / pt_obj.z > bbox_max.x) &&
+            (pt_obj.x * bbox_min.z / pt_obj.z > bbox_max.x)
+           ) || (
+            (pt_obj.y * bbox_max.z / pt_obj.z < bbox_min.y) &&
+            (pt_obj.y * bbox_min.z / pt_obj.z < bbox_min.y)
+           ) || (
+            (pt_obj.y * bbox_max.z / pt_obj.z > bbox_max.y) &&
+            (pt_obj.y * bbox_min.z / pt_obj.z > bbox_max.y)
+           )
+        )
             continue;
 
         if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
