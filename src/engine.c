@@ -14,7 +14,6 @@
 #define LINE_COLOR_2 0xFF0296F2
 #define BG_COLOR 0xFF111111
 
-//Edge2D cap_edge(Edge2D edge){
 ProjectedEdge cap_edge(ProjectedEdge edge){
     Point2D a = edge.edge2D.a;
     Point2D b = edge.edge2D.b;
@@ -277,6 +276,9 @@ int main(int argc, char **argv){
 
     // Initializing camera
     Camera cam = make_camera(0, 0, 0, 0, 0, 0, 800);
+    float orbit_radius = 0;
+    bool orbit_pressed = false;
+    bool orbit = false;
 
     // Creating a buffer for the 2D projection
     ProjectedMesh* pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
@@ -327,9 +329,9 @@ int main(int argc, char **argv){
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
         if (mousestate & SDL_BUTTON(1)){
             rotation.y = -(float)(mouse_x - prev_x)/500;
-            rotation.x = -(float)(mouse_y - prev_y)/500;
+            rotation.x = (float)(mouse_y - prev_y)/500;
             reproject = true;
-        } else if (mousestate & SDL_BUTTON(2)){
+        } else if (mousestate & SDL_BUTTON(3)){
             rotation.z = (float)(mouse_x - prev_x)/500;
             reproject = true;
         }
@@ -341,9 +343,11 @@ int main(int argc, char **argv){
 
         if (kbstate[SDL_SCANCODE_W]) {
             translation.z = -1;
+            orbit_radius += -1;
             reproject = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
             translation.z = 1;
+            orbit_radius += 1;
             reproject = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
@@ -363,8 +367,14 @@ int main(int argc, char **argv){
         if (kbstate[SDL_SCANCODE_R]) {
             do_hidden = true;
         }
-        if (kbstate[SDL_SCANCODE_R]) {
-            do_hidden = true;
+        if (kbstate[SDL_SCANCODE_O]) {
+            if (!orbit_pressed){
+                orbit_pressed = true;
+                orbit = !orbit;
+                printf("Orbit mode toggled\n");
+            }
+        } else {
+            orbit_pressed = false;
         }
         if (kbstate[SDL_SCANCODE_SPACE]) {
             if (!captured){
@@ -378,12 +388,12 @@ int main(int argc, char **argv){
         //Projecting
         if (do_hidden){
             do_hidden = false;
-            update_transform_matrix(cam.transform_mat, rotation, translation);
+            update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, false);
             free(pculled_tri);
         } else if (reproject) {
-            update_transform_matrix(cam.transform_mat, rotation, translation);
+            update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
             free(pculled_tri);

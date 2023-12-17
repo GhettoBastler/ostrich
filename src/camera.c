@@ -29,7 +29,6 @@ Point2D project_point(Point3D point, float focal_length){
     return res;
 }
 
-//Edge2D project_edge(Edge3D edge, float focal_length){
 ProjectedEdge project_edge(Edge3D edge, float focal_length){
     ProjectedEdge res;
     Point2D a = project_point(edge.a, focal_length);
@@ -113,11 +112,37 @@ void multiply_matrix(float* matB, float* matA){
     memcpy(matB, res, sizeof(float) * 16);
 }
 
-void update_transform_matrix(float* mat, Point3D rotation, Point3D translation){
+void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius){
     float new_mat[16];
-    calculate_transform_matrix(new_mat,
-           rotation,
-           translation);
+    if (orbit){
+        float tmp_mat[16];
+        Point3D nul_pt = {0, 0, 0},
+                z_translate = {0, 0, -orbit_radius};
+
+        // Bringing the model to the camera
+        calculate_transform_matrix(new_mat,
+            nul_pt,
+            z_translate);
+        // Rotating it
+        calculate_transform_matrix(tmp_mat,
+            rotation,
+            nul_pt);
+        multiply_matrix(new_mat, tmp_mat);
+        // Putting it back
+        calculate_transform_matrix(tmp_mat,
+            nul_pt,
+            pt_mul(-1.0, z_translate));
+        multiply_matrix(new_mat, tmp_mat);
+        // Translating
+        calculate_transform_matrix(tmp_mat,
+            nul_pt,
+            translation);
+        multiply_matrix(new_mat, tmp_mat);
+    } else {
+        calculate_transform_matrix(new_mat,
+               rotation,
+               translation);
+    }
     multiply_matrix(mat, new_mat);
 }
 
