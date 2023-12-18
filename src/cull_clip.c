@@ -6,6 +6,13 @@
 #include "vect.h"
 #include "transforms.h"
 
+
+int comp_tri_z(const void* ptri_a, const void* ptri_b);
+void clip_line(Edge3D* pedge, float ratio, bool reverse);
+bool facing_camera(Triangle tri);
+bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri);
+
+
 void clip_line(Edge3D* pedge, float ratio, bool reverse){
     if (reverse)
         pedge->a = pt_add(pedge->b, pt_mul(ratio, pt_diff(pedge->a, pedge->b)));
@@ -43,10 +50,8 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
     }
     
     // Clip edges around
-    Point2D a_proj, b_proj;
-
-    a_proj = project_point(pedge->a, pcam);
-    b_proj = project_point(pedge->b, pcam);
+    Point2D a_proj = project_point(pedge->a, pcam),
+            b_proj = project_point(pedge->b, pcam);
 
     diff = pt_diff(pedge->b, pedge->a);
     float dx_proj = b_proj.x - a_proj.x,

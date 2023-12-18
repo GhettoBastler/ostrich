@@ -138,7 +138,7 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
         for (int j = 0; j < 3; j++){
             // Add only the visible edges
             if (pculled_tri->triangles[i].visible[j]) {
-                // Clip the line if it goes behind the camera
+                // Clip the line if it goes outside the frustum
                 clip_frustum(&edges[j], pcam);
                 // If there is nothing left
                 if (pt_is_null(edges[j].a) && pt_is_null(edges[j].b))
