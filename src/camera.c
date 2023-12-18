@@ -200,9 +200,140 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     return pres;
 }
 
+Edge3D clip_behind(Edge3D edge){
+    // Clip edges that go behind the camera
+    Point3D a = edge.a;
+    Point3D b = edge.b;
+
+    bool a_hidden, b_hidden;
+    a_hidden = a.z <= 0;
+    b_hidden = b.z <= 0;
+
+    if (a_hidden && b_hidden){
+        // Both points are hidden
+        // Skip this edge
+        a.x = a.y = a.z =
+        b.x = b.y = b.z = 0;
+    } else if (a_hidden){
+        // A is hidden, B is visible
+        a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
+        a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
+        a.z = -1;
+    } else if (b_hidden){
+        // B is hidden, A is visible
+        b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
+        b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
+        b.z = -1;
+    } // If both are visible, we do nothing
+    Edge3D res = {a, b};
+    return res;
+}
+
+ProjectedEdge clip_around(ProjectedEdge edge){
+    // Clip edges that go beyond the screen limit, both in screen and object space
+    ProjectedEdge res;
+
+    Point3D a = edge.edge3D.a;
+    Point3D b = edge.edge3D.b;
+    Point2D a2 = edge.edge2D.a;
+    Point2D b2 = edge.edge2D.b;
+
+    float dx3 = b.x - a.x;
+    float dy3 = b.y - a.y;
+    float dz3 = b.z - a.z;
+
+    float dx = b2.x - a2.x;
+    float dy = b2.y - a2.y;
+
+    float ratio;
+
+    if (dx != 0){
+        if (a2.x < 0){
+            ratio = -(a2.x / dx);
+            a2.y = -(a2.x / dx) * dy + a2.y;
+            a2.x = 0;
+
+            a.x = ratio * dx3 + a.x;
+            a.y = ratio * dy3 + a.y;
+            a.z = ratio * dz3 + a.z;
+        } else if (a2.x > WIDTH){
+            ratio = -(a2.x - WIDTH)/ dx;
+            a2.y = -((a2.x - WIDTH) / dx) * dy + a2.y;
+            a2.x = WIDTH;
+
+            a.x = ratio * dx3 + a.x;
+            a.y = ratio * dy3 + a.y;
+            a.z = ratio * dz3 + a.z;
+        }
+
+        if (b2.x < 0){
+            ratio = -b2.x / dx;
+            b2.y = -(b2.x / dx) * dy + b2.y;
+            b2.x = 0;
+
+            b.x = ratio * dx3 + b.x;
+            b.y = ratio * dy3 + b.y;
+            b.z = ratio * dz3 + b.z;
+        } else if (b2.x > WIDTH){
+            ratio = -(b2.x - WIDTH)/ dx;
+            b2.y = -((b2.x - WIDTH) / dx) * dy + b2.y;
+            b2.x = WIDTH;
+
+            b.x = ratio * dx3 + b.x;
+            b.y = ratio * dy3 + b.y;
+            b.z = ratio * dz3 + b.z;
+        }
+    }
+    
+    if (dy != 0){
+        if (a2.y < 0){
+            ratio = -(a2.y / dy);
+            a2.x = -(a2.y / dy) * dx + a2.x;
+            a2.y = 0;
+
+            a.x = ratio * dx3 + a.x;
+            a.y = ratio * dy3 + a.y;
+            a.z = ratio * dz3 + a.z;
+        } else if (a2.y > HEIGHT){
+            ratio = -(a2.y - HEIGHT) / dy;
+            a2.x = -((a2.y - HEIGHT) / dy) * dx + a2.x;
+            a2.y = HEIGHT;
+
+            a.x = ratio * dx3 + a.x;
+            a.y = ratio * dy3 + a.y;
+            a.z = ratio * dz3 + a.z;
+        }
+
+        if (b2.y < 0){
+            ratio = -b2.y/ dy;
+            b2.x = -(b2.y / dy) * dx + b2.x;
+            b2.y = 0;
+
+            b.x = ratio * dx3 + b.x;
+            b.y = ratio * dy3 + b.y;
+            b.z = ratio * dz3 + b.z;
+        } else if (b2.y > HEIGHT){
+            ratio = -(b2.y - HEIGHT) / dy;
+            b2.x = -((b2.y - HEIGHT) / dy) * dx + b2.x;
+            b2.y = HEIGHT;
+
+            b.x = ratio * dx3 + b.x;
+            b.y = ratio * dy3 + b.y;
+            b.z = ratio * dz3 + b.z;
+        }
+    }
+
+    res.edge3D.a = a;
+    res.edge3D.b = b;
+    res.edge2D.a = a2;
+    res.edge2D.b = b2;
+    return res;
+}
+
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
     Edge3D edges[3];
+    Edge3D curr_clipped_edge;
     ProjectedEdge curr_proj_edge;
 
     int n = 0;
@@ -221,129 +352,21 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
         for (int j = 0; j < 3; j++){
             // Add only the visible edges
             if (pculled_tri->triangles[i].visible[j]) {
-                // Clip edges that go behind the camera
-                Point3D a = edges[j].a;
-                Point3D b = edges[j].b;
+                // Clip the line if it goes behind the camera
+                curr_clipped_edge = clip_behind(edges[j]);
+                if (curr_clipped_edge.a.x == 0 &&
+                    curr_clipped_edge.a.y == 0 &&
+                    curr_clipped_edge.a.z == 0 &&
+                    curr_clipped_edge.b.x == 0 &&
+                    curr_clipped_edge.b.y == 0 &&
+                    curr_clipped_edge.b.z == 0)
+                    continue; // Edge is behind the camera
 
-                // Check visibility
-                bool a_hidden, b_hidden;
-                a_hidden = a.z <= 0;
-                b_hidden = b.z <= 0;
-
-                if (a_hidden && b_hidden){
-                    // Both points are hidden
-                    // Skip this edge
-                    continue;
-                } else if (a_hidden){
-                    // A is hidden, B is visible
-                    a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
-                    a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
-                    a.z = -1;
-                } else if (b_hidden){
-                    // B is hidden, A is visible
-                    b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
-                    b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
-                    b.z = -1;
-                } // If both are visible, we do nothing
-
-                Edge3D new_edge = {a, b};
-                curr_proj_edge = project_edge(new_edge, pcam->focal_length);
-
-                // Clip edges that go beyond the screen limit, both in screen and object space
-
-                Point2D a2 = curr_proj_edge.edge2D.a;
-                Point2D b2 = curr_proj_edge.edge2D.b;
-
-                float dx3 = b.x - a.x;
-                float dy3 = b.y - a.y;
-                float dz3 = b.z - a.z;
-
-                float dx = b2.x - a2.x;
-                float dy = b2.y - a2.y;
-
-                float ratio;
-
-                if (dx != 0){
-                    if (a2.x < 0){
-                        ratio = -(a2.x / dx);
-                        a2.y = -(a2.x / dx) * dy + a2.y;
-                        a2.x = 0;
-
-                        a.x = ratio * dx3 + a.x;
-                        a.y = ratio * dy3 + a.y;
-                        a.z = ratio * dz3 + a.z;
-                    } else if (a2.x > WIDTH){
-                        ratio = -(a2.x - WIDTH)/ dx;
-                        a2.y = -((a2.x - WIDTH) / dx) * dy + a2.y;
-                        a2.x = WIDTH;
-
-                        a.x = ratio * dx3 + a.x;
-                        a.y = ratio * dy3 + a.y;
-                        a.z = ratio * dz3 + a.z;
-                    }
-
-                    if (b2.x < 0){
-                        ratio = -b2.x / dx;
-                        b2.y = -(b2.x / dx) * dy + b2.y;
-                        b2.x = 0;
-
-                        b.x = ratio * dx3 + b.x;
-                        b.y = ratio * dy3 + b.y;
-                        b.z = ratio * dz3 + b.z;
-                    } else if (b2.x > WIDTH){
-                        ratio = -(b2.x - WIDTH)/ dx;
-                        b2.y = -((b2.x - WIDTH) / dx) * dy + b2.y;
-                        b2.x = WIDTH;
-
-                        b.x = ratio * dx3 + b.x;
-                        b.y = ratio * dy3 + b.y;
-                        b.z = ratio * dz3 + b.z;
-                    }
-                }
-                
-                if (dy != 0){
-                    if (a2.y < 0){
-                        ratio = -(a2.y / dy);
-                        a2.x = -(a2.y / dy) * dx + a2.x;
-                        a2.y = 0;
-
-                        a.x = ratio * dx3 + a.x;
-                        a.y = ratio * dy3 + a.y;
-                        a.z = ratio * dz3 + a.z;
-                    } else if (a2.y > HEIGHT){
-                        ratio = -(a2.y - HEIGHT) / dy;
-                        a2.x = -((a2.y - HEIGHT) / dy) * dx + a2.x;
-                        a2.y = HEIGHT;
-
-                        a.x = ratio * dx3 + a.x;
-                        a.y = ratio * dy3 + a.y;
-                        a.z = ratio * dz3 + a.z;
-                    }
-
-                    if (b2.y < 0){
-                        ratio = -b2.y/ dy;
-                        b2.x = -(b2.y / dy) * dx + b2.x;
-                        b2.y = 0;
-
-                        b.x = ratio * dx3 + b.x;
-                        b.y = ratio * dy3 + b.y;
-                        b.z = ratio * dz3 + b.z;
-                    } else if (b2.y > HEIGHT){
-                        ratio = -(b2.y - HEIGHT) / dy;
-                        b2.x = -((b2.y - HEIGHT) / dy) * dx + b2.x;
-                        b2.y = HEIGHT;
-
-                        b.x = ratio * dx3 + b.x;
-                        b.y = ratio * dy3 + b.y;
-                        b.z = ratio * dz3 + b.z;
-                    }
-                }
-
-                // Updating the clipped coordinates
-                curr_proj_edge.edge3D.a = a;
-                curr_proj_edge.edge3D.b = b;
-                curr_proj_edge.edge2D.a = a2;
-                curr_proj_edge.edge2D.b = b2;
+                // Project
+                curr_proj_edge = project_edge(curr_clipped_edge, pcam->focal_length);
+                // Clip the line if it goes beyond the screen edges
+                curr_proj_edge = clip_around(curr_proj_edge);
+                // Add the line to the buffer
                 pbuffer->edges[n] = curr_proj_edge;
                 n += 1;
             }
