@@ -52,78 +52,67 @@ Point3D transform_point(float* matrix, Point3D point){
     return res;
 }
 
-void calculate_transform_matrix(float* matrix,
-                                Point3D rotation,
-                                Point3D translation){
-
+void calculate_rotation_matrix(float* matrix, Point3D rotation){
     float r_x = rotation.x,
           r_y = rotation.y,
-          r_z = rotation.z,
-          t_x = translation.x,
-          t_y = translation.y,
-          t_z = translation.z;
+          r_z = rotation.z;
 
-    float r0, r1, r2, r3, r4, r5, r6, r7, r8;
+    matrix[0] = cosf(r_y) * cosf(r_z);
+    matrix[1] = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
+    matrix[2] = cosf(r_x) * sinf(r_y) * cosf(r_z) + sinf(r_x) * sinf(r_z);
+    matrix[4] = cosf(r_y) * sinf(r_z);
+    matrix[5] = sinf(r_x) * sinf(r_y) * sinf(r_z) + cosf(r_x) * cosf(r_z);
+    matrix[6] = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
+    matrix[8] = -sinf(r_y);
+    matrix[9] = sinf(r_x) * cosf(r_y);
+    matrix[10] = cosf(r_x) * cosf(r_y);
 
-    r0 = cosf(r_y) * cosf(r_z);
-    r1 = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
-    r2 = cosf(r_x) * sinf(r_y) * cosf(r_z) + sinf(r_x) * sinf(r_z);
-    r3 = cosf(r_y) * sinf(r_z);
-    r4 = sinf(r_x) * sinf(r_y) * sinf(r_z) + cosf(r_x) * cosf(r_z);
-    r5 = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
-    r6 = -sinf(r_y);
-    r7 = sinf(r_x) * cosf(r_y);
-    r8 = cosf(r_x) * cosf(r_y);
-
-    matrix[0] = r0;
-    matrix[1] = r1;
-    matrix[2] = r2;
-    matrix[4] = r3;
-    matrix[5] = r4;
-    matrix[6] = r5;
-    matrix[8] = r6;
-    matrix[9] = r7;
-    matrix[10] = r8;
-
-    matrix[3] = r0 * t_x + r1 * t_y + r2 * t_z;
-    matrix[7] = r3 * t_x + r4 * t_y + r5 * t_z;
-    matrix[11] = r6 * t_x + r7 * t_y + r8 * t_z;
-
-    matrix[12] = matrix[13] = matrix[14] = 0;
+    matrix[3] = matrix[7]
+              = matrix[11]
+              = matrix[12]
+              = matrix[13]
+              = matrix[14] = 0;
     matrix[15] = 1;
 }
 
-void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius){
-    float new_mat[16];
-    if (orbit){
-        float tmp_mat[16];
-        Point3D nul_pt = {0, 0, 0},
-                z_translate = {0, 0, -orbit_radius};
+void calculate_translation_matrix(float* matrix, Point3D translation){
+    matrix[3] = translation.x;
+    matrix[7] = translation.y;
+    matrix[11] = translation.z;
 
+    matrix[1] = matrix[2]
+              = matrix[4]
+              = matrix[6]
+              = matrix[8]
+              = matrix[9]
+              = matrix[12]
+              = matrix[13]
+              = matrix[14] = 0;
+
+    matrix[0] = matrix[5]
+              = matrix[10]
+              = matrix[15] = 1;
+}
+
+void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius){
+    float new_mat[16],
+          tmp_mat[16];
+    if (orbit){
+        Point3D z_translate = {0, 0, -orbit_radius};
         // Bringing the model to the camera
-        calculate_transform_matrix(new_mat,
-            nul_pt,
-            z_translate);
+        calculate_translation_matrix(new_mat, z_translate);
         // Rotating it
-        calculate_transform_matrix(tmp_mat,
-            rotation,
-            nul_pt);
+        calculate_rotation_matrix(tmp_mat, rotation);
         multiply_matrix(new_mat, tmp_mat);
         // Putting it back
-        calculate_transform_matrix(tmp_mat,
-            nul_pt,
-            pt_mul(-1.0, z_translate));
-        multiply_matrix(new_mat, tmp_mat);
-        // Translating
-        calculate_transform_matrix(tmp_mat,
-            nul_pt,
-            translation);
+        calculate_translation_matrix(tmp_mat, pt_mul(-1.0, z_translate));
         multiply_matrix(new_mat, tmp_mat);
     } else {
-        calculate_transform_matrix(new_mat,
-               rotation,
-               translation);
+        calculate_rotation_matrix(new_mat, rotation);
     }
+    // Translating
+    calculate_translation_matrix(tmp_mat, translation);
+    multiply_matrix(new_mat, tmp_mat);
     multiply_matrix(mat, new_mat);
 }
 
@@ -240,20 +229,22 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
     // Moving A
     // X axis
     ratio = 1;
-    if (diff.x != 0 && a_proj.x > abs(pcam->width/2)){
-        if (a_proj.x < 0) // A is too far to the left
-            ratio = (a_proj.x + pcam->width/2) / dx_proj;
-        else // A is too far to the right
-            ratio = (a_proj.x - pcam->width/2) / dx_proj;
+    if (diff.x != 0 && abs(a_proj.x) > abs(pcam->width/2)){
+        if (a_proj.x < 0){ // A is too far to the left
+            ratio = 1 + ((a_proj.x + pcam->width/2) / dx_proj);
+        } else { // A is too far to the right
+            ratio = 1 + ((a_proj.x - pcam->width/2) / dx_proj);
+        }
     }
     // Y axis
-    if (diff.y != 0 && a_proj.y > abs(pcam->width/2)){
-        if (a_proj.y < 0) // A is too far down
-            ratio = fminf(ratio, (a_proj.y + pcam->height/2) / dy_proj);
-        else // A is too far up
-            ratio = fminf(ratio, (a_proj.y - pcam->height/2) / dy_proj);
+    if (diff.y != 0 && abs(a_proj.y) > abs(pcam->height/2)){
+        if (a_proj.y < 0){ // A is too far up
+            ratio = fminf(ratio, 1 + ((a_proj.y + pcam->height/2) / dy_proj));
+        } else { // A is too far down
+            ratio = fminf(ratio, 1 + ((a_proj.y - pcam->height/2) / dy_proj));
+        }
     }
-    if (ratio > 0){
+    if (ratio > 0 && ratio < 1){
         clip_line(pedge, ratio, true);
         // Recalculating difference with the new A coordinates
         diff = pt_diff(pedge->b, pedge->a);
@@ -265,20 +256,22 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
     // Moving B
     // X axis
     ratio = 1;
-    if (diff.x != 0 && b_proj.x > abs(pcam->width/2)){
-        if (b_proj.x < 0) // B is too far to the left
-            ratio = (b_proj.x + pcam->width/2) / dx_proj;
-        else // B is too far to the right
-            ratio = (b_proj.x - pcam->width/2) / dx_proj;
+    if (diff.x != 0 && abs(b_proj.x) > abs(pcam->width/2)){
+        if (b_proj.x < 0){ // B is too far to the left
+            ratio = 1 + ((b_proj.x + pcam->width/2) / dx_proj);
+        } else { // B is too far to the right
+            ratio = 1 + ((b_proj.x - pcam->width/2) / dx_proj);
+        }
     }
     // Y axis
-    if (diff.y != 0 && b_proj.y > abs(pcam->height/2)){
-        if (b_proj.y < 0) // B is too far down
-            ratio = fminf(ratio, (b_proj.y + pcam->height/2) / dy_proj);
-        else // B is too far up
-            ratio = fminf(ratio, (b_proj.y - pcam->height/2) / dy_proj);
+    if (diff.y != 0 && abs(b_proj.y) > abs(pcam->height/2)){
+        if (b_proj.y < 0){ // B is too far up
+            ratio = fminf(ratio, 1 - ((b_proj.y + pcam->height/2) / dy_proj));
+        } else { // B is too far down
+            ratio = fminf(ratio, (pcam->height/2 - a_proj.y) / dy_proj);
+        }
     }
-    if (ratio > 1){
+    if (ratio > 0 && ratio < 1){
         clip_line(pedge, ratio, false);
     }
 }
@@ -286,7 +279,6 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
     Edge3D edges[3];
-    //Edge3D curr_clipped_edge;
     ProjectedEdge curr_proj_edge;
 
     int n = 0;

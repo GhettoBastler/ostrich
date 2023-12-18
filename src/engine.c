@@ -190,7 +190,7 @@ int main(int argc, char **argv){
     TriangleMesh* pculled_tri;
 
     // Initializing camera
-    Camera cam = make_camera(WIDTH/SCALE, HEIGHT/SCALE, 800/SCALE);
+    Camera cam = make_camera((float)WIDTH/SCALE, (float)HEIGHT/SCALE, 800/SCALE);
     float orbit_radius = 0;
     bool orbit_pressed = false;
     bool orbit = false;
