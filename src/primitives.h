@@ -13,11 +13,6 @@ typedef struct {
     Point2D a, b;
 } Edge2D;
 
-typedef struct {
-    int size;
-    Edge2D edges[];
-} Mesh2D;
-
 // 3D
 typedef struct {
    float x, y, z; 
