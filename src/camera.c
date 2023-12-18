@@ -181,14 +181,14 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     return pres;
 }
 
-Edge3D clip_behind(Edge3D edge){
-    // Clip edges that go behind the camera
+Edge3D clip_behind(Edge3D edge, Camera* pcam){
+    // Clip edges that go behind the focal plane
     Point3D a = edge.a;
     Point3D b = edge.b;
 
     bool a_hidden, b_hidden;
-    a_hidden = a.z <= 0;
-    b_hidden = b.z <= 0;
+    a_hidden = a.z <= pcam->focal_length;
+    b_hidden = b.z <= pcam->focal_length;
 
     if (a_hidden && b_hidden){
         // Both points are hidden
@@ -197,14 +197,14 @@ Edge3D clip_behind(Edge3D edge){
         b.x = b.y = b.z = 0;
     } else if (a_hidden){
         // A is hidden, B is visible
-        a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
-        a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
-        a.z = -1;
+        a.x = b.x + (a.x - b.x) * (pcam->focal_length - b.z)/(a.z - b.z);
+        a.y = b.y + (a.y - b.y) * (pcam->focal_length - b.z)/(a.z - b.z);
+        a.z = pcam->focal_length;
     } else if (b_hidden){
         // B is hidden, A is visible
-        b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
-        b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
-        b.z = -1;
+        b.x = a.x + (b.x - a.x) * (pcam->focal_length - a.z)/(b.z - a.z);
+        b.y = a.y + (b.y - a.y) * (pcam->focal_length - a.z)/(b.z - a.z);
+        b.z = pcam->focal_length;
     } // If both are visible, we do nothing
     Edge3D res = {a, b};
     return res;
@@ -334,7 +334,7 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
             // Add only the visible edges
             if (pculled_tri->triangles[i].visible[j]) {
                 // Clip the line if it goes behind the camera
-                curr_clipped_edge = clip_behind(edges[j]);
+                curr_clipped_edge = clip_behind(edges[j], pcam);
                 if (curr_clipped_edge.a.x == 0 &&
                     curr_clipped_edge.a.y == 0 &&
                     curr_clipped_edge.a.z == 0 &&
