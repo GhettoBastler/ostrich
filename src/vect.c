@@ -83,3 +83,7 @@ void multiply_matrix(float* matB, float* matA){
 
     memcpy(matB, res, sizeof(float) * 16);
 }
+
+bool pt_is_null(Point3D pt){
+    return (pt.x == 0 && pt.y == 0 && pt.z == 0);
+}

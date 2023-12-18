@@ -26,8 +26,6 @@ Camera make_camera(float width, float height, float focal_length){
 
 // 2D projection
 Point2D project_point(Point3D point, Camera* pcam){
-    // float x = (point.x * (pcam->focal_length / (point.z))) + (pcam->width / 2);
-    // float y = (point.y * (pcam->focal_length / (point.z))) + (pcam->height / 2);
     float x = point.x * (pcam->focal_length / (point.z));
     float y = point.y * (pcam->focal_length / (point.z));
     Point2D res = {x, y};
@@ -183,152 +181,112 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     return pres;
 }
 
-Edge3D clip_frustum(Edge3D edge, Camera* pcam){
-    // Clip edges that go behind the focal plane
-    Point3D a = edge.a;
-    Point3D b = edge.b;
+void clip_line(Edge3D* pedge, float ratio, bool reverse){
+    if (reverse)
+        pedge->a = pt_add(pedge->b, pt_mul(ratio, pt_diff(pedge->a, pedge->b)));
+    else
+        pedge->b = pt_add(pedge->a, pt_mul(ratio, pt_diff(pedge->b, pedge->a)));
+}
 
-    bool a_hidden, b_hidden;
-    a_hidden = a.z < pcam->focal_length;
-    b_hidden = b.z < pcam->focal_length;
+void clip_frustum(Edge3D* pedge, Camera* pcam){
+    Point3D diff;
+    float ratio;
+
+    // Clip edges that go behind the focal plane
+    bool a_hidden = pedge->a.z < pcam->focal_length,
+         b_hidden = pedge->b.z < pcam->focal_length;
 
     if (a_hidden && b_hidden){
         // Both points are hidden
-        // Skip this edge
-        a.x = a.y = a.z =
-        b.x = b.y = b.z = 0;
-        Edge3D res = {a, b};
-        return res;
-    } else if (a_hidden){
-        // A is hidden, B is visible
-        a.x = b.x + (a.x - b.x) * (pcam->focal_length - b.z)/(a.z - b.z);
-        a.y = b.y + (a.y - b.y) * (pcam->focal_length - b.z)/(a.z - b.z);
-        a.z = pcam->focal_length;
-    } else if (b_hidden){
-        // B is hidden, A is visible
-        b.x = a.x + (b.x - a.x) * (pcam->focal_length - a.z)/(b.z - a.z);
-        b.y = a.y + (b.y - a.y) * (pcam->focal_length - a.z)/(b.z - a.z);
-        b.z = pcam->focal_length;
-    } // If both are visible, we do nothing
+        // We set the edge's coordinates to zero 
+        pedge->a.x = pedge->a.y = pedge->a.z =
+        pedge->b.x = pedge->b.y = pedge->b.z = 0;
+        return;
+
+    } else {
+        // One of the point is visible
+        if (a_hidden) {
+            // A is hidden, B is visible
+            ratio = (pcam->focal_length - pedge->b.z)/(pedge->a.z - pedge->b.z);
+            clip_line(pedge, ratio, true);
+        } else if (b_hidden){
+            // B is hidden, A is visible
+            ratio = (pcam->focal_length - pedge->a.z)/(pedge->b.z - pedge->a.z);
+            clip_line(pedge, ratio, false);
+        }
+        // Both point are visible, we don't clip
+    }
     
     // Clip edges around
     Point2D a_proj, b_proj;
 
-    a_proj = project_point(a, pcam);
-    b_proj = project_point(b, pcam);
+    a_proj = project_point(pedge->a, pcam);
+    b_proj = project_point(pedge->b, pcam);
 
-    float dx = b.x - a.x,
-          dy = b.y - a.y,
-          dz = b.z - a.z,
-          dx_proj = b_proj.x - a_proj.x,
-          dy_proj = b_proj.y - a_proj.y,
-          ratio;
+    diff = pt_diff(pedge->b, pedge->a);
+    float dx_proj = b_proj.x - a_proj.x,
+          dy_proj = b_proj.y - a_proj.y;
 
     // Both A and B are outside the frustum
-    if ((a_proj.x < -pcam->width/2 &&
-        b_proj.x < -pcam->width/2) ||
-        (a_proj.y < -pcam->height/2 &&
-        b_proj.y < -pcam->height/2) ||
-        (a_proj.x > pcam->width/2 &&
-        b_proj.x > pcam->width/2) ||
-        (a_proj.y > pcam->height/2 &&
-        b_proj.y > pcam->height/2)
-       ){
-        a.x = a.y = a.z =
-        b.x = b.y = b.z = 0; // Edge is null
-        Edge3D res = {a, b};
-        return res;
+    if ((a_proj.x < -pcam->width/2 && b_proj.x < -pcam->width/2) ||
+        (a_proj.y < -pcam->height/2 && b_proj.y < -pcam->height/2) ||
+        (a_proj.x > pcam->width/2 && b_proj.x > pcam->width/2) ||
+        (a_proj.y > pcam->height/2 && b_proj.y > pcam->height/2)){
+        pedge->a.x = pedge->a.y = pedge->a.z =
+        pedge->b.x = pedge->b.y = pedge->b.z = 0; // Edge is null
+        return;
 
     } 
-    if (dx != 0){
-        if (a_proj.x < -pcam->width/2){ // A is too far to the left
+    // Moving A
+    // X axis
+    ratio = 1;
+    if (diff.x != 0 && a_proj.x > abs(pcam->width/2)){
+        if (a_proj.x < 0) // A is too far to the left
             ratio = (a_proj.x + pcam->width/2) / dx_proj;
-            if (ratio > 0){
-                a.x = a.x - dx * ratio;
-                a.y = a.y - dy * ratio;
-                a.z = a.z - dz * ratio;
-            }
-
-        } else if (a_proj.x > pcam->width/2){ // A is too far to the right
+        else // A is too far to the right
             ratio = (a_proj.x - pcam->width/2) / dx_proj;
-            if (ratio > 0){
-                a.x = a.x - dx * ratio;
-                a.y = a.y - dy * ratio;
-                a.z = a.z - dz * ratio;
-            }
-        }
+    }
+    // Y axis
+    if (diff.y != 0 && a_proj.y > abs(pcam->width/2)){
+        if (a_proj.y < 0) // A is too far down
+            ratio = fminf(ratio, (a_proj.y + pcam->height/2) / dy_proj);
+        else // A is too far up
+            ratio = fminf(ratio, (a_proj.y - pcam->height/2) / dy_proj);
+    }
+    if (ratio > 0){
+        clip_line(pedge, ratio, true);
+        // Recalculating difference with the new A coordinates
+        diff = pt_diff(pedge->b, pedge->a);
+        a_proj = project_point(pedge->a, pcam); // projecting new A
+        dx_proj = a_proj.x - b_proj.x;
+        dy_proj = a_proj.y - b_proj.y;
     }
 
-    if (dy != 0){
-        if (a_proj.y < -pcam->height/2){ // A is too far down
-            ratio = (a_proj.y + pcam->height/2) / dy_proj;
-            if (ratio > 0){
-                a.x = a.x - dx * ratio;
-                a.y = a.y - dy * ratio;
-                a.z = a.z - dz * ratio;
-            }
-        } else if (a_proj.y > pcam->height/2){ // A is too far up
-            ratio = (a_proj.y - pcam->height/2) / dy_proj;
-            if (ratio > 0){
-                a.x = a.x - dx * ratio;
-                a.y = a.y - dy * ratio;
-                a.z = a.z - dz * ratio;
-            }
-        }
-    }
-
-    dx = a.x - b.x;
-    dy = a.y - b.y;
-    dz = a.z - b.z;
-    a_proj = project_point(a, pcam);
-    dx_proj = a_proj.x - b_proj.x;
-    dy_proj = a_proj.y - b_proj.y;
-
-    if (dx != 0){
-        if (b_proj.x < -pcam->width/2){ // B is too far to the left
+    // Moving B
+    // X axis
+    ratio = 1;
+    if (diff.x != 0 && b_proj.x > abs(pcam->width/2)){
+        if (b_proj.x < 0) // B is too far to the left
             ratio = (b_proj.x + pcam->width/2) / dx_proj;
-            if (ratio > 0){
-                b.x = b.x - dx * ratio;
-                b.y = b.y - dy * ratio;
-                b.z = b.z - dz * ratio;
-            }
-
-        } else if (b_proj.x > pcam->width/2){ // B is too far to the right
+        else // B is too far to the right
             ratio = (b_proj.x - pcam->width/2) / dx_proj;
-            if (ratio > 0){
-                b.x = b.x - dx * ratio;
-                b.y = b.y - dy * ratio;
-                b.z = b.z - dz * ratio;
-            }
-        }
     }
-
-    if (dy != 0){
-        if (b_proj.y < -pcam->height/2){ // B is too far down
-            ratio = (b_proj.y + pcam->height/2) / dy_proj;
-            if (ratio > 0){
-                b.x = b.x - dx * ratio;
-                b.y = b.y - dy * ratio;
-                b.z = b.z - dz * ratio;
-            }
-        } else if (b_proj.y > pcam->height/2){ // B is too far up
-            ratio = (b_proj.y - pcam->height/2) / dy_proj;
-            if (ratio > 0){
-                b.x = b.x - dx * ratio;
-                b.y = b.y - dy * ratio;
-                b.z = b.z - dz * ratio;
-            }
-        }
+    // Y axis
+    if (diff.y != 0 && b_proj.y > abs(pcam->height/2)){
+        if (b_proj.y < 0) // B is too far down
+            ratio = fminf(ratio, (b_proj.y + pcam->height/2) / dy_proj);
+        else // B is too far up
+            ratio = fminf(ratio, (b_proj.y - pcam->height/2) / dy_proj);
     }
-
-    Edge3D res = {a, b};
-    return res;
+    if (ratio > 1){
+        clip_line(pedge, ratio, false);
+    }
 }
 
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
     Edge3D edges[3];
-    Edge3D curr_clipped_edge;
+    //Edge3D curr_clipped_edge;
     ProjectedEdge curr_proj_edge;
 
     int n = 0;
@@ -348,18 +306,13 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
             // Add only the visible edges
             if (pculled_tri->triangles[i].visible[j]) {
                 // Clip the line if it goes behind the camera
-                curr_clipped_edge = clip_frustum(edges[j], pcam);
-
-                if (curr_clipped_edge.a.x == 0 &&
-                    curr_clipped_edge.a.y == 0 &&
-                    curr_clipped_edge.a.z == 0 &&
-                    curr_clipped_edge.b.x == 0 &&
-                    curr_clipped_edge.b.y == 0 &&
-                    curr_clipped_edge.b.z == 0)
-                    continue; // Edge is behind the camera
-
-                // Project
-                curr_proj_edge = project_edge(curr_clipped_edge, pcam);
+                clip_frustum(&edges[j], pcam);
+                // If there is nothing left
+                if (pt_is_null(edges[j].a) && pt_is_null(edges[j].b))
+                    continue;
+                // Project the edge
+                curr_proj_edge = project_edge(edges[j], pcam);
+                // Add it to the mesh
                 pbuffer->edges[n] = curr_proj_edge;
                 n += 1;
             }
