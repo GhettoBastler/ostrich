@@ -1,6 +1,7 @@
 #ifndef VECT_H
 #define VECT_H
 
+#include <string.h>
 #include <math.h>
 #include <stdbool.h>
 #include "primitives.h"
@@ -13,5 +14,6 @@ Point3D cross_product(Point3D a, Point3D b);
 float dot_product(Point3D a, Point3D b);
 Point3D pt_min(Point3D a, Point3D b);
 Point3D pt_max(Point3D a, Point3D b);
+void multiply_matrix(float* ma, float* mb);
 
 #endif
