@@ -7,7 +7,6 @@
 #define HEIGHT 600
 
 typedef struct {
-//    Point3D translation, rotation;
     float focal_length;
     float transform_mat[16];
 } Camera;

@@ -105,14 +105,12 @@ ProjectedEdge cap_edge(ProjectedEdge edge){
         }
     }
 
-    //Edge2D res = {a, b};
     Edge2D res2D = {a, b};
     Edge3D res3D = {a3, b3};
     ProjectedEdge res = {res2D, res3D};
     return res;
 }
 
-//void draw_line(Uint32* ppixels, Edge2D edge){
 void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden){
 
     ProjectedEdge proj_capped = cap_edge(edge);
@@ -281,7 +279,6 @@ int main(int argc, char **argv){
 
     // Initializing main loop
     // Creating scene
-    //Mesh3D* pscene = make_scene();
     TriangleMesh* pscene = tri_make_scene();
     TriangleMesh* pculled_tri;
 

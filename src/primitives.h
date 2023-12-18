@@ -56,13 +56,6 @@ typedef struct {
     ProjectedEdge edges[];
 } ProjectedMesh;
 
-// 3D MESHES
-Mesh3D* prism(Mesh3D* pmesh, Point3D vect);
-Mesh3D* box(float a, float b, float c);
-Mesh3D* polygon(float radius, int n);
-Mesh3D* line(float xa, float ya, float za, float xb, float yb, float zb);
-Mesh3D* sphere(float radius);
-Mesh3D* grid(float width, float length, int n_div_x, int n_div_y);
 TriangleMesh* tri_cube(float size);
 
 #endif
