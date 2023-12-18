@@ -6,6 +6,112 @@
 #include "vect.h"
 #include "transforms.h"
 
+void clip_line(Edge3D* pedge, float ratio, bool reverse){
+    if (reverse)
+        pedge->a = pt_add(pedge->b, pt_mul(ratio, pt_diff(pedge->a, pedge->b)));
+    else
+        pedge->b = pt_add(pedge->a, pt_mul(ratio, pt_diff(pedge->b, pedge->a)));
+}
+
+void clip_frustum(Edge3D* pedge, Camera* pcam){
+    Point3D diff;
+    float ratio;
+
+    // Clip edges that go behind the focal plane
+    bool a_hidden = pedge->a.z < pcam->focal_length,
+         b_hidden = pedge->b.z < pcam->focal_length;
+
+    if (a_hidden && b_hidden){
+        // Both points are hidden
+        // We set the edge's coordinates to zero 
+        pedge->a.x = pedge->a.y = pedge->a.z =
+        pedge->b.x = pedge->b.y = pedge->b.z = 0;
+        return;
+
+    } else {
+        // One of the point is visible
+        if (a_hidden) {
+            // A is hidden, B is visible
+            ratio = (pcam->focal_length - pedge->b.z)/(pedge->a.z - pedge->b.z);
+            clip_line(pedge, ratio, true);
+        } else if (b_hidden){
+            // B is hidden, A is visible
+            ratio = (pcam->focal_length - pedge->a.z)/(pedge->b.z - pedge->a.z);
+            clip_line(pedge, ratio, false);
+        }
+        // Both point are visible, we don't clip
+    }
+    
+    // Clip edges around
+    Point2D a_proj, b_proj;
+
+    a_proj = project_point(pedge->a, pcam);
+    b_proj = project_point(pedge->b, pcam);
+
+    diff = pt_diff(pedge->b, pedge->a);
+    float dx_proj = b_proj.x - a_proj.x,
+          dy_proj = b_proj.y - a_proj.y;
+
+    // Both A and B are outside the frustum
+    if ((a_proj.x < -pcam->width/2 && b_proj.x < -pcam->width/2) ||
+        (a_proj.y < -pcam->height/2 && b_proj.y < -pcam->height/2) ||
+        (a_proj.x > pcam->width/2 && b_proj.x > pcam->width/2) ||
+        (a_proj.y > pcam->height/2 && b_proj.y > pcam->height/2)){
+        pedge->a.x = pedge->a.y = pedge->a.z =
+        pedge->b.x = pedge->b.y = pedge->b.z = 0; // Edge is null
+        return;
+
+    } 
+    // Moving A
+    // X axis
+    ratio = 1;
+    if (diff.x != 0 && abs(a_proj.x) > abs(pcam->width/2)){
+        if (a_proj.x < 0){ // A is too far to the left
+            ratio = 1 + ((a_proj.x + pcam->width/2) / dx_proj);
+        } else { // A is too far to the right
+            ratio = 1 + ((a_proj.x - pcam->width/2) / dx_proj);
+        }
+    }
+    // Y axis
+    if (diff.y != 0 && abs(a_proj.y) > abs(pcam->height/2)){
+        if (a_proj.y < 0){ // A is too far up
+            ratio = fminf(ratio, 1 + ((a_proj.y + pcam->height/2) / dy_proj));
+        } else { // A is too far down
+            ratio = fminf(ratio, 1 + ((a_proj.y - pcam->height/2) / dy_proj));
+        }
+    }
+    if (ratio > 0 && ratio < 1){
+        clip_line(pedge, ratio, true);
+        // Recalculating difference with the new A coordinates
+        diff = pt_diff(pedge->b, pedge->a);
+        a_proj = project_point(pedge->a, pcam); // projecting new A
+        dx_proj = a_proj.x - b_proj.x;
+        dy_proj = a_proj.y - b_proj.y;
+    }
+
+    // Moving B
+    // X axis
+    ratio = 1;
+    if (diff.x != 0 && abs(b_proj.x) > abs(pcam->width/2)){
+        if (b_proj.x < 0){ // B is too far to the left
+            ratio = 1 + ((b_proj.x + pcam->width/2) / dx_proj);
+        } else { // B is too far to the right
+            ratio = 1 + ((b_proj.x - pcam->width/2) / dx_proj);
+        }
+    }
+    // Y axis
+    if (diff.y != 0 && abs(b_proj.y) > abs(pcam->height/2)){
+        if (b_proj.y < 0){ // B is too far up
+            ratio = fminf(ratio, 1 - ((b_proj.y + pcam->height/2) / dy_proj));
+        } else { // B is too far down
+            ratio = fminf(ratio, (pcam->height/2 - a_proj.y) / dy_proj);
+        }
+    }
+    if (ratio > 0 && ratio < 1){
+        clip_line(pedge, ratio, false);
+    }
+}
+
 bool facing_camera(Triangle tri){
     Point3D vect_1 = pt_diff(tri.b, tri.a),
             vect_2 = pt_diff(tri.a, tri.c);
@@ -13,8 +119,6 @@ bool facing_camera(Triangle tri){
     Point3D center = pt_mul((float)1/3, pt_add(pt_add(tri.a, tri.b), tri.c));
     return (dot_product(center, normal) >= 0);
 }
-
-
 
 int comp_tri_z(const void* ptri_a, const void* ptri_b){
     Point3D tri_a_a = ((Triangle*) ptri_a)->a,

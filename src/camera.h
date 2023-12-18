@@ -13,6 +13,7 @@ typedef struct {
     float transform_mat[16];
 } Camera;
 
+Point2D project_point(Point3D point, Camera* pcam);
 Point3D transform_point(float* matrix, Point3D point);
 Camera make_camera(float width, float height, float focal_length);
 void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius);
