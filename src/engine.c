@@ -231,9 +231,11 @@ int main(int argc, char **argv){
 
                 case SDL_MOUSEWHEEL:
                     if (event.wheel.y > 0) {
-                        cam.focal_length += 5;
+                        cam.focal_length += 1;
                     } else {
-                        cam.focal_length -= 5;
+                        cam.focal_length -= 1;
+                        if (cam.focal_length <= 0)
+                            cam.focal_length = 0.001;
                     }
                     reproject = true;
                     break;
