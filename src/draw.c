@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "draw.h"
 #include "vect.h"
+#include "cull_clip.h"
 
 void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden, Camera* pcam){
 
@@ -31,41 +32,26 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool 
 
     if (!draw_hidden){
         // Check when the line's bounding box gets obstructed
-        Point3D tri_bbox_min, tri_bbox_max,
-                edge_bbox_min = pt_min(edge.edge3D.a, edge.edge3D.b),
-                edge_bbox_max = pt_max(edge.edge3D.a, edge.edge3D.b);
         Triangle curr_tri;
+
+        BoundingBox edge_bbox = bbox_from_edge(edge.edge3D),
+                    tri_bbox;
 
         for (i=0; i < pmesh->size; i++){
             curr_tri = pmesh->triangles[i];
 
-            tri_bbox_min = pt_min(pt_min(curr_tri.a, curr_tri.b), curr_tri.c);
-            tri_bbox_max = pt_max(pt_max(curr_tri.a, curr_tri.b), curr_tri.c);
+            tri_bbox = bbox_from_triangle(curr_tri);
 
             // If the edge's bbox is completely in front of this triangle's bounding box,
             // it is not hidden by this triangle, nor by any other
-            if (edge_bbox_max.z < tri_bbox_min.z){
+            if (edge_bbox.max.z < tri_bbox.min.z){
                 i = pmesh->size - 1;
                 break;
             }
 
             // If edge's bbox is projected completely outside of the triangle bounding box,
             // the triangle doesn't hide it
-            if (
-                (
-                 (edge_bbox_max.x * tri_bbox_min.z / edge_bbox_max.z < tri_bbox_min.x) &&
-                 (edge_bbox_max.x * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.x)
-                ) || (
-                 (edge_bbox_min.x * tri_bbox_min.z / edge_bbox_max.z > tri_bbox_max.x) &&
-                 (edge_bbox_min.x * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.x)
-                ) || (
-                 (edge_bbox_max.y * tri_bbox_min.z / edge_bbox_max.z < tri_bbox_min.y) &&
-                 (edge_bbox_max.y * tri_bbox_max.z / edge_bbox_max.z < tri_bbox_min.y)
-                ) || (
-                 (edge_bbox_min.y * tri_bbox_min.z / edge_bbox_max.z > tri_bbox_max.y) &&
-                 (edge_bbox_min.y * tri_bbox_max.z / edge_bbox_max.z > tri_bbox_max.y)
-                )
-            )
+            if (!bbox_in_shadow(tri_bbox, edge_bbox))
                 continue;
 
             // At this point, we know that the edge's bounding box is in the shadow of
