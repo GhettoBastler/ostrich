@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "vect.h"
 
+#define SCALE 40
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
 #define LINE_COLOR_1 0xFFF4115D
@@ -17,6 +18,10 @@
 void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden){
 
     Edge2D capped = edge.edge2D;
+    capped.a.x *= SCALE;
+    capped.a.y *= SCALE;
+    capped.b.x *= SCALE;
+    capped.b.y *= SCALE;
 
     int x0 = (int) capped.a.x,
         y0 = (int) capped.a.y,
@@ -185,7 +190,7 @@ int main(int argc, char **argv){
     TriangleMesh* pculled_tri;
 
     // Initializing camera
-    Camera cam = make_camera(800, 600, 800);
+    Camera cam = make_camera(20, 15, 40);
     float orbit_radius = 0;
     bool orbit_pressed = false;
     bool orbit = false;
