@@ -202,62 +202,60 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
 
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
     TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
-    Mesh3D* pculled = (Mesh3D*) malloc(sizeof(Mesh3D));
-    pculled->size = 0;
-    Edge3D ab, bc, ca;
-    for (int j = 0; j < pculled_tri->size; j++){
-        // Convert each triangle into three edges
-        ab.a = pculled_tri->triangles[j].a;
-        ab.b = pculled_tri->triangles[j].b;
-        bc.a = pculled_tri->triangles[j].b;
-        bc.b = pculled_tri->triangles[j].c;
-        ca.a = pculled_tri->triangles[j].c;
-        ca.b = pculled_tri->triangles[j].a;
-
-        if (pculled_tri->triangles[j].visible[0])
-            pculled = add_edge(pculled, ab);
-        if (pculled_tri->triangles[j].visible[1])
-            pculled = add_edge(pculled, bc);
-        if (pculled_tri->triangles[j].visible[2])
-            pculled = add_edge(pculled, ca);
-    }
-    int n = 0;
+    Edge3D edges[3];
     ProjectedEdge curr_proj_edge;
-    for (int i = 0; i < pculled->size; i++){
-        Point3D a = pculled->edges[i].a;
-        Point3D b = pculled->edges[i].b;
 
-        // Check visibility
-        bool a_hidden, b_hidden;
-        a_hidden = a.z <= 0;
-        b_hidden = b.z <= 0;
+    int n = 0;
+    for (int i = 0; i < pculled_tri->size; i++){
+        // Convert each triangle into three edges
+        // AB
+        edges[0].a = pculled_tri->triangles[i].a;
+        edges[0].b = pculled_tri->triangles[i].b;
+        // BC
+        edges[1].a = pculled_tri->triangles[i].b;
+        edges[1].b = pculled_tri->triangles[i].c;
+        // CA
+        edges[2].a = pculled_tri->triangles[i].c;
+        edges[2].b = pculled_tri->triangles[i].a;
 
-        if (a_hidden && b_hidden){
-            // Both points are hidden
-            // Skip this edge
-            continue;
-        } else if (a_hidden){
-            // A is hidden, B is visible
-            a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
-            a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
-            a.z = -1;
-        } else if (b_hidden){
-            // B is hidden, A is visible
-            b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
-            b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
-            b.z = -1;
-        } // If both are visible, we do nothing
+        for (int j = 0; j < 3; j++){
+            // Add only the visible edges
+            if (pculled_tri->triangles[i].visible[j]) {
+                // Clip edges to screen limits
+                Point3D a = edges[j].a;
+                Point3D b = edges[j].b;
 
-        Edge3D new_edge = {a, b};
-        //pbuffer->edges[n] = project_edge(new_edge, pcam->focal_length);
-        curr_proj_edge = project_edge(new_edge, pcam->focal_length);
-        curr_proj_edge.edge3D = new_edge;
-        pbuffer->edges[n] = curr_proj_edge;
-        n += 1;
+                // Check visibility
+                bool a_hidden, b_hidden;
+                a_hidden = a.z <= 0;
+                b_hidden = b.z <= 0;
+
+                if (a_hidden && b_hidden){
+                    // Both points are hidden
+                    // Skip this edge
+                    continue;
+                } else if (a_hidden){
+                    // A is hidden, B is visible
+                    a.x = (a.z / (b.z - a.z)) * (b.x - a.x) - a.x;
+                    a.y = (a.z / (b.z - a.z)) * (b.y - a.y) - a.y;
+                    a.z = -1;
+                } else if (b_hidden){
+                    // B is hidden, A is visible
+                    b.x = (b.z / (a.z - b.z)) * (a.x - b.x) - b.x;
+                    b.y = (b.z / (a.z - b.z)) * (a.y - b.y) - b.y;
+                    b.z = -1;
+                } // If both are visible, we do nothing
+
+                Edge3D new_edge = {a, b};
+                curr_proj_edge = project_edge(new_edge, pcam->focal_length);
+                curr_proj_edge.edge3D = new_edge;
+                pbuffer->edges[n] = curr_proj_edge;
+                n += 1;
+
+            }
+        }
     }
     pbuffer->size = n;
-    //free(pculled_tri);
-    free(pculled);
     return pculled_tri;
 }
 
