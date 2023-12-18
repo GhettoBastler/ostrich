@@ -14,107 +14,9 @@
 #define LINE_COLOR_2 0xFF0296F2
 #define BG_COLOR 0xFF111111
 
-ProjectedEdge cap_edge(ProjectedEdge edge){
-    Point2D a = edge.edge2D.a;
-    Point2D b = edge.edge2D.b;
-
-    Point3D a3 = edge.edge3D.a;
-    Point3D b3 = edge.edge3D.b;
-    float dx3 = b3.x - a3.x;
-    float dy3 = b3.y - a3.y;
-    float dz3 = b3.z - a3.z;
-
-    float dx = b.x - a.x;
-    float dy = b.y - a.y;
-
-    float ratio;
-
-    if (dx != 0){
-        if (a.x < 0){
-            ratio = -(a.x / dx);
-            a.y = -(a.x / dx) * dy + a.y;
-            a.x = 0;
-
-            a3.x = ratio * dx3 + a3.x;
-            a3.y = ratio * dy3 + a3.y;
-            a3.z = ratio * dz3 + a3.z;
-        } else if (a.x > WIDTH){
-            ratio = -(a.x - WIDTH)/ dx;
-            a.y = -((a.x - WIDTH) / dx) * dy + a.y;
-            a.x = WIDTH;
-
-            a3.x = ratio * dx3 + a3.x;
-            a3.y = ratio * dy3 + a3.y;
-            a3.z = ratio * dz3 + a3.z;
-        }
-
-        if (b.x < 0){
-            ratio = -b.x / dx;
-            b.y = -(b.x / dx) * dy + b.y;
-            b.x = 0;
-
-            b3.x = ratio * dx3 + b3.x;
-            b3.y = ratio * dy3 + b3.y;
-            b3.z = ratio * dz3 + b3.z;
-        } else if (b.x > WIDTH){
-            ratio = -(b.x - WIDTH)/ dx;
-            b.y = -((b.x - WIDTH) / dx) * dy + b.y;
-            b.x = WIDTH;
-
-            b3.x = ratio * dx3 + b3.x;
-            b3.y = ratio * dy3 + b3.y;
-            b3.z = ratio * dz3 + b3.z;
-        }
-    }
-    
-    if (dy != 0){
-        if (a.y < 0){
-            ratio = -(a.y / dy);
-            a.x = -(a.y / dy) * dx + a.x;
-            a.y = 0;
-
-            a3.x = ratio * dx3 + a3.x;
-            a3.y = ratio * dy3 + a3.y;
-            a3.z = ratio * dz3 + a3.z;
-        } else if (a.y > HEIGHT){
-            ratio = -(a.y - HEIGHT) / dy;
-            a.x = -((a.y - HEIGHT) / dy) * dx + a.x;
-            a.y = HEIGHT;
-
-            a3.x = ratio * dx3 + a3.x;
-            a3.y = ratio * dy3 + a3.y;
-            a3.z = ratio * dz3 + a3.z;
-        }
-
-        if (b.y < 0){
-            ratio = -b.y/ dy;
-            b.x = -(b.y / dy) * dx + b.x;
-            b.y = 0;
-
-            b3.x = ratio * dx3 + b3.x;
-            b3.y = ratio * dy3 + b3.y;
-            b3.z = ratio * dz3 + b3.z;
-        } else if (b.y > HEIGHT){
-            ratio = -(b.y - HEIGHT) / dy;
-            b.x = -((b.y - HEIGHT) / dy) * dx + b.x;
-            b.y = HEIGHT;
-
-            b3.x = ratio * dx3 + b3.x;
-            b3.y = ratio * dy3 + b3.y;
-            b3.z = ratio * dz3 + b3.z;
-        }
-    }
-
-    Edge2D res2D = {a, b};
-    Edge3D res3D = {a3, b3};
-    ProjectedEdge res = {res2D, res3D};
-    return res;
-}
-
 void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden){
 
-    ProjectedEdge proj_capped = cap_edge(edge);
-    Edge2D capped = proj_capped.edge2D;
+    Edge2D capped = edge.edge2D;
 
     int x0 = (int) capped.a.x,
         y0 = (int) capped.a.y,
@@ -185,7 +87,7 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool dr
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
             if (draw_hidden)
                 ppixels[x0 + WIDTH * y0] = LINE_COLOR_1;
-            else if (point_is_visible(proj_capped.edge3D, ratio, pmesh, i))
+            else if (point_is_visible(edge.edge3D, ratio, pmesh, i))
                     ppixels[x0 + WIDTH * y0] = LINE_COLOR_2;
 
         if (x0 == x1 && y0 == y1) break;
