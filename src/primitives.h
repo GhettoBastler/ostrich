@@ -27,11 +27,6 @@ typedef struct {
     Point3D a, b;
 } Edge3D;
 
-typedef struct {
-    int size;
-    Edge3D edges[];
-} Mesh3D;
-
 // For hidden lines
 typedef struct {
     Edge2D edge2D;
