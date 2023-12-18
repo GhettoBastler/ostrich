@@ -14,13 +14,13 @@
 #define LINE_COLOR_2 0xFF0296F2
 #define BG_COLOR 0xFF111111
 
-void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden){
+void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden, Camera* pcam){
 
     Edge2D capped = edge.edge2D;
-    capped.a.x *= SCALE;
-    capped.a.y *= SCALE;
-    capped.b.x *= SCALE;
-    capped.b.y *= SCALE;
+    capped.a.x = (capped.a.x + pcam->width/2)*SCALE;
+    capped.a.y = (capped.a.y + pcam->height/2)*SCALE;
+    capped.b.x = (capped.b.x + pcam->width/2)*SCALE;
+    capped.b.y = (capped.b.y + pcam->height/2)*SCALE;
 
     int x0 = (int) capped.a.x,
         y0 = (int) capped.a.y,
@@ -86,6 +86,7 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool dr
         }
     };
 
+    // Bresenham
     for (;;){
         ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
@@ -107,7 +108,7 @@ void draw_line(Uint32* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool dr
     }
 }
 
-void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden){
+void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden, Camera* pcam){
     int pitch = WIDTH * sizeof(Uint32);
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     //Clear pixels
@@ -116,7 +117,7 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
     }
     //Draw lines
     for (int i = 0; i < pmesh->size; i++){
-        draw_line(ppixels, pmesh->edges[i], ptri_mesh, draw_hidden);
+        draw_line(ppixels, pmesh->edges[i], ptri_mesh, draw_hidden, pcam);
     }
     SDL_UnlockTexture(ptexture);
 }
@@ -208,7 +209,7 @@ int main(int argc, char **argv){
     int prev_x, prev_y;
 
     pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-    update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
+    update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
     free(pculled_tri);
     draw(ptexture, prenderer);
 
@@ -311,12 +312,12 @@ int main(int argc, char **argv){
             do_hidden = false;
             update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri, false);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri, false, &cam);
             free(pculled_tri);
         } else if (reproject) {
             update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri, true);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
             free(pculled_tri);
         }
 

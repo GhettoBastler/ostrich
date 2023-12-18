@@ -26,8 +26,10 @@ Camera make_camera(float width, float height, float focal_length){
 
 // 2D projection
 Point2D project_point(Point3D point, Camera* pcam){
-    float x = (point.x * (pcam->focal_length / (point.z))) + (pcam->width / 2);
-    float y = (point.y * (pcam->focal_length / (point.z))) + (pcam->height / 2);
+    // float x = (point.x * (pcam->focal_length / (point.z))) + (pcam->width / 2);
+    // float y = (point.y * (pcam->focal_length / (point.z))) + (pcam->height / 2);
+    float x = point.x * (pcam->focal_length / (point.z));
+    float y = point.y * (pcam->focal_length / (point.z));
     Point2D res = {x, y};
     return res;
 }
@@ -181,20 +183,22 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     return pres;
 }
 
-Edge3D clip_behind(Edge3D edge, Camera* pcam){
+Edge3D clip_frustum(Edge3D edge, Camera* pcam){
     // Clip edges that go behind the focal plane
     Point3D a = edge.a;
     Point3D b = edge.b;
 
     bool a_hidden, b_hidden;
-    a_hidden = a.z <= pcam->focal_length;
-    b_hidden = b.z <= pcam->focal_length;
+    a_hidden = a.z < pcam->focal_length;
+    b_hidden = b.z < pcam->focal_length;
 
     if (a_hidden && b_hidden){
         // Both points are hidden
         // Skip this edge
         a.x = a.y = a.z =
         b.x = b.y = b.z = 0;
+        Edge3D res = {a, b};
+        return res;
     } else if (a_hidden){
         // A is hidden, B is visible
         a.x = b.x + (a.x - b.x) * (pcam->focal_length - b.z)/(a.z - b.z);
@@ -206,108 +210,118 @@ Edge3D clip_behind(Edge3D edge, Camera* pcam){
         b.y = a.y + (b.y - a.y) * (pcam->focal_length - a.z)/(b.z - a.z);
         b.z = pcam->focal_length;
     } // If both are visible, we do nothing
-    Edge3D res = {a, b};
-    return res;
-}
+    
+    // Clip edges around
+    Point2D a_proj, b_proj;
 
-ProjectedEdge clip_around(ProjectedEdge edge, Camera* pcam){
-    // Clip edges that go beyond the screen limit, both in screen and object space
-    ProjectedEdge res;
+    a_proj = project_point(a, pcam);
+    b_proj = project_point(b, pcam);
 
-    Point3D a = edge.edge3D.a;
-    Point3D b = edge.edge3D.b;
-    Point2D a2 = edge.edge2D.a;
-    Point2D b2 = edge.edge2D.b;
+    float dx = b.x - a.x,
+          dy = b.y - a.y,
+          dz = b.z - a.z,
+          dx_proj = b_proj.x - a_proj.x,
+          dy_proj = b_proj.y - a_proj.y,
+          ratio;
 
-    float dx3 = b.x - a.x;
-    float dy3 = b.y - a.y;
-    float dz3 = b.z - a.z;
+    // Both A and B are outside the frustum
+    if ((a_proj.x < -pcam->width/2 &&
+        b_proj.x < -pcam->width/2) ||
+        (a_proj.y < -pcam->height/2 &&
+        b_proj.y < -pcam->height/2) ||
+        (a_proj.x > pcam->width/2 &&
+        b_proj.x > pcam->width/2) ||
+        (a_proj.y > pcam->height/2 &&
+        b_proj.y > pcam->height/2)
+       ){
+        a.x = a.y = a.z =
+        b.x = b.y = b.z = 0; // Edge is null
+        Edge3D res = {a, b};
+        return res;
 
-    float dx = b2.x - a2.x;
-    float dy = b2.y - a2.y;
+    } 
+    if (dx != 0){
+        if (a_proj.x < -pcam->width/2){ // A is too far to the left
+            ratio = (a_proj.x + pcam->width/2) / dx_proj;
+            if (ratio > 0){
+                a.x = a.x - dx * ratio;
+                a.y = a.y - dy * ratio;
+                a.z = a.z - dz * ratio;
+            }
 
-    float ratio;
+        } else if (a_proj.x > pcam->width/2){ // A is too far to the right
+            ratio = (a_proj.x - pcam->width/2) / dx_proj;
+            if (ratio > 0){
+                a.x = a.x - dx * ratio;
+                a.y = a.y - dy * ratio;
+                a.z = a.z - dz * ratio;
+            }
+        }
+    }
+
+    if (dy != 0){
+        if (a_proj.y < -pcam->height/2){ // A is too far down
+            ratio = (a_proj.y + pcam->height/2) / dy_proj;
+            if (ratio > 0){
+                a.x = a.x - dx * ratio;
+                a.y = a.y - dy * ratio;
+                a.z = a.z - dz * ratio;
+            }
+        } else if (a_proj.y > pcam->height/2){ // A is too far up
+            ratio = (a_proj.y - pcam->height/2) / dy_proj;
+            if (ratio > 0){
+                a.x = a.x - dx * ratio;
+                a.y = a.y - dy * ratio;
+                a.z = a.z - dz * ratio;
+            }
+        }
+    }
+
+    dx = a.x - b.x;
+    dy = a.y - b.y;
+    dz = a.z - b.z;
+    a_proj = project_point(a, pcam);
+    dx_proj = a_proj.x - b_proj.x;
+    dy_proj = a_proj.y - b_proj.y;
 
     if (dx != 0){
-        if (a2.x < 0){
-            ratio = -(a2.x / dx);
-            a2.y = -(a2.x / dx) * dy + a2.y;
-            a2.x = 0;
+        if (b_proj.x < -pcam->width/2){ // B is too far to the left
+            ratio = (b_proj.x + pcam->width/2) / dx_proj;
+            if (ratio > 0){
+                b.x = b.x - dx * ratio;
+                b.y = b.y - dy * ratio;
+                b.z = b.z - dz * ratio;
+            }
 
-            a.x = ratio * dx3 + a.x;
-            a.y = ratio * dy3 + a.y;
-            a.z = ratio * dz3 + a.z;
-        } else if (a2.x > pcam->width){
-            ratio = -(a2.x - pcam->width)/ dx;
-            a2.y = -((a2.x - pcam->width) / dx) * dy + a2.y;
-            a2.x = pcam->width;
-
-            a.x = ratio * dx3 + a.x;
-            a.y = ratio * dy3 + a.y;
-            a.z = ratio * dz3 + a.z;
-        }
-
-        if (b2.x < 0){
-            ratio = -b2.x / dx;
-            b2.y = -(b2.x / dx) * dy + b2.y;
-            b2.x = 0;
-
-            b.x = ratio * dx3 + b.x;
-            b.y = ratio * dy3 + b.y;
-            b.z = ratio * dz3 + b.z;
-        } else if (b2.x > pcam->width){
-            ratio = -(b2.x - pcam->width)/ dx;
-            b2.y = -((b2.x - pcam->width) / dx) * dy + b2.y;
-            b2.x = pcam->width;
-
-            b.x = ratio * dx3 + b.x;
-            b.y = ratio * dy3 + b.y;
-            b.z = ratio * dz3 + b.z;
+        } else if (b_proj.x > pcam->width/2){ // B is too far to the right
+            ratio = (b_proj.x - pcam->width/2) / dx_proj;
+            if (ratio > 0){
+                b.x = b.x - dx * ratio;
+                b.y = b.y - dy * ratio;
+                b.z = b.z - dz * ratio;
+            }
         }
     }
-    
+
     if (dy != 0){
-        if (a2.y < 0){
-            ratio = -(a2.y / dy);
-            a2.x = -(a2.y / dy) * dx + a2.x;
-            a2.y = 0;
-
-            a.x = ratio * dx3 + a.x;
-            a.y = ratio * dy3 + a.y;
-            a.z = ratio * dz3 + a.z;
-        } else if (a2.y > pcam->height){
-            ratio = -(a2.y - pcam->height) / dy;
-            a2.x = -((a2.y - pcam->height) / dy) * dx + a2.x;
-            a2.y = pcam->height;
-
-            a.x = ratio * dx3 + a.x;
-            a.y = ratio * dy3 + a.y;
-            a.z = ratio * dz3 + a.z;
-        }
-
-        if (b2.y < 0){
-            ratio = -b2.y/ dy;
-            b2.x = -(b2.y / dy) * dx + b2.x;
-            b2.y = 0;
-
-            b.x = ratio * dx3 + b.x;
-            b.y = ratio * dy3 + b.y;
-            b.z = ratio * dz3 + b.z;
-        } else if (b2.y > pcam->height){
-            ratio = -(b2.y - pcam->height) / dy;
-            b2.x = -((b2.y - pcam->height) / dy) * dx + b2.x;
-            b2.y = pcam->height;
-
-            b.x = ratio * dx3 + b.x;
-            b.y = ratio * dy3 + b.y;
-            b.z = ratio * dz3 + b.z;
+        if (b_proj.y < -pcam->height/2){ // B is too far down
+            ratio = (b_proj.y + pcam->height/2) / dy_proj;
+            if (ratio > 0){
+                b.x = b.x - dx * ratio;
+                b.y = b.y - dy * ratio;
+                b.z = b.z - dz * ratio;
+            }
+        } else if (b_proj.y > pcam->height/2){ // B is too far up
+            ratio = (b_proj.y - pcam->height/2) / dy_proj;
+            if (ratio > 0){
+                b.x = b.x - dx * ratio;
+                b.y = b.y - dy * ratio;
+                b.z = b.z - dz * ratio;
+            }
         }
     }
 
-    res.edge3D.a = a;
-    res.edge3D.b = b;
-    res.edge2D.a = a2;
-    res.edge2D.b = b2;
+    Edge3D res = {a, b};
     return res;
 }
 
@@ -334,7 +348,8 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
             // Add only the visible edges
             if (pculled_tri->triangles[i].visible[j]) {
                 // Clip the line if it goes behind the camera
-                curr_clipped_edge = clip_behind(edges[j], pcam);
+                curr_clipped_edge = clip_frustum(edges[j], pcam);
+
                 if (curr_clipped_edge.a.x == 0 &&
                     curr_clipped_edge.a.y == 0 &&
                     curr_clipped_edge.a.z == 0 &&
@@ -345,9 +360,6 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
 
                 // Project
                 curr_proj_edge = project_edge(curr_clipped_edge, pcam);
-                // Clip the line if it goes beyond the screen edges
-                curr_proj_edge = clip_around(curr_proj_edge, pcam);
-                // Add the line to the buffer
                 pbuffer->edges[n] = curr_proj_edge;
                 n += 1;
             }
