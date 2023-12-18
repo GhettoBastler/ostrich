@@ -8,12 +8,15 @@
 #include "transforms.h"
 #include "vect.h"
 
-Camera make_camera(float x, float y, float z, float rx, float ry, float rz, float focal_length){
+Camera make_camera(float width, float height, float focal_length){
     Camera cam;
     cam.focal_length = focal_length;
+    cam.width = width;
+    cam.height = height;
 
     for (int i = 0; i < 16; i++)
         cam.transform_mat[i] = 0;
+
     cam.transform_mat[0] = cam.transform_mat[5]
                          = cam.transform_mat[10]
                          = cam.transform_mat[15] = 1;
@@ -22,17 +25,17 @@ Camera make_camera(float x, float y, float z, float rx, float ry, float rz, floa
 }
 
 // 2D projection
-Point2D project_point(Point3D point, float focal_length){
-    float x = (point.x * (focal_length / (point.z))) + (WIDTH / 2);
-    float y = (point.y * (focal_length / (point.z))) + (HEIGHT / 2);
+Point2D project_point(Point3D point, Camera* pcam){
+    float x = (point.x * (pcam->focal_length / (point.z))) + (pcam->width / 2);
+    float y = (point.y * (pcam->focal_length / (point.z))) + (pcam->height / 2);
     Point2D res = {x, y};
     return res;
 }
 
-ProjectedEdge project_edge(Edge3D edge, float focal_length){
+ProjectedEdge project_edge(Edge3D edge, Camera* pcam){
     ProjectedEdge res;
-    Point2D a = project_point(edge.a, focal_length);
-    Point2D b = project_point(edge.b, focal_length);
+    Point2D a = project_point(edge.a, pcam);
+    Point2D b = project_point(edge.b, pcam);
     res.edge3D = edge;
     res.edge2D.a = a;
     res.edge2D.b = b;
@@ -207,7 +210,7 @@ Edge3D clip_behind(Edge3D edge){
     return res;
 }
 
-ProjectedEdge clip_around(ProjectedEdge edge){
+ProjectedEdge clip_around(ProjectedEdge edge, Camera* pcam){
     // Clip edges that go beyond the screen limit, both in screen and object space
     ProjectedEdge res;
 
@@ -234,10 +237,10 @@ ProjectedEdge clip_around(ProjectedEdge edge){
             a.x = ratio * dx3 + a.x;
             a.y = ratio * dy3 + a.y;
             a.z = ratio * dz3 + a.z;
-        } else if (a2.x > WIDTH){
-            ratio = -(a2.x - WIDTH)/ dx;
-            a2.y = -((a2.x - WIDTH) / dx) * dy + a2.y;
-            a2.x = WIDTH;
+        } else if (a2.x > pcam->width){
+            ratio = -(a2.x - pcam->width)/ dx;
+            a2.y = -((a2.x - pcam->width) / dx) * dy + a2.y;
+            a2.x = pcam->width;
 
             a.x = ratio * dx3 + a.x;
             a.y = ratio * dy3 + a.y;
@@ -252,10 +255,10 @@ ProjectedEdge clip_around(ProjectedEdge edge){
             b.x = ratio * dx3 + b.x;
             b.y = ratio * dy3 + b.y;
             b.z = ratio * dz3 + b.z;
-        } else if (b2.x > WIDTH){
-            ratio = -(b2.x - WIDTH)/ dx;
-            b2.y = -((b2.x - WIDTH) / dx) * dy + b2.y;
-            b2.x = WIDTH;
+        } else if (b2.x > pcam->width){
+            ratio = -(b2.x - pcam->width)/ dx;
+            b2.y = -((b2.x - pcam->width) / dx) * dy + b2.y;
+            b2.x = pcam->width;
 
             b.x = ratio * dx3 + b.x;
             b.y = ratio * dy3 + b.y;
@@ -272,10 +275,10 @@ ProjectedEdge clip_around(ProjectedEdge edge){
             a.x = ratio * dx3 + a.x;
             a.y = ratio * dy3 + a.y;
             a.z = ratio * dz3 + a.z;
-        } else if (a2.y > HEIGHT){
-            ratio = -(a2.y - HEIGHT) / dy;
-            a2.x = -((a2.y - HEIGHT) / dy) * dx + a2.x;
-            a2.y = HEIGHT;
+        } else if (a2.y > pcam->height){
+            ratio = -(a2.y - pcam->height) / dy;
+            a2.x = -((a2.y - pcam->height) / dy) * dx + a2.x;
+            a2.y = pcam->height;
 
             a.x = ratio * dx3 + a.x;
             a.y = ratio * dy3 + a.y;
@@ -290,10 +293,10 @@ ProjectedEdge clip_around(ProjectedEdge edge){
             b.x = ratio * dx3 + b.x;
             b.y = ratio * dy3 + b.y;
             b.z = ratio * dz3 + b.z;
-        } else if (b2.y > HEIGHT){
-            ratio = -(b2.y - HEIGHT) / dy;
-            b2.x = -((b2.y - HEIGHT) / dy) * dx + b2.x;
-            b2.y = HEIGHT;
+        } else if (b2.y > pcam->height){
+            ratio = -(b2.y - pcam->height) / dy;
+            b2.x = -((b2.y - pcam->height) / dy) * dx + b2.x;
+            b2.y = pcam->height;
 
             b.x = ratio * dx3 + b.x;
             b.y = ratio * dy3 + b.y;
@@ -341,9 +344,9 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
                     continue; // Edge is behind the camera
 
                 // Project
-                curr_proj_edge = project_edge(curr_clipped_edge, pcam->focal_length);
+                curr_proj_edge = project_edge(curr_clipped_edge, pcam);
                 // Clip the line if it goes beyond the screen edges
-                curr_proj_edge = clip_around(curr_proj_edge);
+                curr_proj_edge = clip_around(curr_proj_edge, pcam);
                 // Add the line to the buffer
                 pbuffer->edges[n] = curr_proj_edge;
                 n += 1;
