@@ -8,7 +8,6 @@
 #include "camera.h"
 #include "vect.h"
 
-#define SCALE 40
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
 #define LINE_COLOR_1 0xFFF4115D
@@ -190,7 +189,7 @@ int main(int argc, char **argv){
     TriangleMesh* pculled_tri;
 
     // Initializing camera
-    Camera cam = make_camera(20, 15, 40);
+    Camera cam = make_camera(WIDTH/SCALE, HEIGHT/SCALE, 800/SCALE);
     float orbit_radius = 0;
     bool orbit_pressed = false;
     bool orbit = false;

@@ -5,6 +5,7 @@
 
 #define WIDTH 800
 #define HEIGHT 600
+#define SCALE 40
 
 typedef struct {
     float width, height;
