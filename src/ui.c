@@ -15,7 +15,11 @@ void load_ui(SDL_Renderer* prenderer){
     ptexture_orbit = SDL_CreateTextureFromSurface(prenderer, psurface_orbit);
 };
 
-void draw_ui(SDL_Renderer* prenderer, int window_height, bool orbit_mode){
+void draw_ui(SDL_Renderer* prenderer, int window_height, int window_width, bool orbit_mode){
+    // Background
+    SDL_SetRenderDrawColor(prenderer, 0, 0, 0, 255);
+    SDL_Rect ui_bg_rect = {0, window_height-70, window_width, 70};
+    SDL_RenderFillRect(prenderer, &ui_bg_rect);
     SDL_Rect dst_rect = {10, window_height-60, 50, 50};
     if (orbit_mode)
         SDL_RenderCopy(prenderer, ptexture_orbit, NULL, &dst_rect);

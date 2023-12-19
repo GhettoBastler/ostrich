@@ -30,7 +30,7 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
 
 void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
-    draw_ui(prenderer, HEIGHT, orbit_mode);
+    draw_ui(prenderer, HEIGHT, WIDTH, orbit_mode);
     SDL_RenderPresent(prenderer);
 }
 

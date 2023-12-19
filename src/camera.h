@@ -3,8 +3,8 @@
 
 #include "primitives.h"
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 720
+#define HEIGHT 480
 #define SCALE 80
 
 typedef struct {
