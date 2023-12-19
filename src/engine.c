@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "vect.h"
 #include "draw.h"
+#include "ui.h"
 
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
@@ -27,8 +28,9 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
     SDL_UnlockTexture(ptexture);
 }
 
-void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer){
+void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
+    draw_ui(prenderer, HEIGHT, orbit_mode);
     SDL_RenderPresent(prenderer);
 }
 
@@ -81,6 +83,9 @@ int main(int argc, char **argv){
     Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
     check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
 
+    // UI
+    load_ui(prenderer);
+
 
     // Keyboard
     const Uint8* kbstate = SDL_GetKeyboardState(NULL);
@@ -116,7 +121,7 @@ int main(int argc, char **argv){
     pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
     update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
     free(pculled_tri);
-    draw(ptexture, prenderer);
+    draw(ptexture, prenderer, orbit);
 
     Point3D rotation, translation;
     do_hidden = false;
@@ -229,7 +234,7 @@ int main(int argc, char **argv){
         }
 
         //Drawing
-        draw(ptexture, prenderer);
+        draw(ptexture, prenderer, orbit);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
@@ -242,6 +247,7 @@ int main(int argc, char **argv){
     free(ppixels);
     free(pbuffer);
     free(pscene);
+    //destroy_ui();
 
     SDL_DestroyTexture(ptexture);
     SDL_DestroyRenderer(prenderer);
