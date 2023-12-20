@@ -9,9 +9,13 @@
 #include "vect.h"
 #include "draw.h"
 #include "ui.h"
+#include "engine.h"
 
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
+
+
+static EngineState engine_state = {false, false};
 
 
 void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden, Camera* pcam){
@@ -103,7 +107,7 @@ int main(int argc, char **argv){
     Camera cam = make_camera((float)WIDTH/SCALE, (float)HEIGHT/SCALE, 800/SCALE);
     float orbit_radius = 0;
     bool orbit_pressed = false;
-    bool orbit = false;
+    //bool orbit = false;
     bool shift_pressed = false;
 
     // Creating a buffer for the 2D projection
@@ -126,7 +130,7 @@ int main(int argc, char **argv){
     hidden_removed = false;
     do_hidden = false;
 
-    draw(ptexture, prenderer, orbit, hidden_removed);
+    draw(ptexture, prenderer, engine_state.orbit, hidden_removed);
 
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
@@ -157,22 +161,29 @@ int main(int argc, char **argv){
 
         // Mouse
         mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
-        if (mousestate & SDL_BUTTON(1)){
-            if (shift_pressed){
-                translation.x = (float)(mouse_x - prev_x)/2;
-                translation.y = (float)(mouse_y - prev_y)/2;
-            } else {
-                rotation.y = -(float)(mouse_x - prev_x)/500;
-                rotation.x = (float)(mouse_y - prev_y)/500;
+        // Dirty check to check in which part of the window is the mouse
+        if (mouse_y < HEIGHT - BAR_HEIGHT) {
+            // Top part
+            if (mousestate & SDL_BUTTON(1)){
+                if (shift_pressed){
+                    translation.x = (float)(mouse_x - prev_x)/2;
+                    translation.y = (float)(mouse_y - prev_y)/2;
+                } else {
+                    rotation.y = -(float)(mouse_x - prev_x)/500;
+                    rotation.x = (float)(mouse_y - prev_y)/500;
+                }
+                reproject = true;
+            } else if (mousestate & SDL_BUTTON(3)){
+                rotation.z = (float)(mouse_x - prev_x)/500;
+                reproject = true;
             }
-            reproject = true;
-        } else if (mousestate & SDL_BUTTON(3)){
-            rotation.z = (float)(mouse_x - prev_x)/500;
-            reproject = true;
-        }
 
-        prev_x = mouse_x;
-        prev_y = mouse_y;
+            prev_x = mouse_x;
+            prev_y = mouse_y;
+        } else {
+            // Bottom part
+            process_ui_click(mouse_x, mouse_y, mousestate, &engine_state);
+        }
 
         // Keyboard
 
@@ -205,7 +216,7 @@ int main(int argc, char **argv){
         if (kbstate[SDL_SCANCODE_O]) {
             if (!orbit_pressed){
                 orbit_pressed = true;
-                orbit = !orbit;
+                engine_state.orbit = !engine_state.orbit;
                 printf("Orbit mode toggled\n");
             }
         } else {
@@ -224,21 +235,21 @@ int main(int argc, char **argv){
         //Projecting
         if (do_hidden){
             do_hidden = false;
-            update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
+            update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, false, &cam);
             free(pculled_tri);
             hidden_removed = true;
         } else if (reproject) {
             hidden_removed = false;
-            update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
+            update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
             free(pculled_tri);
         }
 
         //Drawing
-        draw(ptexture, prenderer, orbit, hidden_removed);
+        draw(ptexture, prenderer, engine_state.orbit, hidden_removed);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;

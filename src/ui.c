@@ -1,13 +1,7 @@
-#include <stdlib.h>
-#include "icons.c"
 #include "ui.h"
+#include "icons.c"
 
-#define ICON_WIDTH 50
-#define ICON_HEIGHT 50
-#define BAR_HEIGHT 70
-#define SPACING 30
-#define MARGIN 10
-
+static bool clicked;
 static SDL_Texture* ptexture_icons;
 static SDL_Rect ui_bg_rect;
 static SDL_Rect camera_dst_rect = {MARGIN,
@@ -24,7 +18,18 @@ const SDL_Rect eye_src_rect = {0, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
 const SDL_Rect hlr_on_src_rect = {ICON_WIDTH, 0, ICON_WIDTH, ICON_HEIGHT};
 const SDL_Rect hlr_off_src_rect = {ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
 
+
+bool is_in_rect(int x, int y, SDL_Rect* rect);
+
+
+bool is_in_rect(int x, int y, SDL_Rect* prect){
+    return (x >= prect->x && x <= prect->x + prect->w &&
+            y >= prect->y && y <= prect->y + prect->h);
+}
+
 void init_ui(int win_height, int win_width, SDL_Renderer* prenderer){
+    // Mouse
+    clicked = false;
     // Background
     ui_bg_rect.x = 0;
     ui_bg_rect.y = win_height-BAR_HEIGHT;
@@ -64,4 +69,28 @@ void draw_ui(SDL_Renderer* prenderer, bool orbit_mode, bool hidden_removed){
         SDL_RenderCopy(prenderer, ptexture_icons, &hlr_on_src_rect, &hlr_dst_rect);
     else
         SDL_RenderCopy(prenderer, ptexture_icons, &hlr_off_src_rect, &hlr_dst_rect);
+}
+
+void process_ui_click(int mouse_x, int mouse_y, Uint32 mousestate, EngineState* pstate){
+    if (is_in_rect(mouse_x, mouse_y, &ui_bg_rect)){
+        // Mouse is here!
+        if (mousestate & SDL_BUTTON(1)){
+            // Oh boy, it's a click!
+            // Wait, is the button just being held ?
+            if (!clicked)
+                // Nope, it's a genuine click!
+                // What button is being clicked ?
+                if (is_in_rect(mouse_x, mouse_y, &camera_dst_rect)){
+                    // Toggle the camera
+                    printf("Toggle camera\n");
+                    pstate->orbit = !pstate->orbit;
+                } else if (is_in_rect(mouse_x, mouse_y, &hlr_dst_rect)){
+                    // Toggle HLR
+                    printf("HLR toggled\n");
+                }
+                clicked = true;
+        } else {
+            clicked = false;
+        }
+    }
 }
