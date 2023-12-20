@@ -118,7 +118,15 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, 
 }
 
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
-    TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
+    //TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
+    // 3D transform
+    TriangleMesh* pmesh_transformed = transform_mesh(pcam->transform_mat, ptri_mesh);
+    // Culling
+    TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, pmesh_transformed);
+
+    // Freeing
+    free(pmesh_transformed);
+    
     Edge3D edges[3];
     ProjectedEdge curr_proj_edge;
 
@@ -166,7 +174,19 @@ Triangle transform_triangle(float* matrix, Triangle tri){
     trans_tri.a = trans_a;
     trans_tri.b = trans_b;
     trans_tri.c = trans_c;
-    memcpy(trans_tri.visible, trans_tri.visible, 3);
+    memcpy(trans_tri.visible, tri.visible, 3);
 
     return trans_tri;
+}
+
+TriangleMesh* transform_mesh(float* matrix, TriangleMesh* pmesh){
+    Triangle curr_tri;
+    TriangleMesh* pres = malloc(sizeof(TriangleMesh));
+    pres->size = 0;
+
+    for (int i = 0; i < pmesh->size; i++){
+        curr_tri = transform_triangle(matrix, pmesh->triangles[i]);
+        pres = add_triangle(pres, curr_tri);
+    }
+    return pres;
 }

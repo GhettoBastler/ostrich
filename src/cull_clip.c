@@ -149,16 +149,15 @@ int comp_tri_z(const void* ptri_a, const void* ptri_b){
 
 TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
+    Triangle curr_tri;
     pres->size = 0;
-    Point3D trans_a, trans_b, trans_c;
-    Triangle trans_tri;
-    Edge3D ab, bc, ca;
 
     for (int i = 0; i < ptri->size; i++){
-        trans_tri = transform_triangle(matrix, ptri->triangles[i]);
-
-        if (facing_camera(trans_tri)){
-            pres = add_triangle(pres, trans_tri);
+        curr_tri = ptri->triangles[i];
+        //if (facing_camera(ptri->triangles[i])){
+            //pres = add_triangle(pres, ptri->triangles[i]);
+        if (facing_camera(curr_tri)){
+            pres = add_triangle(pres, curr_tri);
         }
     }
 
