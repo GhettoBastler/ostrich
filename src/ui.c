@@ -5,15 +5,15 @@ static bool clicked;
 static SDL_Texture* ptexture_icons;
 static SDL_Rect ui_bg_rect;
 static SDL_Rect camera_dst_rect = {MARGIN,
-                                   MARGIN,
+                                   (BAR_HEIGHT - ICON_HEIGHT)/2,
                                    ICON_WIDTH,
                                    ICON_HEIGHT};
 static SDL_Rect bfc_dst_rect = {MARGIN + 1*(ICON_WIDTH + SPACING),
-                                MARGIN,
+                                (BAR_HEIGHT - ICON_HEIGHT)/2,
                                 ICON_WIDTH,
                                 ICON_HEIGHT};
 static SDL_Rect hlr_dst_rect = {MARGIN + 2*(ICON_WIDTH + SPACING),
-                                MARGIN,
+                                (BAR_HEIGHT - ICON_HEIGHT)/2,
                                 ICON_WIDTH,
                                 ICON_HEIGHT};
 
