@@ -30,7 +30,7 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
 
 void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
-    draw_ui(prenderer, HEIGHT, WIDTH, orbit_mode);
+    draw_ui(prenderer, orbit_mode);
     SDL_RenderPresent(prenderer);
 }
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv){
     check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
 
     // UI
-    load_ui(prenderer);
+    init_ui(HEIGHT, WIDTH, prenderer);
 
 
     // Keyboard

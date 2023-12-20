@@ -1,33 +1,49 @@
 #include <stdlib.h>
-#include "eye.c"
-#include "orbit.c"
+#include "icons.c"
 #include "ui.h"
 
-static SDL_Surface* psurface_eye;
-static SDL_Texture* ptexture_eye;
-static SDL_Surface* psurface_orbit;
-static SDL_Texture* ptexture_orbit;
+static SDL_Texture* ptexture_icons;
+static SDL_Rect ui_bg_rect;
+static SDL_Rect camera_dst_rect;
+const SDL_Rect orbit_src_rect = {0, 0, 50, 50};
+const SDL_Rect eye_src_rect = {0, 50, 50, 50};
 
-void load_ui(SDL_Renderer* prenderer){
-    psurface_eye = SDL_CreateRGBSurfaceFrom((void*)eye_icon.pixel_data, eye_icon.width, eye_icon.height, eye_icon.bytes_per_pixel * 8, eye_icon.bytes_per_pixel * eye_icon.width, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
-    psurface_orbit = SDL_CreateRGBSurfaceFrom((void*)orbit_icon.pixel_data, orbit_icon.width, orbit_icon.height, orbit_icon.bytes_per_pixel * 8, orbit_icon.bytes_per_pixel * orbit_icon.width, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
-    ptexture_eye = SDL_CreateTextureFromSurface(prenderer, psurface_eye);
-    ptexture_orbit = SDL_CreateTextureFromSurface(prenderer, psurface_orbit);
+void init_ui(int win_height, int win_width, SDL_Renderer* prenderer){
+    // Background
+    ui_bg_rect.x = 0;
+    ui_bg_rect.y = win_height-70;
+    ui_bg_rect.w = win_width;
+    ui_bg_rect.h = 70;
+
+    // Icons
+    // Load sheet
+    SDL_Surface* psurface_icons = SDL_CreateRGBSurfaceFrom((void*)icons.pixel_data,
+            icons.width,
+            icons.height,
+            icons.bytes_per_pixel * 8,
+            icons.bytes_per_pixel * icons.width,
+            0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+    ptexture_icons = SDL_CreateTextureFromSurface(prenderer, psurface_icons);
+    free(psurface_icons);
+
+    // Set render positions
+    camera_dst_rect.x = ui_bg_rect.x + 10;
+    camera_dst_rect.y = ui_bg_rect.y + 10;
+    camera_dst_rect.w = 50;
+    camera_dst_rect.h = 50;
 };
 
-void draw_ui(SDL_Renderer* prenderer, int window_height, int window_width, bool orbit_mode){
+void draw_ui(SDL_Renderer* prenderer, bool orbit_mode){
     // Background
     SDL_SetRenderDrawColor(prenderer, 0, 0, 0, 255);
-    SDL_Rect ui_bg_rect = {0, window_height-70, window_width, 70};
     SDL_RenderFillRect(prenderer, &ui_bg_rect);
-    SDL_Rect dst_rect = {10, window_height-60, 50, 50};
     if (orbit_mode)
-        SDL_RenderCopy(prenderer, ptexture_orbit, NULL, &dst_rect);
+        SDL_RenderCopy(prenderer, ptexture_icons, &orbit_src_rect, &camera_dst_rect);
     else
-        SDL_RenderCopy(prenderer, ptexture_eye, NULL, &dst_rect);
+        SDL_RenderCopy(prenderer, ptexture_icons, &eye_src_rect, &camera_dst_rect);
 }
 
 void destroy_ui(){
-    free(ptexture_eye);
-    free(psurface_eye);
+    //free(ptexture_eye);
+    //free(psurface_eye);
 }

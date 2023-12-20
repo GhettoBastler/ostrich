@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
-void load_ui(SDL_Renderer* prenderer);
-void draw_ui(SDL_Renderer* prenderer, int win_height, int win_width, bool orbit_mode);
+void init_ui(int win_height, int win_width, SDL_Renderer* prenderer);
+void draw_ui(SDL_Renderer* prenderer, bool orbit_mode);
 void destroy_ui();
 
 #endif
