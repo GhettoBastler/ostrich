@@ -8,6 +8,8 @@ I'm trying things out as I go without a clear goal in mind. Right now it renders
 
 You can read the full log on [my website](https://ghettobastler.com/december_adventure_2023.html).
 
+*Credit for the 3D model : [Low poly Chocobo](https://www.thingiverse.com/thing:2216365) by Kijai*
+
 ## Features
 
 - STL file import
