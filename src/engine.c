@@ -32,9 +32,9 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
     SDL_UnlockTexture(ptexture);
 }
 
-void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode, bool hidden_removed){
+void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, EngineState engine_state){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
-    draw_ui(prenderer, engine_state.orbit, engine_state.hlr);
+    draw_ui(prenderer, engine_state);
     SDL_RenderPresent(prenderer);
 }
 
@@ -118,7 +118,7 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
-    bool reproject, do_hidden, captured, hidden_removed;
+    bool reproject, captured;
     bool is_stopped = false;
     int prev_x, prev_y;
 
@@ -130,7 +130,7 @@ int main(int argc, char **argv){
     engine_state.hlr = false;
     engine_state.do_hlr = false;
 
-    draw(ptexture, prenderer, engine_state.orbit, engine_state.hlr);
+    draw(ptexture, prenderer, engine_state);
 
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
@@ -250,7 +250,7 @@ int main(int argc, char **argv){
         }
 
         //Drawing
-        draw(ptexture, prenderer, engine_state.orbit, engine_state.hlr);
+        draw(ptexture, prenderer, engine_state);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;

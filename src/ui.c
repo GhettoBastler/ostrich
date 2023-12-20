@@ -55,17 +55,17 @@ void init_ui(int win_height, int win_width, SDL_Renderer* prenderer){
     hlr_dst_rect.y += ui_bg_rect.y;
 };
 
-void draw_ui(SDL_Renderer* prenderer, bool orbit_mode, bool hidden_removed){
+void draw_ui(SDL_Renderer* prenderer, EngineState state){
     // Background
     SDL_SetRenderDrawColor(prenderer, 0, 0, 0, 255);
     SDL_RenderFillRect(prenderer, &ui_bg_rect);
     // Camera
-    if (orbit_mode)
+    if (state.orbit)
         SDL_RenderCopy(prenderer, ptexture_icons, &orbit_src_rect, &camera_dst_rect);
     else
         SDL_RenderCopy(prenderer, ptexture_icons, &eye_src_rect, &camera_dst_rect);
     // HLR
-    if (hidden_removed)
+    if (state.hlr)
         SDL_RenderCopy(prenderer, ptexture_icons, &hlr_on_src_rect, &hlr_dst_rect);
     else
         SDL_RenderCopy(prenderer, ptexture_icons, &hlr_off_src_rect, &hlr_dst_rect);
