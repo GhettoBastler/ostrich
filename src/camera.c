@@ -117,15 +117,17 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, 
     multiply_matrix(mat, new_mat);
 }
 
-TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam){
-    //TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, ptri_mesh);
+TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam, bool do_cull){
     // 3D transform
     TriangleMesh* pmesh_transformed = transform_mesh(pcam->transform_mat, ptri_mesh);
     // Culling
-    TriangleMesh* pculled_tri = bface_cull(pcam->transform_mat, pmesh_transformed);
-
-    // Freeing
-    free(pmesh_transformed);
+    TriangleMesh* pculled_tri;
+    if (do_cull){
+        pculled_tri = bface_cull(pcam->transform_mat, pmesh_transformed);
+        free(pmesh_transformed);
+    } else {
+        pculled_tri = pmesh_transformed;
+    }
     
     Edge3D edges[3];
     ProjectedEdge curr_proj_edge;

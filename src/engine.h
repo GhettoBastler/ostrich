@@ -6,7 +6,8 @@
 typedef struct {
     bool orbit,
          hlr,
-         do_hlr;
+         do_hlr,
+         bface_cull;
 } EngineState;
 
 #endif

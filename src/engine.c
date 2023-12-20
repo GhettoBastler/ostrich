@@ -15,7 +15,7 @@
 #define EXPORT_PATH "export.bmp"
 
 
-static EngineState engine_state = {false, false, false};
+static EngineState engine_state = {false, false, false, true};
 
 
 void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden, Camera* pcam){
@@ -107,6 +107,7 @@ int main(int argc, char **argv){
     Camera cam = make_camera((float)WIDTH/SCALE, (float)HEIGHT/SCALE, 800/SCALE);
     float orbit_radius = 0;
     bool orbit_pressed = false;
+    bool b_key_pressed = false;
     //bool orbit = false;
     bool shift_pressed = false;
 
@@ -122,7 +123,7 @@ int main(int argc, char **argv){
     bool is_stopped = false;
     int prev_x, prev_y;
 
-    pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
+    pculled_tri = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
     update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
     free(pculled_tri);
 
@@ -211,10 +212,6 @@ int main(int argc, char **argv){
             translation.y = -1;
             reproject = true;
         }
-        if (kbstate[SDL_SCANCODE_R]) {
-            engine_state.do_hlr = true;
-            reproject = true;
-        }
         if (kbstate[SDL_SCANCODE_O]) {
             if (!orbit_pressed){
                 orbit_pressed = true;
@@ -224,6 +221,25 @@ int main(int argc, char **argv){
         } else {
             orbit_pressed = false;
         }
+
+        if (kbstate[SDL_SCANCODE_B]) {
+            if (!b_key_pressed){
+                b_key_pressed = true;
+                engine_state.bface_cull = !engine_state.bface_cull;
+                printf("Back-face culling toggled\n");
+                reproject = true;
+            }
+        } else {
+            b_key_pressed = false;
+        }
+
+        if (kbstate[SDL_SCANCODE_R]) {
+            // Activate back-face culling
+            engine_state.bface_cull = true;
+            engine_state.do_hlr = true;
+            reproject = true;
+        }
+
         if (kbstate[SDL_SCANCODE_SPACE]) {
             if (!captured){
                 export(prenderer);
@@ -237,7 +253,7 @@ int main(int argc, char **argv){
         //Projecting
         if (reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
-            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
+            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, !engine_state.do_hlr, &cam);
             free(pculled_tri);
             if (engine_state.do_hlr){
