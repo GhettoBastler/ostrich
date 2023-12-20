@@ -28,9 +28,9 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
     SDL_UnlockTexture(ptexture);
 }
 
-void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode){
+void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode, bool hidden_removed){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
-    draw_ui(prenderer, orbit_mode);
+    draw_ui(prenderer, orbit_mode, hidden_removed);
     SDL_RenderPresent(prenderer);
 }
 
@@ -114,17 +114,19 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
-    bool reproject, do_hidden, captured;
+    bool reproject, do_hidden, captured, hidden_removed;
     bool is_stopped = false;
     int prev_x, prev_y;
 
     pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
     update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
     free(pculled_tri);
-    draw(ptexture, prenderer, orbit);
 
     Point3D rotation, translation;
+    hidden_removed = false;
     do_hidden = false;
+
+    draw(ptexture, prenderer, orbit, hidden_removed);
 
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
@@ -226,7 +228,9 @@ int main(int argc, char **argv){
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, false, &cam);
             free(pculled_tri);
+            hidden_removed = true;
         } else if (reproject) {
+            hidden_removed = false;
             update_transform_matrix(cam.transform_mat, rotation, translation, orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
@@ -234,7 +238,7 @@ int main(int argc, char **argv){
         }
 
         //Drawing
-        draw(ptexture, prenderer, orbit);
+        draw(ptexture, prenderer, orbit, hidden_removed);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
