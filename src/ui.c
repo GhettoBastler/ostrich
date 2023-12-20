@@ -81,12 +81,13 @@ void process_ui_click(int mouse_x, int mouse_y, Uint32 mousestate, EngineState* 
                 // Nope, it's a genuine click!
                 // What button is being clicked ?
                 if (is_in_rect(mouse_x, mouse_y, &camera_dst_rect)){
-                    // Toggle the camera
-                    printf("Toggle camera\n");
+                    // Toggle orbit
+                    printf("Orbit toggled\n");
                     pstate->orbit = !pstate->orbit;
                 } else if (is_in_rect(mouse_x, mouse_y, &hlr_dst_rect)){
-                    // Toggle HLR
-                    printf("HLR toggled\n");
+                    // Trigger HLR
+                    printf("HLR triggered\n");
+                    pstate->do_hlr = true;
                 }
                 clicked = true;
         } else {

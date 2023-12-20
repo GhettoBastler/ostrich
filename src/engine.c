@@ -15,7 +15,7 @@
 #define EXPORT_PATH "export.bmp"
 
 
-static EngineState engine_state = {false, false};
+static EngineState engine_state = {false, false, false};
 
 
 void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden, Camera* pcam){
@@ -34,7 +34,7 @@ void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture
 
 void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, bool orbit_mode, bool hidden_removed){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
-    draw_ui(prenderer, orbit_mode, hidden_removed);
+    draw_ui(prenderer, engine_state.orbit, engine_state.hlr);
     SDL_RenderPresent(prenderer);
 }
 
@@ -127,10 +127,10 @@ int main(int argc, char **argv){
     free(pculled_tri);
 
     Point3D rotation, translation;
-    hidden_removed = false;
-    do_hidden = false;
+    engine_state.hlr = false;
+    engine_state.do_hlr = false;
 
-    draw(ptexture, prenderer, engine_state.orbit, hidden_removed);
+    draw(ptexture, prenderer, engine_state.orbit, engine_state.hlr);
 
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
@@ -183,6 +183,7 @@ int main(int argc, char **argv){
         } else {
             // Bottom part
             process_ui_click(mouse_x, mouse_y, mousestate, &engine_state);
+            if (engine_state.do_hlr) reproject = true;
         }
 
         // Keyboard
@@ -211,7 +212,8 @@ int main(int argc, char **argv){
             reproject = true;
         }
         if (kbstate[SDL_SCANCODE_R]) {
-            do_hidden = true;
+            engine_state.do_hlr = true;
+            reproject = true;
         }
         if (kbstate[SDL_SCANCODE_O]) {
             if (!orbit_pressed){
@@ -233,23 +235,22 @@ int main(int argc, char **argv){
         shift_pressed = kbstate[SDL_SCANCODE_LSHIFT];
 
         //Projecting
-        if (do_hidden){
-            do_hidden = false;
+        if (reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri, false, &cam);
+            update_texture(ppixels, pbuffer, ptexture, pculled_tri, !engine_state.do_hlr, &cam);
             free(pculled_tri);
-            hidden_removed = true;
-        } else if (reproject) {
-            hidden_removed = false;
-            update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
-            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
-            free(pculled_tri);
+            if (engine_state.do_hlr){
+                engine_state.hlr = true;
+                engine_state.do_hlr = false;
+            } else {
+                engine_state.hlr = false;
+            }
+            reproject = false;
         }
 
         //Drawing
-        draw(ptexture, prenderer, engine_state.orbit, hidden_removed);
+        draw(ptexture, prenderer, engine_state.orbit, engine_state.hlr);
 
         //FPS caping
         delta = SDL_GetTicks() - time_start;
