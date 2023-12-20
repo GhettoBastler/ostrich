@@ -65,8 +65,3 @@ void draw_ui(SDL_Renderer* prenderer, bool orbit_mode, bool hidden_removed){
     else
         SDL_RenderCopy(prenderer, ptexture_icons, &hlr_off_src_rect, &hlr_dst_rect);
 }
-
-void destroy_ui(){
-    //free(ptexture_eye);
-    //free(psurface_eye);
-}
