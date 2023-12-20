@@ -154,3 +154,19 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
     pbuffer->size = n;
     return pculled_tri;
 }
+
+Triangle transform_triangle(float* matrix, Triangle tri){
+    Point3D trans_a, trans_b, trans_c;
+    Triangle trans_tri;
+
+    trans_a = transform_point(matrix, tri.a);
+    trans_b = transform_point(matrix, tri.b);
+    trans_c = transform_point(matrix, tri.c);
+
+    trans_tri.a = trans_a;
+    trans_tri.b = trans_b;
+    trans_tri.c = trans_c;
+    memcpy(trans_tri.visible, trans_tri.visible, 3);
+
+    return trans_tri;
+}

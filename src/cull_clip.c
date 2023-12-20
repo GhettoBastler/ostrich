@@ -155,14 +155,7 @@ TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
     Edge3D ab, bc, ca;
 
     for (int i = 0; i < ptri->size; i++){
-        trans_a = transform_point(matrix, ptri->triangles[i].a);
-        trans_b = transform_point(matrix, ptri->triangles[i].b);
-        trans_c = transform_point(matrix, ptri->triangles[i].c);
-
-        trans_tri.a = trans_a;
-        trans_tri.b = trans_b;
-        trans_tri.c = trans_c;
-        memcpy(trans_tri.visible, ptri->triangles[i].visible, 3);
+        trans_tri = transform_triangle(matrix, ptri->triangles[i]);
 
         if (facing_camera(trans_tri)){
             pres = add_triangle(pres, trans_tri);
