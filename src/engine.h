@@ -4,7 +4,8 @@
 #include <stdbool.h>
 
 typedef struct {
-    bool orbit,
+    bool reproject,
+         orbit,
          hlr,
          do_hlr,
          bface_cull;

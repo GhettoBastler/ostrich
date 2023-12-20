@@ -8,15 +8,21 @@ static SDL_Rect camera_dst_rect = {MARGIN,
                                    MARGIN,
                                    ICON_WIDTH,
                                    ICON_HEIGHT};
-static SDL_Rect hlr_dst_rect = {MARGIN + ICON_WIDTH + SPACING,
+static SDL_Rect bfc_dst_rect = {MARGIN + 1*(ICON_WIDTH + SPACING),
+                                MARGIN,
+                                ICON_WIDTH,
+                                ICON_HEIGHT};
+static SDL_Rect hlr_dst_rect = {MARGIN + 2*(ICON_WIDTH + SPACING),
                                 MARGIN,
                                 ICON_WIDTH,
                                 ICON_HEIGHT};
 
 const SDL_Rect orbit_src_rect = {0, 0, ICON_WIDTH, ICON_HEIGHT};
 const SDL_Rect eye_src_rect = {0, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
-const SDL_Rect hlr_on_src_rect = {ICON_WIDTH, 0, ICON_WIDTH, ICON_HEIGHT};
-const SDL_Rect hlr_off_src_rect = {ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
+const SDL_Rect bfc_on_src_rect = {1*ICON_WIDTH, 0, ICON_WIDTH, ICON_HEIGHT};
+const SDL_Rect bfc_off_src_rect = {1*ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
+const SDL_Rect hlr_on_src_rect = {2*ICON_WIDTH, 0, ICON_WIDTH, ICON_HEIGHT};
+const SDL_Rect hlr_off_src_rect = {2*ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
 
 
 bool is_in_rect(int x, int y, SDL_Rect* rect);
@@ -51,6 +57,9 @@ void init_ui(int win_height, int win_width, SDL_Renderer* prenderer){
     camera_dst_rect.x += ui_bg_rect.x;
     camera_dst_rect.y += ui_bg_rect.y;
 
+    bfc_dst_rect.x += ui_bg_rect.x;
+    bfc_dst_rect.y += ui_bg_rect.y;
+
     hlr_dst_rect.x += ui_bg_rect.x;
     hlr_dst_rect.y += ui_bg_rect.y;
 };
@@ -64,6 +73,11 @@ void draw_ui(SDL_Renderer* prenderer, EngineState state){
         SDL_RenderCopy(prenderer, ptexture_icons, &orbit_src_rect, &camera_dst_rect);
     else
         SDL_RenderCopy(prenderer, ptexture_icons, &eye_src_rect, &camera_dst_rect);
+    // BFC
+    if (state.bface_cull)
+        SDL_RenderCopy(prenderer, ptexture_icons, &bfc_on_src_rect, &bfc_dst_rect);
+    else
+        SDL_RenderCopy(prenderer, ptexture_icons, &bfc_off_src_rect, &bfc_dst_rect);
     // HLR
     if (state.hlr)
         SDL_RenderCopy(prenderer, ptexture_icons, &hlr_on_src_rect, &hlr_dst_rect);
@@ -84,10 +98,17 @@ void process_ui_click(int mouse_x, int mouse_y, Uint32 mousestate, EngineState* 
                     // Toggle orbit
                     printf("Orbit toggled\n");
                     pstate->orbit = !pstate->orbit;
+                } else if (is_in_rect(mouse_x, mouse_y, &bfc_dst_rect)){
+                    // Toggle back-face culling
+                    printf("Back-face culling toggled\n");
+                    pstate->bface_cull = !pstate->bface_cull;
+                    pstate->reproject = true;
                 } else if (is_in_rect(mouse_x, mouse_y, &hlr_dst_rect)){
                     // Trigger HLR
                     printf("HLR triggered\n");
+                    pstate->bface_cull = true;
                     pstate->do_hlr = true;
+                    pstate->reproject = true;
                 }
                 clicked = true;
         } else {

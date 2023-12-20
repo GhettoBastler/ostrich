@@ -15,7 +15,7 @@
 #define EXPORT_PATH "export.bmp"
 
 
-static EngineState engine_state = {false, false, false, true};
+static EngineState engine_state = {false, false, false, false, true};
 
 
 void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden, Camera* pcam){
@@ -119,7 +119,7 @@ int main(int argc, char **argv){
     Uint32 time_start, delta;
     SDL_Event event;
 
-    bool reproject, captured;
+    bool captured;
     bool is_stopped = false;
     int prev_x, prev_y;
 
@@ -136,7 +136,7 @@ int main(int argc, char **argv){
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
         rotation.x = rotation.y = rotation.z = 0;
-        reproject = false;
+        engine_state.reproject = false;
         time_start = SDL_GetTicks();
         
         //Processing inputs
@@ -154,7 +154,7 @@ int main(int argc, char **argv){
                         if (cam.focal_length <= 0)
                             cam.focal_length = 0.001;
                     }
-                    reproject = true;
+                    engine_state.reproject = true;
                     break;
             }
 
@@ -173,10 +173,10 @@ int main(int argc, char **argv){
                     rotation.y = -(float)(mouse_x - prev_x)/500;
                     rotation.x = (float)(mouse_y - prev_y)/500;
                 }
-                reproject = true;
+                engine_state.reproject = true;
             } else if (mousestate & SDL_BUTTON(3)){
                 rotation.z = (float)(mouse_x - prev_x)/500;
-                reproject = true;
+                engine_state.reproject = true;
             }
 
             prev_x = mouse_x;
@@ -184,7 +184,7 @@ int main(int argc, char **argv){
         } else {
             // Bottom part
             process_ui_click(mouse_x, mouse_y, mousestate, &engine_state);
-            if (engine_state.do_hlr) reproject = true;
+            //if (engine_state.do_hlr) engine_state.reproject = true;
         }
 
         // Keyboard
@@ -192,25 +192,25 @@ int main(int argc, char **argv){
         if (kbstate[SDL_SCANCODE_W]) {
             translation.z = -1;
             orbit_radius += -1;
-            reproject = true;
+            engine_state.reproject = true;
         } else if (kbstate[SDL_SCANCODE_S]) {
             translation.z = 1;
             orbit_radius += 1;
-            reproject = true;
+            engine_state.reproject = true;
         }
         if (kbstate[SDL_SCANCODE_A]) {
             translation.x = 1;
-            reproject = true;
+            engine_state.reproject = true;
         } else if (kbstate[SDL_SCANCODE_D]) {
             translation.x = -1;
-            reproject = true;
+            engine_state.reproject = true;
         }
         if (kbstate[SDL_SCANCODE_Q]) {
             translation.y = 1;
-            reproject = true;
+            engine_state.reproject = true;
         } else if (kbstate[SDL_SCANCODE_E]) {
             translation.y = -1;
-            reproject = true;
+            engine_state.reproject = true;
         }
         if (kbstate[SDL_SCANCODE_O]) {
             if (!orbit_pressed){
@@ -226,8 +226,7 @@ int main(int argc, char **argv){
             if (!b_key_pressed){
                 b_key_pressed = true;
                 engine_state.bface_cull = !engine_state.bface_cull;
-                printf("Back-face culling toggled\n");
-                reproject = true;
+                engine_state.reproject = true;
             }
         } else {
             b_key_pressed = false;
@@ -237,7 +236,7 @@ int main(int argc, char **argv){
             // Activate back-face culling
             engine_state.bface_cull = true;
             engine_state.do_hlr = true;
-            reproject = true;
+            engine_state.reproject = true;
         }
 
         if (kbstate[SDL_SCANCODE_SPACE]) {
@@ -251,7 +250,7 @@ int main(int argc, char **argv){
         shift_pressed = kbstate[SDL_SCANCODE_LSHIFT];
 
         //Projecting
-        if (reproject){
+        if (engine_state.reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
             pculled_tri = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
             update_texture(ppixels, pbuffer, ptexture, pculled_tri, !engine_state.do_hlr, &cam);
@@ -262,7 +261,7 @@ int main(int argc, char **argv){
             } else {
                 engine_state.hlr = false;
             }
-            reproject = false;
+            engine_state.reproject = false;
         }
 
         //Drawing
