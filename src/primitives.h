@@ -13,6 +13,18 @@ typedef struct {
     Point2D a, b;
 } Edge2D;
 
+// Polygons
+typedef struct _pv{
+    Point2D coordinates;
+    struct _pv* prev;
+    struct _pv* next;
+} PolygonVertex;
+
+typedef struct {
+    int size;
+    PolygonVertex* head;
+} Polygon;
+
 // 3D
 typedef struct {
    float x, y, z; 
@@ -46,6 +58,11 @@ typedef struct {
     ProjectedEdge edges[];
 } ProjectedMesh;
 
+
+// FUNCTIONS
 TriangleMesh* tri_cube(float size);
+Polygon* new_polygon(Point2D* vertices, int size);
+void free_polygon(Polygon* ppoly);
+void triangulate(Polygon* ppoly);
 
 #endif
