@@ -290,11 +290,13 @@ void triangulate(Polygon* ppoly){
                     // Last item, don't join
                     break;
                 } else {
-                    printf("Will draw a diagonal from x:%.2f y:%.2f to x:%.2f y:%.2f\n",
-                            chain[i].vertex->coordinates.x,
-                            chain[i].vertex->coordinates.y,
-                            curr_vertex.vertex->coordinates.x,
-                            curr_vertex.vertex->coordinates.y);
+                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
+                           chain[i].vertex->coordinates.x,
+                           chain[i].vertex->coordinates.y,
+                           curr_vertex.vertex->coordinates.x,
+                           curr_vertex.vertex->coordinates.y,
+                           peek().vertex->coordinates.x,
+                           peek().vertex->coordinates.y);
                 }
             }
             // Push the last two vertices
@@ -316,29 +318,24 @@ void triangulate(Polygon* ppoly){
                 Point3D cross = cross_product(v1, v2);
                 if (curr_vertex.chain == 1 && cross.z < 0){
                     // Left chain, can join
-                    printf("Will draw a diagonal from x:%.2f y:%.2f to x:%.2f y:%.2f\n",
-                            chain[i].vertex->coordinates.x,
-                            chain[i].vertex->coordinates.y,
-                            curr_vertex.vertex->coordinates.x,
-                            curr_vertex.vertex->coordinates.y);
+                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
+                           chain[i].vertex->coordinates.x,
+                           chain[i].vertex->coordinates.y,
+                           curr_vertex.vertex->coordinates.x,
+                           curr_vertex.vertex->coordinates.y,
+                           prev_vertex.vertex->coordinates.x,
+                           prev_vertex.vertex->coordinates.y);
                 } else if (curr_vertex.chain == 2 && cross.z > 0){
                     // Right chain, can join
-                    printf("Will draw a diagonal from x:%.2f y:%.2f to x:%.2f y:%.2f\n",
-                            chain[i].vertex->coordinates.x,
-                            chain[i].vertex->coordinates.y,
-                            curr_vertex.vertex->coordinates.x,
-                            curr_vertex.vertex->coordinates.y);
+                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
+                           chain[i].vertex->coordinates.x,
+                           chain[i].vertex->coordinates.y,
+                           curr_vertex.vertex->coordinates.x,
+                           curr_vertex.vertex->coordinates.y,
+                           prev_vertex.vertex->coordinates.x,
+                           prev_vertex.vertex->coordinates.y);
                 } else {
                     // Can't join
-                    // printf("Can't join x:%.2f y:%.2f to x:%.2f y:%.2f:\n\tv1: %.2f %.2f v2: %.2f %.2f, chain is %d and cross is %.2f\n",
-                    //         chain[i].vertex->coordinates.x,
-                    //         chain[i].vertex->coordinates.y,
-                    //         curr_vertex.vertex->coordinates.x,
-                    //         curr_vertex.vertex->coordinates.y,
-                    //         v1.x, v1.y,
-                    //         v2.x, v2.y,
-                    //         curr_vertex.chain,
-                    //         cross.z);
                     // Put it back
                     push(curr_vertex);
                     curr_vertex = prev_vertex;
@@ -351,19 +348,28 @@ void triangulate(Polygon* ppoly){
     }
     // Add diagonals from un to all stack vertices except the ﬁrst and the last one
     if (!stack_empty()){
-        pop();
+        // pop();
+        prev_vertex = pop();
         if (!stack_empty()){
-            while(1){
-                curr_vertex = pop();
+            while(!stack_empty()){
                 if (stack_empty())
                 // Last one
                     break;
                 else {
-                    printf("Will draw a diagonal from x:%.2f y:%.2f to x:%.2f y:%.2f\n",
-                            chain[ppoly->size - 1].vertex->coordinates.x,
-                            chain[ppoly->size - 1].vertex->coordinates.y,
-                            curr_vertex.vertex->coordinates.x,
-                            curr_vertex.vertex->coordinates.y);
+                    curr_vertex = pop();
+                    // printf("Will draw a diagonal from x:%.2f y:%.2f to x:%.2f y:%.2f\n",
+                    //         chain[ppoly->size - 1].vertex->coordinates.x,
+                    //         chain[ppoly->size - 1].vertex->coordinates.y,
+                    //         curr_vertex.vertex->coordinates.x,
+                    //         curr_vertex.vertex->coordinates.y);
+                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
+                           chain[ppoly->size - 1].vertex->coordinates.x,
+                           chain[ppoly->size - 1].vertex->coordinates.y,
+                           curr_vertex.vertex->coordinates.x,
+                           curr_vertex.vertex->coordinates.y,
+                           prev_vertex.vertex->coordinates.x,
+                           prev_vertex.vertex->coordinates.y);
+                    prev_vertex = curr_vertex;
                 }
 
             }
