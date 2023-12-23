@@ -106,6 +106,7 @@ Polygon* new_polygon(Point2D* vertices, int size){
     phead->prev = phead;
     phead->next = phead;
     phead->coordinates = vertices[0];
+    phead->index = 0;
 
     PolygonVertex* ptail = phead;
 
@@ -115,6 +116,7 @@ Polygon* new_polygon(Point2D* vertices, int size){
             fprintf(stderr, "Couldn\'t allocate memory for the new vertex\n");
             exit(1);
         };
+        pcurr->index = i;
         pcurr->coordinates = vertices[i];
         pcurr->prev = ptail;
         pcurr->next = phead;
@@ -278,6 +280,41 @@ void triangulate(Polygon* ppoly){
 
     struct MergedChain curr_vertex, prev_vertex;
 
+    void make_triangle(PolygonVertex* p1, PolygonVertex* p2, PolygonVertex* p3, int poly_size){
+        // Fix triangle order
+        int p1_p2_dist = (p2->index - p1->index) % poly_size;
+        int p2_p3_dist = (p3->index - p2->index) % poly_size;
+        int p3_p1_dist = (p1->index - p3->index) % poly_size;
+
+        PolygonVertex* tmp;
+        if (p1_p2_dist == -1){
+            tmp = p2;
+            p2 = p1;
+            p1 = tmp;
+        } else if (p2_p3_dist == -1){
+            tmp = p3;
+            p3 = p2;
+            p2 = tmp;
+        } else if (p3_p1_dist == -1){
+            tmp = p1;
+            p1 = p3;
+            p3 = tmp;
+        }
+
+        // Check visibility
+        int visible[3] = {0, 0, 0};
+        if (abs(p1_p2_dist) == 1)
+            visible[0] = 1;
+        if (abs(p2_p3_dist) == 1)
+            visible[1] = 1;
+        if (abs(p3_p1_dist) == 1)
+            visible[2] = 1;
+
+        printf("%d %d %d (%d %d %d)\n",
+                p1->index, p2->index, p3->index,
+                visible[0], visible[1], visible[2]);
+    }
+
     // Next, go through all the remaining nodes from the merged chain
     for (i = 2; i < ppoly->size - 1; i++){
         // Are the current node and the one on top of the stack on the same chain ?
@@ -290,13 +327,15 @@ void triangulate(Polygon* ppoly){
                     // Last item, don't join
                     break;
                 } else {
-                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
-                           chain[i].vertex->coordinates.x,
-                           chain[i].vertex->coordinates.y,
-                           curr_vertex.vertex->coordinates.x,
-                           curr_vertex.vertex->coordinates.y,
-                           peek().vertex->coordinates.x,
-                           peek().vertex->coordinates.y);
+                    // printf("Triangle %d %d %d\n",
+                    //        chain[i].vertex->index,
+                    //        curr_vertex.vertex->index,
+                    //        peek().vertex->index);
+                    make_triangle(
+                           chain[i].vertex,
+                           curr_vertex.vertex,
+                           peek().vertex,
+                           ppoly->size);
                 }
             }
             // Push the last two vertices
@@ -318,22 +357,26 @@ void triangulate(Polygon* ppoly){
                 Point3D cross = cross_product(v1, v2);
                 if (curr_vertex.chain == 1 && cross.z < 0){
                     // Left chain, can join
-                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
-                           chain[i].vertex->coordinates.x,
-                           chain[i].vertex->coordinates.y,
-                           curr_vertex.vertex->coordinates.x,
-                           curr_vertex.vertex->coordinates.y,
-                           prev_vertex.vertex->coordinates.x,
-                           prev_vertex.vertex->coordinates.y);
+                    // printf("Triangle %d %d %d\n",
+                    //        chain[i].vertex->index,
+                    //        curr_vertex.vertex->index,
+                    //        prev_vertex.vertex->index);
+                    make_triangle(
+                           chain[i].vertex,
+                           curr_vertex.vertex,
+                           prev_vertex.vertex,
+                           ppoly->size);
                 } else if (curr_vertex.chain == 2 && cross.z > 0){
                     // Right chain, can join
-                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
-                           chain[i].vertex->coordinates.x,
-                           chain[i].vertex->coordinates.y,
-                           curr_vertex.vertex->coordinates.x,
-                           curr_vertex.vertex->coordinates.y,
-                           prev_vertex.vertex->coordinates.x,
-                           prev_vertex.vertex->coordinates.y);
+                    // printf("Triangle %d %d %d\n",
+                    //        chain[i].vertex->index,
+                    //        curr_vertex.vertex->index,
+                    //        prev_vertex.vertex->index);
+                    make_triangle(
+                           chain[i].vertex,
+                           curr_vertex.vertex,
+                           prev_vertex.vertex,
+                           ppoly->size);
                 } else {
                     // Can't join
                     // Put it back
@@ -357,19 +400,16 @@ void triangulate(Polygon* ppoly){
                     break;
                 else {
                     curr_vertex = pop();
-                    // printf("Will draw a diagonal from x:%.2f y:%.2f to x:%.2f y:%.2f\n",
-                    //         chain[ppoly->size - 1].vertex->coordinates.x,
-                    //         chain[ppoly->size - 1].vertex->coordinates.y,
-                    //         curr_vertex.vertex->coordinates.x,
-                    //         curr_vertex.vertex->coordinates.y);
-                    printf("Triangle:\n\t%.2f %.2f\n\t%.2f %.2f\n\t%.2f %.2f\n",
-                           chain[ppoly->size - 1].vertex->coordinates.x,
-                           chain[ppoly->size - 1].vertex->coordinates.y,
-                           curr_vertex.vertex->coordinates.x,
-                           curr_vertex.vertex->coordinates.y,
-                           prev_vertex.vertex->coordinates.x,
-                           prev_vertex.vertex->coordinates.y);
-                    prev_vertex = curr_vertex;
+                    // printf("Triangle %d %d %d\n",
+                    //        chain[ppoly->size - 1].vertex->index,
+                    //        curr_vertex.vertex->index,
+                    //        prev_vertex.vertex->index);
+                    // prev_vertex = curr_vertex;
+                    make_triangle(
+                           chain[i].vertex,
+                           curr_vertex.vertex,
+                           prev_vertex.vertex,
+                           ppoly->size);
                 }
 
             }

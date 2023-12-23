@@ -15,6 +15,7 @@ typedef struct {
 
 // Polygons
 typedef struct _pv{
+    int index;
     Point2D coordinates;
     struct _pv* prev;
     struct _pv* next;
