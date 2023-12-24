@@ -192,8 +192,6 @@ TriangleMesh* triangulate(Polygon* ppoly){
     }
     pcurr_vertex = pcurr_vertex->next;
 
-    printf("Top vertex is at %.2f %.2f\n", ptop_vertex->coordinates.x, ptop_vertex->coordinates.y);
-    printf("Bottom vertex is at %.2f %.2f\n", pbottom_vertex->coordinates.x, pbottom_vertex->coordinates.y);
 
     // Then, create a list of vertices from top to bottom, and keep track of which "chain"
     // it is on (left=1, right=2. Bottom and top are 0).
@@ -215,30 +213,25 @@ TriangleMesh* triangulate(Polygon* ppoly){
     int i = 1;
     while (cont_left || cont_right){
         if (cont_left && !cont_right){
-            printf("Adding left\n");
             chain[i].vertex = curr_left;
             chain[i].chain = 1;
             curr_left = curr_left->next;
         } else if (cont_right && !cont_left){
-            printf("Adding right\n");
             chain[i].vertex = curr_right;
             chain[i].chain = 2;
             curr_right = curr_right->prev;
         } else {
             if (curr_left->coordinates.y == curr_right->coordinates.y){
                 // Add leftmost
-                printf("Adding left\n");
                 chain[i].vertex = curr_left;
                 chain[i].chain = 1;
                 curr_left = curr_left->next;
             } else if (curr_left->coordinates.y < curr_right->coordinates.y){
                 // Left vertex above right vertex
-                printf("Adding left\n");
                 chain[i].vertex = curr_left;
                 chain[i].chain = 1;
                 curr_left = curr_left->next;
             } else {
-                printf("Adding right\n");
                 chain[i].vertex = curr_right;
                 chain[i].chain = 2;
                 curr_right = curr_right->prev;
@@ -256,7 +249,6 @@ TriangleMesh* triangulate(Polygon* ppoly){
 
     // Printing merged chain
     for (i = 0; i < ppoly->size; i++){
-        printf("%d: y is %.2f on chain %d\n", i, chain[i].vertex->coordinates.y, chain[i].chain);
     }
 
     // Next, create a stack...
@@ -316,15 +308,12 @@ TriangleMesh* triangulate(Polygon* ppoly){
         bool visible[3] = {false, false, false};
         // bool visible[3] = {true, true, true};
         if (p1->prev == p2){
-            printf("%d %d is visible\n", p1->index, p2->index);
             visible[0] = true;
         }
         if (p2->prev == p3){
-            printf("%d %d is visible\n", p2->index, p3->index);
             visible[1] = true;
         }
         if (p3->prev == p1){
-            printf("%d %d is visible\n", p3->index, p1->index);
             visible[2] = true;
         }
 
