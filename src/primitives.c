@@ -6,6 +6,16 @@
 #include "transforms.h"
 #include "vect.h"
 
+TriangleMesh* new_triangle_mesh(){
+    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
+    if (pres == NULL){
+        fprintf(stderr, "Couldn\'t allocate memory for the mesh\n");
+        exit(1);
+    };
+    pres->size = 0;
+    return pres;
+}
+
 TriangleMesh* tri_cube(float size){
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh) + 12 * sizeof(Triangle));
     pres->size = 12;
@@ -287,15 +297,15 @@ TriangleMesh* triangulate(Polygon* ppoly){
     Triangle make_triangle(PolygonVertex* p1, PolygonVertex* p2, PolygonVertex* p3, int poly_size){
         // Fix triangle order
         PolygonVertex* tmp;
-        if (p1->prev == p2){
+        if (p1->next == p2){
             tmp = p2;
             p2 = p1;
             p1 = tmp;
-        } else if (p2->prev == p3){
+        } else if (p2->next == p3){
             tmp = p3;
             p3 = p2;
             p2 = tmp;
-        } else if (p3->prev == p1){
+        } else if (p3->next == p1){
             tmp = p1;
             p1 = p3;
             p3 = tmp;
@@ -305,15 +315,15 @@ TriangleMesh* triangulate(Polygon* ppoly){
         // Check visibility
         bool visible[3] = {false, false, false};
         // bool visible[3] = {true, true, true};
-        if (p1->next == p2){
+        if (p1->prev == p2){
             printf("%d %d is visible\n", p1->index, p2->index);
             visible[0] = true;
         }
-        if (p2->next == p3){
+        if (p2->prev == p3){
             printf("%d %d is visible\n", p2->index, p3->index);
             visible[1] = true;
         }
-        if (p3->next == p1){
+        if (p3->prev == p1){
             printf("%d %d is visible\n", p3->index, p1->index);
             visible[2] = true;
         }
@@ -419,13 +429,18 @@ TriangleMesh* triangulate(Polygon* ppoly){
     return pres;
 }
 
-TriangleMesh* triangulated_regular_polygon(float radius, int n_sides){
+Polygon* new_regular_polygon(float radius, int n_sides){
     Point2D vertices[n_sides];
     for (int i = 0; i < n_sides; i++){
         vertices[i].x = radius * cosf(-i*2*M_PI / n_sides);
         vertices[i].y = radius * sinf(-i*2*M_PI / n_sides);
     }
     Polygon* ppoly = new_polygon(vertices, n_sides);
+    return ppoly;
+}
+
+TriangleMesh* triangulated_regular_polygon(float radius, int n_sides){
+    Polygon* ppoly = new_regular_polygon(radius, n_sides);
     TriangleMesh* pres = triangulate(ppoly);
     free_polygon(ppoly);
     return pres;
