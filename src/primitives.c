@@ -143,10 +143,14 @@ void free_polygon(Polygon* ppoly){
     free(ppoly);
 }
 
-void triangulate(Polygon* ppoly){
-    // This does nothing for now, except telling you what
-    // diagonals it should add
+TriangleMesh* triangulate(Polygon* ppoly){
+    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh) + (ppoly->size - 2) * sizeof(Triangle));
+    pres->size = 0;
 
+    if (pres == NULL){
+        fprintf(stderr, "Could not allocate memory for mesh\n");
+        exit(1);
+    }
     // First, find the top and bottom-most vertices
 
     float min_y = INFINITY,
@@ -280,39 +284,52 @@ void triangulate(Polygon* ppoly){
 
     struct MergedChain curr_vertex, prev_vertex;
 
-    void make_triangle(PolygonVertex* p1, PolygonVertex* p2, PolygonVertex* p3, int poly_size){
+    Triangle make_triangle(PolygonVertex* p1, PolygonVertex* p2, PolygonVertex* p3, int poly_size){
         // Fix triangle order
-        int p1_p2_dist = (p2->index - p1->index) % poly_size;
-        int p2_p3_dist = (p3->index - p2->index) % poly_size;
-        int p3_p1_dist = (p1->index - p3->index) % poly_size;
-
         PolygonVertex* tmp;
-        if (p1_p2_dist == -1){
+        if (p1->prev == p2){
             tmp = p2;
             p2 = p1;
             p1 = tmp;
-        } else if (p2_p3_dist == -1){
+        } else if (p2->prev == p3){
             tmp = p3;
             p3 = p2;
             p2 = tmp;
-        } else if (p3_p1_dist == -1){
+        } else if (p3->prev == p1){
             tmp = p1;
             p1 = p3;
             p3 = tmp;
         }
 
-        // Check visibility
-        int visible[3] = {0, 0, 0};
-        if (abs(p1_p2_dist) == 1)
-            visible[0] = 1;
-        if (abs(p2_p3_dist) == 1)
-            visible[1] = 1;
-        if (abs(p3_p1_dist) == 1)
-            visible[2] = 1;
 
-        printf("%d %d %d (%d %d %d)\n",
-                p1->index, p2->index, p3->index,
-                visible[0], visible[1], visible[2]);
+        // Check visibility
+        bool visible[3] = {false, false, false};
+        if (p1->next == p2){
+            printf("%d %d is visible\n", p1->index, p2->index);
+            visible[0] = true;
+        }
+        if (p2->next == p3){
+            printf("%d %d is visible\n", p2->index, p3->index);
+            visible[1] = true;
+        }
+        if (p3->next == p1){
+            printf("%d %d is visible\n", p3->index, p1->index);
+            visible[2] = true;
+        }
+
+        // Make triangle
+        Triangle res;
+        res.a.x = p1->coordinates.x;
+        res.a.y = p1->coordinates.y;
+        res.a.z = 0;
+        res.b.x = p2->coordinates.x;
+        res.b.y = p2->coordinates.y;
+        res.b.z = 0;
+        res.c.x = p3->coordinates.x;
+        res.c.y = p3->coordinates.y;
+        res.c.z = 0;
+        memcpy(res.visible, visible, 3*sizeof(bool));
+        return res;
     }
 
     // Next, go through all the remaining nodes from the merged chain
@@ -327,15 +344,11 @@ void triangulate(Polygon* ppoly){
                     // Last item, don't join
                     break;
                 } else {
-                    // printf("Triangle %d %d %d\n",
-                    //        chain[i].vertex->index,
-                    //        curr_vertex.vertex->index,
-                    //        peek().vertex->index);
-                    make_triangle(
+                    pres = add_triangle(pres, make_triangle(
                            chain[i].vertex,
                            curr_vertex.vertex,
                            peek().vertex,
-                           ppoly->size);
+                           ppoly->size));
                 }
             }
             // Push the last two vertices
@@ -357,26 +370,18 @@ void triangulate(Polygon* ppoly){
                 Point3D cross = cross_product(v1, v2);
                 if (curr_vertex.chain == 1 && cross.z < 0){
                     // Left chain, can join
-                    // printf("Triangle %d %d %d\n",
-                    //        chain[i].vertex->index,
-                    //        curr_vertex.vertex->index,
-                    //        prev_vertex.vertex->index);
-                    make_triangle(
+                    pres = add_triangle(pres, make_triangle(
                            chain[i].vertex,
                            curr_vertex.vertex,
                            prev_vertex.vertex,
-                           ppoly->size);
+                           ppoly->size));
                 } else if (curr_vertex.chain == 2 && cross.z > 0){
                     // Right chain, can join
-                    // printf("Triangle %d %d %d\n",
-                    //        chain[i].vertex->index,
-                    //        curr_vertex.vertex->index,
-                    //        prev_vertex.vertex->index);
-                    make_triangle(
+                    pres = add_triangle(pres, make_triangle(
                            chain[i].vertex,
                            curr_vertex.vertex,
                            prev_vertex.vertex,
-                           ppoly->size);
+                           ppoly->size));
                 } else {
                     // Can't join
                     // Put it back
@@ -400,19 +405,15 @@ void triangulate(Polygon* ppoly){
                     break;
                 else {
                     curr_vertex = pop();
-                    // printf("Triangle %d %d %d\n",
-                    //        chain[ppoly->size - 1].vertex->index,
-                    //        curr_vertex.vertex->index,
-                    //        prev_vertex.vertex->index);
-                    // prev_vertex = curr_vertex;
-                    make_triangle(
+                    pres = add_triangle(pres, make_triangle(
                            chain[i].vertex,
                            curr_vertex.vertex,
                            prev_vertex.vertex,
-                           ppoly->size);
+                           ppoly->size));
                 }
 
             }
         }
     }
+    return pres;
 }
