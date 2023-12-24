@@ -65,5 +65,6 @@ TriangleMesh* tri_cube(float size);
 Polygon* new_polygon(Point2D* vertices, int size);
 void free_polygon(Polygon* ppoly);
 TriangleMesh* triangulate(Polygon* ppoly);
+TriangleMesh* triangulated_regular_polygon(float radius, int n_sides);
 
 #endif

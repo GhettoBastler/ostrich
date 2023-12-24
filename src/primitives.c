@@ -304,6 +304,7 @@ TriangleMesh* triangulate(Polygon* ppoly){
 
         // Check visibility
         bool visible[3] = {false, false, false};
+        // bool visible[3] = {true, true, true};
         if (p1->next == p2){
             printf("%d %d is visible\n", p1->index, p2->index);
             visible[0] = true;
@@ -415,5 +416,17 @@ TriangleMesh* triangulate(Polygon* ppoly){
             }
         }
     }
+    return pres;
+}
+
+TriangleMesh* triangulated_regular_polygon(float radius, int n_sides){
+    Point2D vertices[n_sides];
+    for (int i = 0; i < n_sides; i++){
+        vertices[i].x = radius * cosf(-i*2*M_PI / n_sides);
+        vertices[i].y = radius * sinf(-i*2*M_PI / n_sides);
+    }
+    Polygon* ppoly = new_polygon(vertices, n_sides);
+    TriangleMesh* pres = triangulate(ppoly);
+    free_polygon(ppoly);
     return pres;
 }

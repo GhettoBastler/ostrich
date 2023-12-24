@@ -24,16 +24,17 @@ TriangleMesh* tri_make_scene(){
     // }
 
     // fclose(pfile);
-    Point2D vertices[6] = {
-        {3, 6},
-        {5, 5},
-        {6, 4},
-        {3, 1},
-        {0, 0},
-        {1, 4},
-    };
-    Polygon* ppoly = new_polygon(vertices, 6);
-    TriangleMesh* pscene = triangulate(ppoly);
-    free_polygon(ppoly);
+    // Point2D vertices[6] = {
+    //     {3, 6},
+    //     {5, 5},
+    //     {6, 4},
+    //     {3, 1},
+    //     {0, 0},
+    //     {1, 4},
+    // };
+    // Polygon* ppoly = new_polygon(vertices, 6);
+    // TriangleMesh* pscene = triangulate(ppoly);
+    // free_polygon(ppoly);
+    TriangleMesh* pscene = triangulated_regular_polygon(3, 7);
     return pscene;
 }
