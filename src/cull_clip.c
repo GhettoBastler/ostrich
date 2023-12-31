@@ -199,10 +199,10 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int sta
         
         int a;
         // If point is projected outside of the triangle bounding box, it doesn't hide it
-        Point3D proj1 = pt_mul(bbox.max.z / pt_obj.z, pt_obj),
-                proj2 = pt_mul(bbox.min.z / pt_obj.z, pt_obj);
-        if (!point_in_bbox(proj1, bbox) && !point_in_bbox(proj2, bbox))
-            continue;
+        // Point3D proj1 = pt_mul(bbox.max.z / pt_obj.z, pt_obj),
+        //         proj2 = pt_mul(bbox.min.z / pt_obj.z, pt_obj);
+        // if (!point_in_bbox(proj1, bbox) && !point_in_bbox(proj2, bbox))
+        //     continue;
 
         if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
             if (intersect.z + EPSILON < pt_obj.z){ // Adding an arbitrary value to make sure that edges don't intersect their own faces
