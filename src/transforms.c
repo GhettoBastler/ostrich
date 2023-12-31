@@ -180,6 +180,22 @@ void calculate_translation_matrix(float* matrix, Point3D translation){
 void translate_mesh(TriangleMesh* pmesh, Point3D translation){
     float matrix[16];
     calculate_translation_matrix(matrix, translation);
-    printf("%.4f %.4f %.4f\n", translation.x, translation.y, translation.z);
     transform_mesh(matrix, pmesh);
+}
+
+void rotate_mesh(TriangleMesh* pmesh, Point3D rotation){
+    float matrix[16];
+    calculate_rotation_matrix(matrix, rotation);
+    transform_mesh(matrix, pmesh);
+}
+
+TriangleMesh* copy_mesh(TriangleMesh* pmesh){
+    int size_in_memory = sizeof(TriangleMesh) + sizeof(Triangle) * pmesh->size;
+    TriangleMesh* pcopy = (TriangleMesh*) malloc(size_in_memory);
+    if (pcopy == NULL){
+        fprintf(stderr, "Couldn't allocate memory to copy the mesh\n");
+        exit(1);
+    }
+    memcpy(pcopy, pmesh, size_in_memory);
+    return pcopy;
 }

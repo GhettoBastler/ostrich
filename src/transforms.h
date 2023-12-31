@@ -12,7 +12,9 @@ void flip_mesh(TriangleMesh* pmesh);
 TriangleMesh* extrude(Polygon* ppoly, float height);
 void calculate_rotation_matrix(float* matrix, Point3D rotation);
 void calculate_translation_matrix(float* matrix, Point3D translation);
-void translate_mesh(TriangleMesh* pmesh, Point3D rotation);
+void translate_mesh(TriangleMesh* pmesh, Point3D translation);
+void rotate_mesh(TriangleMesh* pmesh, Point3D rotation);
 void transform_mesh(float* matrix, TriangleMesh* pmesh);
+TriangleMesh* copy_mesh(TriangleMesh* pmesh);
 
 #endif

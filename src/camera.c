@@ -68,13 +68,7 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, 
 
 TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam, bool do_cull){
     // Creating a copy of the mesh for transform
-    int size_in_memory = sizeof(TriangleMesh) + sizeof(Triangle) * ptri_mesh->size;
-    TriangleMesh* pmesh_transformed = (TriangleMesh*) malloc(size_in_memory);
-    if (pmesh_transformed == NULL){
-        fprintf(stderr, "Couldn't allocate memory to copy the mesh\n");
-        exit(1);
-    }
-    memcpy(pmesh_transformed, ptri_mesh, size_in_memory);
+    TriangleMesh* pmesh_transformed = copy_mesh(ptri_mesh);
     // 3D transform
     transform_mesh(pcam->transform_mat, pmesh_transformed);
     // Culling
