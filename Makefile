@@ -9,3 +9,6 @@ run: engine
 
 profiling: clean
 	gcc src/*.c -lSDL2 -lm -o bin/engine_prof -pg
+
+debug: clean
+	gcc src/*.c -lSDL2 -lm -o bin/engine -g

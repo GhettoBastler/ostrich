@@ -247,6 +247,13 @@ int main(int argc, char **argv){
         } else {
             captured = false;
         }
+        if (kbstate[SDL_SCANCODE_T]) {
+            // Reloading file
+            printf("Reloading input file\n");
+            free(pscene);
+            pscene = tri_make_scene();
+            engine_state.reproject = true;
+        }
         shift_pressed = kbstate[SDL_SCANCODE_LSHIFT];
 
         //Projecting
