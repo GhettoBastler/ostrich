@@ -11,26 +11,17 @@ TriangleMesh* tri_make_scene(){
     TriangleMesh* pscene = new_triangle_mesh();
 
     ppoly = new_regular_polygon(50, 5);
+    Point3D translation = {0, 0, 0};
 
-    float offset_x,
-          offset_y = 0;
-
-    for (int i = 0; i < 10; i++){
-        offset_x = 0;
-        for (int j = 0; j < 10; j++){
+    for (int i = 0; i < 5; i++){
+        translation.x = 0;
+        for (int j = 0; j < 5; j++){
             pprism = extrude(ppoly, 100);
-            for (int k = 0; k < pprism->size; k++){
-                pprism->triangles[k].a.x += offset_x;
-                pprism->triangles[k].a.y += offset_y;
-                pprism->triangles[k].b.x += offset_x;
-                pprism->triangles[k].b.y += offset_y;
-                pprism->triangles[k].c.x += offset_x;
-                pprism->triangles[k].c.y += offset_y;
-            }
+            translate_mesh(pprism, translation);
             pscene = merge_tri_meshes(pscene, pprism);
-            offset_x += 100;
+            translation.x += 100;
         }
-        offset_y += 100;
+        translation.y += 100;
     }
     free_polygon(ppoly);
     return pscene;

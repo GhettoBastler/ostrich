@@ -13,5 +13,8 @@ TriangleMesh* extrude(Polygon* ppoly, float height);
 TriangleMesh* transform_mesh(float* matrix, TriangleMesh* pmesh); 
 Triangle transform_triangle(float* matrix, Triangle tri);
 TriangleMesh* transform_mesh(float* matrix, TriangleMesh* pmesh);
+void calculate_rotation_matrix(float* matrix, Point3D rotation);
+void calculate_translation_matrix(float* matrix, Point3D translation);
+void translate_mesh(TriangleMesh* pmesh, Point3D rotation);
 
 #endif

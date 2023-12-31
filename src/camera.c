@@ -44,48 +44,6 @@ ProjectedEdge project_edge(Edge3D edge, Camera* pcam){
     return res;
 }
 
-void calculate_rotation_matrix(float* matrix, Point3D rotation){
-    float r_x = rotation.x,
-          r_y = rotation.y,
-          r_z = rotation.z;
-
-    matrix[0] = cosf(r_y) * cosf(r_z);
-    matrix[1] = sinf(r_x) * sinf(r_y) * cosf(r_z) - cosf(r_x) * sinf(r_z);
-    matrix[2] = cosf(r_x) * sinf(r_y) * cosf(r_z) + sinf(r_x) * sinf(r_z);
-    matrix[4] = cosf(r_y) * sinf(r_z);
-    matrix[5] = sinf(r_x) * sinf(r_y) * sinf(r_z) + cosf(r_x) * cosf(r_z);
-    matrix[6] = cosf(r_x) * sinf(r_y) * sinf(r_z) - sinf(r_x) * cosf(r_z);
-    matrix[8] = -sinf(r_y);
-    matrix[9] = sinf(r_x) * cosf(r_y);
-    matrix[10] = cosf(r_x) * cosf(r_y);
-
-    matrix[3] = matrix[7]
-              = matrix[11]
-              = matrix[12]
-              = matrix[13]
-              = matrix[14] = 0;
-    matrix[15] = 1;
-}
-
-void calculate_translation_matrix(float* matrix, Point3D translation){
-    matrix[3] = translation.x;
-    matrix[7] = translation.y;
-    matrix[11] = translation.z;
-
-    matrix[1] = matrix[2]
-              = matrix[4]
-              = matrix[6]
-              = matrix[8]
-              = matrix[9]
-              = matrix[12]
-              = matrix[13]
-              = matrix[14] = 0;
-
-    matrix[0] = matrix[5]
-              = matrix[10]
-              = matrix[15] = 1;
-}
-
 void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius){
     float new_mat[16],
           tmp_mat[16];
