@@ -16,90 +16,90 @@ TriangleMesh* new_triangle_mesh(){
     return pres;
 }
 
-TriangleMesh* tri_cube(float size){
+TriangleMesh* box(float a, float b, float c){
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh) + 12 * sizeof(Triangle));
     pres->size = 12;
 
-    Point3D a = {0, 0, 0};
-    Point3D b = {size, 0, 0};
-    Point3D c = {size, size, 0};
-    Point3D d = {0, size, 0};
-    Point3D e = {0, 0, size};
-    Point3D f = {size, 0, size};
-    Point3D g = {size, size, size};
-    Point3D h = {0, size, size};
+    Point3D pt_a = {0, 0, 0};
+    Point3D pt_b = {a, 0, 0};
+    Point3D pt_c = {a, b, 0};
+    Point3D pt_d = {0, b, 0};
+    Point3D pt_e = {0, 0, c};
+    Point3D pt_f = {a, 0, c};
+    Point3D pt_g = {a, b, c};
+    Point3D pt_h = {0, b, c};
 
-    Triangle abc = {a, b, c};
-    Triangle cda = {c, d, a};
+    Triangle abc = {pt_b, pt_a, pt_c};
+    Triangle cda = {pt_d, pt_c, pt_a};
 
-    Triangle bfg = {b, f, g};
-    Triangle gcb = {g, c, b};
+    Triangle bfg = {pt_f, pt_b, pt_g};
+    Triangle gcb = {pt_c, pt_g, pt_b};
 
-    Triangle cgh = {c, g, h};
-    Triangle hdc = {h, d, c};
+    Triangle cgh = {pt_g, pt_c, pt_h};
+    Triangle hdc = {pt_d, pt_h, pt_c};
 
-    Triangle ead = {e, a, d};
-    Triangle dhe = {d, h, e};
+    Triangle ead = {pt_a, pt_e, pt_d};
+    Triangle dhe = {pt_h, pt_d, pt_e};
 
-    Triangle feh = {f, e, h};
-    Triangle hgf = {h, g, f};
+    Triangle feh = {pt_e, pt_f, pt_h};
+    Triangle hgf = {pt_g, pt_h, pt_f};
 
-    Triangle efb = {e, f, b};
-    Triangle bae = {b, a, e};
+    Triangle efb = {pt_f, pt_e, pt_b};
+    Triangle bae = {pt_a, pt_b, pt_e};
 
     pres->triangles[0] = abc;
     pres->triangles[0].visible[0] = true;
-    pres->triangles[0].visible[1] = true;
-    pres->triangles[0].visible[2] = false;
+    pres->triangles[0].visible[1] = false;
+    pres->triangles[0].visible[2] = true;
     pres->triangles[1] = cda;
     pres->triangles[1].visible[0] = true;
-    pres->triangles[1].visible[1] = true;
-    pres->triangles[1].visible[2] = false;
+    pres->triangles[1].visible[1] = false;
+    pres->triangles[1].visible[2] = true;
 
     pres->triangles[2] = bfg;
     pres->triangles[2].visible[0] = true;
-    pres->triangles[2].visible[1] = true;
-    pres->triangles[2].visible[2] = false;
+    pres->triangles[2].visible[1] = false;
+    pres->triangles[2].visible[2] = true;
     pres->triangles[3] = gcb;
     pres->triangles[3].visible[0] = true;
-    pres->triangles[3].visible[1] = true;
-    pres->triangles[3].visible[2] = false;
+    pres->triangles[3].visible[1] = false;
+    pres->triangles[3].visible[2] = true;
 
     pres->triangles[4] = cgh;
     pres->triangles[4].visible[0] = true;
-    pres->triangles[4].visible[1] = true;
-    pres->triangles[4].visible[2] = false;
+    pres->triangles[4].visible[1] = false;
+    pres->triangles[4].visible[2] = true;
     pres->triangles[5] = hdc;
     pres->triangles[5].visible[0] = true;
-    pres->triangles[5].visible[1] = true;
-    pres->triangles[5].visible[2] = false;
+    pres->triangles[5].visible[1] = false;
+    pres->triangles[5].visible[2] = true;
 
     pres->triangles[6] = ead;
     pres->triangles[6].visible[0] = true;
-    pres->triangles[6].visible[1] = true;
-    pres->triangles[6].visible[2] = false;
+    pres->triangles[6].visible[1] = false;
+    pres->triangles[6].visible[2] = true;
     pres->triangles[7] = dhe;
     pres->triangles[7].visible[0] = true;
-    pres->triangles[7].visible[1] = true;
-    pres->triangles[7].visible[2] = false;
+    pres->triangles[7].visible[1] = false;
+    pres->triangles[7].visible[2] = true;
 
     pres->triangles[8] = feh;
     pres->triangles[8].visible[0] = true;
-    pres->triangles[8].visible[1] = true;
-    pres->triangles[8].visible[2] = false;
+    pres->triangles[8].visible[1] = false;
+    pres->triangles[8].visible[2] = true;
     pres->triangles[9] = hgf;
     pres->triangles[9].visible[0] = true;
-    pres->triangles[9].visible[1] = true;
-    pres->triangles[9].visible[2] = false;
+    pres->triangles[9].visible[1] = false;
+    pres->triangles[9].visible[2] = true;
 
     pres->triangles[10] = efb;
     pres->triangles[10].visible[0] = true;
-    pres->triangles[10].visible[1] = true;
-    pres->triangles[10].visible[2] = false;
+    pres->triangles[10].visible[1] = false;
+    pres->triangles[10].visible[2] = true;
     pres->triangles[11] = bae;
     pres->triangles[11].visible[0] = true;
-    pres->triangles[11].visible[1] = true;
-    pres->triangles[11].visible[2] = false;
+    pres->triangles[11].visible[1] = false;
+    pres->triangles[11].visible[2] = true;
 
     return pres;
 }
@@ -433,4 +433,9 @@ TriangleMesh* triangulated_regular_polygon(float radius, int n_sides){
     TriangleMesh* pres = triangulate(ppoly);
     free_polygon(ppoly);
     return pres;
+}
+
+TriangleMesh* prism(Polygon* pbase, float height){
+    TriangleMesh* pprism = extrude(pbase, height);
+    return pprism;
 }
