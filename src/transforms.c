@@ -126,19 +126,7 @@ Triangle transform_triangle(float* matrix, Triangle tri){
     return trans_tri;
 }
 
-TriangleMesh* transform_mesh(float* matrix, TriangleMesh* pmesh){
-    Triangle curr_tri;
-    TriangleMesh* pres = malloc(sizeof(TriangleMesh));
-    pres->size = 0;
-
-    for (int i = 0; i < pmesh->size; i++){
-        curr_tri = transform_triangle(matrix, pmesh->triangles[i]);
-        pres = add_triangle(pres, curr_tri);
-    }
-    return pres;
-}
-
-void transform_mesh_in_place(float* matrix, TriangleMesh* pmesh){
+void transform_mesh(float* matrix, TriangleMesh* pmesh){
     Triangle curr_tri;
     for (int i = 0; i < pmesh->size; i++){
         curr_tri = transform_triangle(matrix, pmesh->triangles[i]);
@@ -193,5 +181,5 @@ void translate_mesh(TriangleMesh* pmesh, Point3D translation){
     float matrix[16];
     calculate_translation_matrix(matrix, translation);
     printf("%.4f %.4f %.4f\n", translation.x, translation.y, translation.z);
-    transform_mesh_in_place(matrix, pmesh);
+    transform_mesh(matrix, pmesh);
 }
