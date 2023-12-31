@@ -44,15 +44,6 @@ ProjectedEdge project_edge(Edge3D edge, Camera* pcam){
     return res;
 }
 
-// Homogeneous coordinates transforms
-Point3D transform_point(float* matrix, Point3D point){
-    Point3D res;
-    res.x = point.x * matrix[0] + point.y * matrix[1] + point.z * matrix[2] + matrix[3];
-    res.y = point.x * matrix[4] + point.y * matrix[5] + point.z * matrix[6] + matrix[7];
-    res.z = point.x * matrix[8] + point.y * matrix[9] + point.z * matrix[10] + matrix[11];
-    return res;
-}
-
 void calculate_rotation_matrix(float* matrix, Point3D rotation){
     float r_x = rotation.x,
           r_y = rotation.y,
@@ -163,32 +154,4 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
     }
     pbuffer->size = n;
     return pculled_tri;
-}
-
-Triangle transform_triangle(float* matrix, Triangle tri){
-    Point3D trans_a, trans_b, trans_c;
-    Triangle trans_tri;
-
-    trans_a = transform_point(matrix, tri.a);
-    trans_b = transform_point(matrix, tri.b);
-    trans_c = transform_point(matrix, tri.c);
-
-    trans_tri.a = trans_a;
-    trans_tri.b = trans_b;
-    trans_tri.c = trans_c;
-    memcpy(trans_tri.visible, tri.visible, 3);
-
-    return trans_tri;
-}
-
-TriangleMesh* transform_mesh(float* matrix, TriangleMesh* pmesh){
-    Triangle curr_tri;
-    TriangleMesh* pres = malloc(sizeof(TriangleMesh));
-    pres->size = 0;
-
-    for (int i = 0; i < pmesh->size; i++){
-        curr_tri = transform_triangle(matrix, pmesh->triangles[i]);
-        pres = add_triangle(pres, curr_tri);
-    }
-    return pres;
 }
