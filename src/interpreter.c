@@ -76,6 +76,8 @@ void parse_instruction(char* token){
         do_translate();
     } else if (strcmp(token, "clone") == 0){
         do_clone();
+    } else if (strcmp(token, "swap") == 0){
+        do_swap();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -164,4 +166,11 @@ void do_clone(){
     StackElement elem;
     elem.mesh = mesh;
     push_onto_stack(elem);
+}
+
+void do_swap(){
+    StackElement elem1 = pop_from_stack();
+    StackElement elem2 = pop_from_stack();
+    push_onto_stack(elem1);
+    push_onto_stack(elem2);
 }

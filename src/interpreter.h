@@ -32,5 +32,6 @@ void do_rotate();
 void do_translate();
 void do_merge();
 void do_clone();
+void do_swap();
 
 #endif
