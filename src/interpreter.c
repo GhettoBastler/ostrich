@@ -74,6 +74,8 @@ void parse_instruction(char* token){
         do_rotate();
     } else if (strcmp(token, "translate") == 0){
         do_translate();
+    } else if (strcmp(token, "clone") == 0){
+        do_clone();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -153,5 +155,13 @@ void do_merge(){
     mesh1 = merge_tri_meshes(mesh1, mesh2);
     StackElement elem;
     elem.mesh = mesh1;
+    push_onto_stack(elem);
+}
+
+void do_clone(){
+    TriangleMesh* mesh = peek_stack().mesh;
+    mesh = copy_mesh(mesh);
+    StackElement elem;
+    elem.mesh = mesh;
     push_onto_stack(elem);
 }

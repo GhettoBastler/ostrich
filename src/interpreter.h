@@ -31,5 +31,6 @@ void do_prism();
 void do_rotate();
 void do_translate();
 void do_merge();
+void do_clone();
 
 #endif
