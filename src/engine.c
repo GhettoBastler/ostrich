@@ -251,7 +251,9 @@ int main(int argc, char **argv){
             // Reloading file
             printf("Reloading input file\n");
             free(pscene);
+            free(pbuffer);
             pscene = tri_make_scene();
+            pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
             engine_state.reproject = true;
         }
         shift_pressed = kbstate[SDL_SCANCODE_LSHIFT];
