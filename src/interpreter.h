@@ -7,24 +7,26 @@
 #define INPUT_FILE "my_code"
 #define BUFFER_SIZE 512
 
-typedef union {
-    TriangleMesh* mesh;
-    float number;
-} StackElement;
+typedef struct {
+    int top;
+    TriangleMesh* content[STACK_SIZE];
+} ObjectStack;
 
 typedef struct {
     int top;
-    StackElement content[STACK_SIZE];
-} Stack;
+    float content[STACK_SIZE];
+} WorkStack;
 
 static const char* delimiter = " \n";
 
 TriangleMesh* parse_file();
-void push_onto_stack(StackElement elem);
-StackElement pop_from_stack();
-StackElement peek_stack();
+void push_onto_work_stack(float elem);
+void push_onto_obj_stack(TriangleMesh* elem);
+float pop_from_work_stack();
+TriangleMesh* pop_from_obj_stack();
 void parse_token(char* token);
 void parse_instruction(char* token);
+
 // Instructions
 void do_box();
 void do_prism();
@@ -32,6 +34,9 @@ void do_rotate();
 void do_translate();
 void do_merge();
 void do_clone();
-void do_swap();
+void do_swap_obj();
+void do_swap_work();
+void do_rot_work();
+void do_rot_obj();
 
 #endif

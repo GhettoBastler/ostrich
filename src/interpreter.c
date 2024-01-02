@@ -4,7 +4,8 @@
 #include "transforms.h"
 #include "interpreter.h"
 
-static Stack stack = {.top = 0};
+static WorkStack wstack = {.top = 0};
+static ObjectStack ostack = {.top = 0};
 
 float deg_to_rad(float deg){
     return (deg / 180) * M_PI;
@@ -19,7 +20,8 @@ TriangleMesh* parse_file(){
         exit(1);
     }
     // Rewind in case we already read the file before
-    stack.top = 0;
+    wstack.top = 0;
+    ostack.top = 0;
 
     // Read the file and parse the tokens
     char buffer[BUFFER_SIZE];
@@ -46,8 +48,8 @@ TriangleMesh* parse_file(){
         fclose(pfile);
     }
 
-    StackElement elem = pop_from_stack();
-    return elem.mesh;
+    TriangleMesh* mesh = pop_from_obj_stack();
+    return mesh;
 }
 
 void parse_token(char* token){
@@ -56,11 +58,9 @@ void parse_token(char* token){
     if (prest == token){
         parse_instruction(token);
     } else {
-        StackElement elem;
-        elem.number = parsed_number;
-        push_onto_stack(elem);
+        push_onto_work_stack(parsed_number);
     }
-    printf("Parsed \"%s\", stack has %d elements\n", token, stack.top);
+    printf("Parsed \"%s\", work stack has %d elements, obj stack has %d\n", token, wstack.top, ostack.top);
 }
 
 void parse_instruction(char* token){
@@ -76,101 +76,136 @@ void parse_instruction(char* token){
         do_translate();
     } else if (strcmp(token, "clone") == 0){
         do_clone();
-    } else if (strcmp(token, "swap") == 0){
-        do_swap();
+    } else if (strcmp(token, "swap_obj") == 0){
+        do_swap_obj();
+    } else if (strcmp(token, "swap_work") == 0){
+        do_swap_work();
+    } else if (strcmp(token, "rot_work") == 0){
+        do_rot_work();
+    } else if (strcmp(token, "rot_obj") == 0){
+        do_rot_obj();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
     }
 }
 
-void push_onto_stack(StackElement elem){
-    if (stack.top >= STACK_SIZE) {
-        printf("Stack is full\n");
+void push_onto_work_stack(float elem){
+    if (wstack.top >= STACK_SIZE) {
+        printf("Work stack is full\n");
         exit(1);
     } else {
-        stack.content[stack.top] = elem;
-        ++stack.top;
+        wstack.content[wstack.top++] = elem;
     }
 }
 
-StackElement pop_from_stack(){
-    if (stack.top <= 0) {
-        printf("Stack is empty\n");
+void push_onto_obj_stack(TriangleMesh* elem){
+    if (ostack.top >= STACK_SIZE) {
+        printf("Object stack is full\n");
         exit(1);
     } else {
-        return stack.content[--stack.top];
+        ostack.content[ostack.top++] = elem;
     }
 }
 
-StackElement peek_stack(){
-    if (stack.top <= 0) {
-        printf("Stack is empty\n");
+float pop_from_work_stack(){
+    if (wstack.top <= 0) {
+        printf("Work stack is empty\n");
         exit(1);
     } else {
-        return stack.content[stack.top - 1];
+        return wstack.content[--wstack.top];
+    }
+}
+
+TriangleMesh* pop_from_obj_stack(){
+    if (ostack.top <= 0) {
+        printf("Object stack is empty\n");
+        exit(1);
+    } else {
+        return ostack.content[--ostack.top];
     }
 }
 
 void do_box(){
-    float c = pop_from_stack().number;
-    float b = pop_from_stack().number;
-    float a = pop_from_stack().number;
+    float c = pop_from_work_stack();
+    float b = pop_from_work_stack();
+    float a = pop_from_work_stack();
     TriangleMesh* pbox = box(a, b, c);
-    StackElement elem;
-    elem.mesh = pbox;
-    push_onto_stack(elem);
+    push_onto_obj_stack(pbox);
 }
 
 void do_rotate(){
-    float z = pop_from_stack().number;
-    float y = pop_from_stack().number;
-    float x = pop_from_stack().number;
+    float z = pop_from_work_stack();
+    float y = pop_from_work_stack();
+    float x = pop_from_work_stack();
     Point3D rotation = {deg_to_rad(x), deg_to_rad(y), deg_to_rad(z)};
-    TriangleMesh* mesh = peek_stack().mesh;
+    TriangleMesh* mesh = pop_from_obj_stack();
     rotate_mesh(mesh, rotation);
+    push_onto_obj_stack(mesh);
 }
 
 void do_translate(){
-    float z = pop_from_stack().number;
-    float y = pop_from_stack().number;
-    float x = pop_from_stack().number;
+    float z = pop_from_work_stack();
+    float y = pop_from_work_stack();
+    float x = pop_from_work_stack();
     Point3D translation = {x, y, z};
-    TriangleMesh* mesh = peek_stack().mesh;
+    TriangleMesh* mesh = pop_from_obj_stack();
     translate_mesh(mesh, translation);
+    push_onto_obj_stack(mesh);
 }
 
 void do_prism(){
-    float height = pop_from_stack().number;
-    int n_size = (int) pop_from_stack().number;
-    float radius = pop_from_stack().number;
+    float height = pop_from_work_stack();
+    int n_size = (int) pop_from_work_stack();
+    float radius = pop_from_work_stack();
     Polygon* ppoly = new_regular_polygon(radius, n_size);
     TriangleMesh* mesh = prism(ppoly, height);
-    StackElement elem;
-    elem.mesh = mesh;
-    push_onto_stack(elem);
+    push_onto_obj_stack(mesh);
+    free(ppoly);
 }
 
 void do_merge(){
-    TriangleMesh* mesh1 = pop_from_stack().mesh;
-    TriangleMesh* mesh2 = pop_from_stack().mesh;
+    TriangleMesh* mesh1 = pop_from_obj_stack();
+    TriangleMesh* mesh2 = pop_from_obj_stack();
     mesh1 = merge_tri_meshes(mesh1, mesh2);
-    StackElement elem;
-    elem.mesh = mesh1;
-    push_onto_stack(elem);
+    push_onto_obj_stack(mesh1);
 }
 
 void do_clone(){
-    TriangleMesh* mesh = peek_stack().mesh;
-    mesh = copy_mesh(mesh);
-    StackElement elem;
-    elem.mesh = mesh;
-    push_onto_stack(elem);
+    TriangleMesh* mesh1 = pop_from_obj_stack();
+    TriangleMesh* mesh2 = copy_mesh(mesh1);
+    push_onto_obj_stack(mesh1);
+    push_onto_obj_stack(mesh2);
 }
 
-void do_swap(){
-    StackElement elem1 = pop_from_stack();
-    StackElement elem2 = pop_from_stack();
-    push_onto_stack(elem1);
-    push_onto_stack(elem2);
+void do_swap_obj(){
+    TriangleMesh* mesh1 = pop_from_obj_stack();
+    TriangleMesh* mesh2 = pop_from_obj_stack();
+    push_onto_obj_stack(mesh1);
+    push_onto_obj_stack(mesh2);
+}
+
+void do_swap_work(){
+    float n1 = pop_from_work_stack();
+    float n2 = pop_from_work_stack();
+    push_onto_work_stack(n1);
+    push_onto_work_stack(n2);
+}
+
+void do_rot_work(){
+    float n1 = pop_from_work_stack();
+    float n2 = pop_from_work_stack();
+    float n3 = pop_from_work_stack();
+    push_onto_work_stack(n1);
+    push_onto_work_stack(n3);
+    push_onto_work_stack(n2);
+}
+
+void do_rot_obj(){
+    TriangleMesh* mesh1 = pop_from_obj_stack();
+    TriangleMesh* mesh2 = pop_from_obj_stack();
+    TriangleMesh* mesh3 = pop_from_obj_stack();
+    push_onto_obj_stack(mesh1);
+    push_onto_obj_stack(mesh3);
+    push_onto_obj_stack(mesh2);
 }
