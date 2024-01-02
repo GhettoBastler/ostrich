@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "transforms.h"
 #include "interpreter.h"
 
@@ -12,6 +13,8 @@ float deg_to_rad(float deg){
 }
 
 TriangleMesh* parse_file(){
+    // Seed random
+    srand(time(NULL));
     // Open input file
     FILE* pfile = fopen(INPUT_FILE, "r");
 
@@ -84,6 +87,8 @@ void parse_instruction(char* token){
         do_rot_work();
     } else if (strcmp(token, "rot_obj") == 0){
         do_rot_obj();
+    } else if (strcmp(token, "rand") == 0){
+        do_rand();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -208,4 +213,11 @@ void do_rot_obj(){
     push_onto_obj_stack(mesh1);
     push_onto_obj_stack(mesh3);
     push_onto_obj_stack(mesh2);
+}
+
+void do_rand(){
+    float max = pop_from_work_stack();
+    float min = pop_from_work_stack();
+    float res = min + ((float) rand() / (float) (RAND_MAX / (max - min)));
+    push_onto_work_stack(res);
 }

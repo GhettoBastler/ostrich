@@ -38,5 +38,6 @@ void do_swap_obj();
 void do_swap_work();
 void do_rot_work();
 void do_rot_obj();
+void do_rand();
 
 #endif
