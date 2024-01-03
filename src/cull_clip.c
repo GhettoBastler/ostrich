@@ -14,6 +14,7 @@ void clip_line(Edge3D* pedge, float ratio, bool reverse);
 bool facing_camera(Triangle tri);
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri);
 bool point_in_bbox(Point3D point, BoundingBox bbox);
+float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse);
 
 
 void clip_line(Edge3D* pedge, float ratio, bool reverse){
@@ -25,7 +26,7 @@ void clip_line(Edge3D* pedge, float ratio, bool reverse){
 
 void clip_frustum(Edge3D* pedge, Camera* pcam){
     Point3D diff;
-    float ratio;
+    float ratio, obj_ratio;
 
     // Clip edges that go behind the focal plane
     bool a_hidden = pedge->a.z < pcam->focal_length,
@@ -55,6 +56,7 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
     // Clip edges around
     Point2D a_proj = project_point(pedge->a, pcam),
             b_proj = project_point(pedge->b, pcam);
+    Edge2D edge_proj = {a_proj, b_proj};
 
     diff = pt_diff(pedge->b, pedge->a);
     float dx_proj = b_proj.x - a_proj.x,
@@ -89,12 +91,15 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
         }
     }
     if (ratio > 0 && ratio < 1){
-        clip_line(pedge, ratio, true);
+        obj_ratio = obj_ratio_from_screen_ratio(*pedge, edge_proj, pcam->focal_length, ratio, true);
+        // clip_line(pedge, ratio, true);
+        clip_line(pedge, obj_ratio, true);
         // Recalculating difference with the new A coordinates
         diff = pt_diff(pedge->b, pedge->a);
         a_proj = project_point(pedge->a, pcam); // projecting new A
         dx_proj = a_proj.x - b_proj.x;
         dy_proj = a_proj.y - b_proj.y;
+        edge_proj.a = a_proj;
     }
 
     // Moving B
@@ -116,7 +121,9 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
         }
     }
     if (ratio > 0 && ratio < 1){
-        clip_line(pedge, ratio, false);
+        obj_ratio = obj_ratio_from_screen_ratio(*pedge, edge_proj, pcam->focal_length, ratio, false);
+        // clip_line(pedge, ratio, false);
+        clip_line(pedge, obj_ratio, false);
     }
 }
 
@@ -299,4 +306,20 @@ bool bbox_in_shadow(BoundingBox covered, BoundingBox covering){
             point_in_bbox(proj_B22, covered) ||
             point_in_bbox(proj_C22, covered) ||
             point_in_bbox(proj_D22, covered));
+}
+
+float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse){
+    if (reverse){
+        Point3D tmp3 = edge3D.a;
+        edge3D.a = edge3D.b;
+        edge3D.b = tmp3;
+        Point2D tmp2 = edge2D.a;
+        edge2D.a = edge2D.b;
+        edge2D.b = tmp2;
+    }
+    
+    // Convert to ratio in object space
+    float res = (edge3D.a.z * (edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x)) - edge3D.a.x * focal_length)/((edge3D.b.x - edge3D.a.x)*focal_length - (edge3D.b.z - edge3D.a.z)*(edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x)));
+
+    return res;
 }
