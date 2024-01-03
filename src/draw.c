@@ -51,8 +51,8 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool 
 
             // If edge's bbox is projected completely outside of the triangle bounding box,
             // the triangle doesn't hide it
-            if (!bbox_in_shadow(tri_bbox, edge_bbox))
-                continue;
+            // if (!bbox_in_shadow(tri_bbox, edge_bbox))
+            //     continue;
 
             // At this point, we know that the edge's bounding box is in the shadow of
             // this triangle's bounding box. Then we do the modified Bresenham with

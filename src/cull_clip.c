@@ -1,4 +1,4 @@
-#define EPSILON 0.0001
+#define EPSILON 0.0005
 
 #include <math.h>
 #include <stdlib.h>
@@ -176,9 +176,17 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
 
     *inter = pt_mul(q, point);
 
-    return (cross_product(pt_diff(*inter, tri.a), ab).z > 0 &&
+    return (
+        (
+            cross_product(pt_diff(*inter, tri.a), ab).z > 0 &&
             cross_product(pt_diff(*inter, tri.b), bc).z > 0 &&
-            cross_product(pt_diff(*inter, tri.c), ca).z > 0);
+            cross_product(pt_diff(*inter, tri.c), ca).z > 0
+        ) || (
+            cross_product(pt_diff(*inter, tri.a), ab).z <= 0 &&
+            cross_product(pt_diff(*inter, tri.b), bc).z <= 0 &&
+            cross_product(pt_diff(*inter, tri.c), ca).z <= 0
+        )
+    );
 }
 
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int start_idx){
