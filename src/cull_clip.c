@@ -1,4 +1,4 @@
-#define EPSILON 0.001
+#define EPSILON 0.0001
 
 #include <math.h>
 #include <stdlib.h>
