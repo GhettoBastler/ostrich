@@ -154,9 +154,8 @@ int comp_tri_z(const void* ptri_a, const void* ptri_b){
 }
 
 TriangleMesh* bface_cull(TriangleMesh* ptri){
-    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
+    TriangleMesh* pres = new_triangle_mesh(0);
     Triangle curr_tri;
-    pres->size = 0;
 
     for (int i = 0; i < ptri->size; i++){
         curr_tri = ptri->triangles[i];
