@@ -7,15 +7,12 @@
 
 static WorkStack wstack = {.top = 0};
 static ObjectStack ostack = {.top = 0};
-static TriangleMesh* pmesh;
 
 float deg_to_rad(float deg){
     return (deg / 180) * M_PI;
 }
 
 TriangleMesh* parse_file(){
-    pmesh = new_triangle_mesh(0);
-
     // Seed random
     srand(time(NULL));
     // Open input file
@@ -54,9 +51,8 @@ TriangleMesh* parse_file(){
         fclose(pfile);
     }
 
-    //TriangleMesh* mesh = pop_from_obj_stack();
-    //return mesh;
-    return pmesh;
+    TriangleMesh* mesh = pop_from_obj_stack();
+    return mesh;
 }
 
 void parse_token(char* token){
@@ -93,8 +89,6 @@ void parse_instruction(char* token){
         do_rot_obj();
     } else if (strcmp(token, "rand") == 0){
         do_rand();
-    } else if (strcmp(token, "render") == 0){
-        do_render();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -226,9 +220,4 @@ void do_rand(){
     float min = pop_from_work_stack();
     float res = min + ((float) rand() / (float) (RAND_MAX / (max - min)));
     push_onto_work_stack(res);
-}
-
-void do_render(){
-    TriangleMesh* mesh = pop_from_obj_stack();
-    pmesh = merge_tri_meshes(pmesh, mesh);
 }
