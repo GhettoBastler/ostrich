@@ -8,8 +8,6 @@ I'm trying things out as I go without a clear goal in mind. Right now it renders
 
 You can read the full log on [my website](https://ghettobastler.com/december_adventure_2023.html).
 
-*Credit for the 3D model : [Low poly Chocobo](https://www.thingiverse.com/thing:2216365) by Kijai*
-
 ## Features
 
 - STL file import
@@ -17,18 +15,20 @@ You can read the full log on [my website](https://ghettobastler.com/december_adv
 - Variable focal length
 - Back-face culling
 - Frustum clipping
-- Hidden-line removal (glitchy)
+- Frustum culling
+- Hidden-line removal (slow)
 - Image export
+- Model generation using a custom scripting language
 
 ## Things I might wanna add
 
+- ~~A script to generate 3D models~~
 - Second camera to show the effect of various optimizations from a different angle
-- A script to generate 3D models
-- Triangle rasterisation (for texturing the models)
+- Triangle rasterisation (for texturing the models) 
 
 ## Disclaimer
 
-This is a learning project. I'm sharing it here for others to see, but I wouldn't recommend actually using it, as it is quite slow, glitchy and resource hungry.
+This is still a work in progress. I'm sharing it here for others to see, but I wouldn't recommend actually using it, as it is quite slow, glitchy and resource hungry.
 
 ## Licensing
 
