@@ -310,6 +310,7 @@ bool bbox_in_shadow(BoundingBox covered, BoundingBox covering){
 }
 
 float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse){
+    float res;
     if (reverse){
         Point3D tmp3 = edge3D.a;
         edge3D.a = edge3D.b;
@@ -320,7 +321,18 @@ float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_leng
     }
     
     // Convert to ratio in object space
-    float res = (edge3D.a.z * (edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x)) - edge3D.a.x * focal_length)/((edge3D.b.x - edge3D.a.x)*focal_length - (edge3D.b.z - edge3D.a.z)*(edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x)));
+    // Check denominators to avoid infinitely large ratios 
+    float denom_x = ((edge3D.b.x - edge3D.a.x)*focal_length - (edge3D.b.z - edge3D.a.z)*(edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x))),
+          denom_y = ((edge3D.b.y - edge3D.a.y)*focal_length - (edge3D.b.z - edge3D.a.z)*(edge2D.a.y + ratio * (edge2D.b.y - edge2D.a.y)));
+    if (denom_x != 0)
+        // Line is horizontal use denom_x
+        res = (edge3D.a.z * (edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x)) - edge3D.a.x * focal_length)/denom_x;
+    else if (denom_y != 0)
+        // Line is vertical use denom_y
+        res = (edge3D.a.z * (edge2D.a.y + ratio * (edge2D.b.y - edge2D.a.y)) - edge3D.a.y * focal_length)/denom_y;
+    else
+        // Line is a point
+        res = 0;
 
     return res;
 }
