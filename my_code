@@ -1,0 +1,1405 @@
+10 4 2 prism
+
+clone
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+swap_obj
+clone
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+swap_obj
+clone
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+-10 10 rand -10 10 rand -10 10 rand rotate
+0 0 5 translate
+swap_obj clone rot_obj merge
+
+merge
+merge
+merge
