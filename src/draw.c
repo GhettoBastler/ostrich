@@ -65,7 +65,7 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool 
     for (;;){
         screen_ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         // Convert to ratio in object space
-        obj_ratio = (edge.edge3D.a.z * (edge.edge2D.a.x + screen_ratio * (edge.edge2D.b.x - edge.edge2D.a.x)) - edge.edge3D.a.x * pcam->focal_length)/((edge.edge3D.b.x - edge.edge3D.a.x)*pcam->focal_length - (edge.edge3D.b.z - edge.edge3D.a.z)*(edge.edge2D.a.x + screen_ratio * (edge.edge2D.b.x - edge.edge2D.a.x)));
+        obj_ratio = obj_ratio_from_screen_ratio(edge.edge3D, edge.edge2D, pcam->focal_length, screen_ratio, false);
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
             if (draw_hidden)
                 ppixels[x0 + WIDTH * y0] = LINE_COLOR_1;

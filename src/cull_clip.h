@@ -16,5 +16,6 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* pmesh, int start_i
 BoundingBox bbox_from_triangle(Triangle triangle);
 BoundingBox bbox_from_edge(Edge3D edge);
 bool bbox_in_shadow(BoundingBox covered, BoundingBox covering);
+float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse);
 
 #endif
