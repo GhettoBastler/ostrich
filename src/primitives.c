@@ -4,14 +4,12 @@
 #include <string.h>
 #include "primitives.h"
 #include "transforms.h"
+#include "utils.h"
 #include "vect.h"
 
 TriangleMesh* new_triangle_mesh(){
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
-    if (pres == NULL){
-        fprintf(stderr, "Couldn\'t allocate memory for the mesh\n");
-        exit(1);
-    };
+    check_allocation(pres, "Couldn\'t allocate memory for the mesh\n");
     pres->size = 0;
     return pres;
 }
@@ -109,10 +107,8 @@ Polygon* new_polygon(Point2D* vertices, int size){
     pres->size = size;
 
     PolygonVertex* phead = (PolygonVertex*) malloc(sizeof(PolygonVertex));
-    if (pres == NULL){
-        fprintf(stderr, "Couldn\'t allocate memory for the polygon\n");
-        exit(1);
-    };
+    check_allocation(phead, "Couldn\'t allocate memory for the polygon\n");
+
     phead->prev = phead;
     phead->next = phead;
     phead->coordinates = vertices[0];
@@ -122,10 +118,7 @@ Polygon* new_polygon(Point2D* vertices, int size){
 
     for (int i = 1; i < size; i++){
         PolygonVertex* pcurr = (PolygonVertex*) malloc(sizeof(PolygonVertex));
-        if (pcurr == NULL){
-            fprintf(stderr, "Couldn\'t allocate memory for the new vertex\n");
-            exit(1);
-        };
+        check_allocation(pcurr, "Couldn\'t allocate memory for the new vertex\n");
         pcurr->index = i;
         pcurr->coordinates = vertices[i];
         pcurr->prev = ptail;
@@ -155,12 +148,9 @@ void free_polygon(Polygon* ppoly){
 
 TriangleMesh* triangulate(Polygon* ppoly){
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh) + (ppoly->size - 2) * sizeof(Triangle));
+    check_allocation(pres, "Couldn't allocate memory for mesh\n");
     pres->size = 0;
-
-    if (pres == NULL){
-        fprintf(stderr, "Could not allocate memory for mesh\n");
-        exit(1);
-    }
+ 
     // First, find the top and bottom-most vertices
 
     float min_y = INFINITY,

@@ -13,7 +13,6 @@ int comp_tri_z(const void* ptri_a, const void* ptri_b);
 void clip_line(Edge3D* pedge, float ratio, bool reverse);
 bool facing_camera(Triangle tri);
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri);
-bool point_in_bbox(Point3D point, BoundingBox bbox);
 float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse);
 
 
@@ -161,8 +160,6 @@ TriangleMesh* bface_cull(TriangleMesh* ptri){
 
     for (int i = 0; i < ptri->size; i++){
         curr_tri = ptri->triangles[i];
-        //if (facing_camera(ptri->triangles[i])){
-            //pres = add_triangle(pres, ptri->triangles[i]);
         if (facing_camera(curr_tri)){
             pres = add_triangle(pres, curr_tri);
         }
@@ -211,12 +208,6 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int sta
         // If point is totally in front of curr_tri, it doesn't intersect it
         if (pt_obj.z < bbox.min.z)
             return true;
-        
-        // If point is projected outside of the triangle bounding box, it doesn't hide it
-        // Point3D proj1 = pt_mul(bbox.max.z / pt_obj.z, pt_obj),
-        //         proj2 = pt_mul(bbox.min.z / pt_obj.z, pt_obj);
-        // if (!point_in_bbox(proj1, bbox) && !point_in_bbox(proj2, bbox))
-        //     continue;
 
         if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
             if (intersect.z > 0){ // Is the ray intersecting with a triangle in front of the camera ?
@@ -241,72 +232,6 @@ BoundingBox bbox_from_edge(Edge3D edge){
     res.min = pt_min(edge.a, edge.b);
     res.max = pt_max(edge.a, edge.b);
     return res;
-}
-
-bool point_in_bbox(Point3D point, BoundingBox bbox){
-    return (
-        (point.x >= bbox.min.x - EPSILON) && (point.x - EPSILON <= bbox.max.x) &&
-        (point.y >= bbox.min.y - EPSILON) && (point.y - EPSILON <= bbox.max.y) &&
-        (point.z >= bbox.min.z - EPSILON) && (point.z - EPSILON <= bbox.max.z));
-}
-
-bool bbox_in_shadow(BoundingBox covered, BoundingBox covering){
-    // Dumb way: project every corner of the covering bounding
-    // box on both the near and far plane of the covered bbox
-
-    Point3D proj_A11, proj_B11, proj_C11, proj_D11,
-            proj_A12, proj_B12, proj_C12, proj_D12,
-            proj_A21, proj_B21, proj_C21, proj_D21,
-            proj_A22, proj_B22, proj_C22, proj_D22,
-            A1, B1, C1, D1,
-            A2, B2, C2, D2;
-
-    A1.x = A2.x = D1.x = D2.x = covering.min.x;
-    A1.y = A2.y = B1.y = B2.y = covering.min.y;
-    A1.z = B1.z = C1.z = D1.z = covering.min.z;
-    B1.x = B2.x = C1.x = C2.x = covering.max.x;
-    C1.y = C2.y = D1.y = D2.y = covering.max.y;
-    A2.z = B2.z = C2.z = D2.z = covering.max.z;
-
-    float ratio11 = covered.min.z / covering.min.z,
-          ratio12 = covered.max.z / covering.min.z,
-          ratio21 = covered.min.z / covering.max.z,
-          ratio22 = covered.max.z / covering.max.z;
-
-    proj_A11 = pt_mul(ratio11, A1);
-    proj_B11 = pt_mul(ratio11, B1);
-    proj_C11 = pt_mul(ratio11, C1);
-    proj_D11 = pt_mul(ratio11, D1);
-    proj_A12 = pt_mul(ratio12, A1);
-    proj_B12 = pt_mul(ratio12, B1);
-    proj_C12 = pt_mul(ratio12, C1);
-    proj_D12 = pt_mul(ratio12, D1);
-    proj_A21 = pt_mul(ratio21, A2);
-    proj_B21 = pt_mul(ratio21, B2);
-    proj_C21 = pt_mul(ratio21, C2);
-    proj_D21 = pt_mul(ratio21, D2);
-    proj_A22 = pt_mul(ratio22, A2);
-    proj_B22 = pt_mul(ratio22, B2);
-    proj_C22 = pt_mul(ratio22, C2);
-    proj_D22 = pt_mul(ratio22, D2);
-
-    // Then, we check if any of these points lies inside the covered bounding box
-    return (point_in_bbox(proj_A11, covered) ||
-            point_in_bbox(proj_B11, covered) ||
-            point_in_bbox(proj_C11, covered) ||
-            point_in_bbox(proj_D11, covered) ||
-            point_in_bbox(proj_A21, covered) ||
-            point_in_bbox(proj_B21, covered) ||
-            point_in_bbox(proj_C21, covered) ||
-            point_in_bbox(proj_D21, covered) ||
-            point_in_bbox(proj_A12, covered) ||
-            point_in_bbox(proj_B12, covered) ||
-            point_in_bbox(proj_C12, covered) ||
-            point_in_bbox(proj_D12, covered) ||
-            point_in_bbox(proj_A22, covered) ||
-            point_in_bbox(proj_B22, covered) ||
-            point_in_bbox(proj_C22, covered) ||
-            point_in_bbox(proj_D22, covered));
 }
 
 float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse){

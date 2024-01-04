@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include "utils.h"
 #include "primitives.h"
 #include "camera.h"
 
@@ -9,10 +10,8 @@
 TriangleMesh* add_triangle(TriangleMesh* pmesh, Triangle tri){
     //Allocating more memory to add the new triangle
     TriangleMesh* pres = realloc(pmesh, sizeof(TriangleMesh) + (pmesh->size + 1) * sizeof(Triangle));
-    if (pres == NULL){
-        fprintf(stderr, "Couldn't allocate memory to add a new triangle\n");
-        exit(1);
-    }
+    check_allocation(pres, "Couldn't allocate memory to add a new triangle\n");
+
     pres->triangles[pres->size] = tri;
     pres->size += 1;
     return pres;
@@ -192,10 +191,7 @@ void rotate_mesh(TriangleMesh* pmesh, Point3D rotation){
 TriangleMesh* copy_mesh(TriangleMesh* pmesh){
     int size_in_memory = sizeof(TriangleMesh) + sizeof(Triangle) * pmesh->size;
     TriangleMesh* pcopy = (TriangleMesh*) malloc(size_in_memory);
-    if (pcopy == NULL){
-        fprintf(stderr, "Couldn't allocate memory to copy the mesh\n");
-        exit(1);
-    }
+    check_allocation(pcopy, "Couldn't allocate memory to copy the mesh\n");
     memcpy(pcopy, pmesh, size_in_memory);
     return pcopy;
 }

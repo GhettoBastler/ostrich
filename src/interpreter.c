@@ -2,15 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "utils.h"
 #include "transforms.h"
 #include "interpreter.h"
 
 static WorkStack wstack = {.top = 0};
 static ObjectStack ostack = {.top = 0};
-
-float deg_to_rad(float deg){
-    return (deg / 180) * M_PI;
-}
 
 TriangleMesh* parse_file(){
     // Seed random

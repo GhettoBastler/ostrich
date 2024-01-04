@@ -6,16 +6,16 @@
 
 void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden, Camera* pcam){
 
-    Edge2D capped = edge.edge2D;
-    capped.a.x = (capped.a.x + pcam->width/2)*SCALE;
-    capped.a.y = (capped.a.y + pcam->height/2)*SCALE;
-    capped.b.x = (capped.b.x + pcam->width/2)*SCALE;
-    capped.b.y = (capped.b.y + pcam->height/2)*SCALE;
+    Edge2D centered = edge.edge2D;
+    centered.a.x = (centered.a.x + pcam->width/2)*SCALE;
+    centered.a.y = (centered.a.y + pcam->height/2)*SCALE;
+    centered.b.x = (centered.b.x + pcam->width/2)*SCALE;
+    centered.b.y = (centered.b.y + pcam->height/2)*SCALE;
 
-    int x0 = (int) capped.a.x,
-        y0 = (int) capped.a.y,
-        x1 = (int) capped.b.x,
-        y1 = (int) capped.b.y;
+    int x0 = (int) centered.a.x,
+        y0 = (int) centered.a.y,
+        x1 = (int) centered.b.x,
+        y1 = (int) centered.b.y;
     int dx = abs(x1 - x0);
     int sx = x0 < x1 ? 1 : -1;
     int dy = -abs(y1 - y0);
@@ -48,15 +48,6 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool 
                 i = pmesh->size - 1;
                 break;
             }
-
-            // If edge's bbox is projected completely outside of the triangle bounding box,
-            // the triangle doesn't hide it
-            // if (!bbox_in_shadow(tri_bbox, edge_bbox))
-            //     continue;
-
-            // At this point, we know that the edge's bounding box is in the shadow of
-            // this triangle's bounding box. Then we do the modified Bresenham with
-            // the triangle list starting from this point
             break;
         }
     };

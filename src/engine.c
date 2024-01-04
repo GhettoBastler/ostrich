@@ -38,13 +38,6 @@ void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, EngineState engine_sta
     SDL_RenderPresent(prenderer);
 }
 
-void check_allocation(void* pointer, char* message){
-    if (pointer == NULL){
-        fprintf(stderr, message);
-        exit(1);
-    }
-}
-
 void export(SDL_Renderer* prenderer){
     //https://discourse.libsdl.org/t/save-image-from-render/21009/2
     SDL_Surface* psshot = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, 32, 0, 0, 0, 0);

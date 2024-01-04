@@ -16,5 +16,6 @@ float dot_product(Point3D a, Point3D b);
 Point3D pt_min(Point3D a, Point3D b);
 Point3D pt_max(Point3D a, Point3D b);
 void multiply_matrix(float* ma, float* mb);
+void check_allocation(void* pointer, char* message);
 
 #endif
