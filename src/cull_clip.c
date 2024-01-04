@@ -154,7 +154,7 @@ int comp_tri_z(const void* ptri_a, const void* ptri_b){
         return 1;
 }
 
-TriangleMesh* bface_cull(float* matrix, TriangleMesh* ptri){
+TriangleMesh* bface_cull(TriangleMesh* ptri){
     TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
     Triangle curr_tri;
     pres->size = 0;
@@ -335,4 +335,52 @@ float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_leng
         res = 0;
 
     return res;
+}
+
+TriangleMesh* frustum_cull(TriangleMesh* ptri, Camera* pcam){
+    TriangleMesh* pres = new_triangle_mesh(0);
+    Triangle curr_tri;
+    Point2D a_proj, b_proj, c_proj;
+
+    for (int i = 0; i < ptri->size; i++){
+        curr_tri = ptri->triangles[i];
+        // Are all three vertices behind the focal plan ?
+        if (curr_tri.a.z < pcam->focal_length &&
+            curr_tri.b.z < pcam->focal_length &&
+            curr_tri.c.z < pcam->focal_length)
+            continue;
+
+        // Projecting the vertices
+        a_proj = project_point(curr_tri.a, pcam);
+        b_proj = project_point(curr_tri.b, pcam);
+        c_proj = project_point(curr_tri.c, pcam);
+
+        // Are all three vertices left of the frustum ?
+        if (a_proj.x < -pcam->width/2 &&
+            b_proj.x < -pcam->width/2 &&
+            c_proj.x < -pcam->width/2) 
+            continue;
+ 
+        // Are all three vertices right of the frustum ?
+        if (a_proj.x > pcam->width/2 &&
+            b_proj.x > pcam->width/2 &&
+            c_proj.x > pcam->width/2) 
+            continue;
+ 
+        // Are all three vertices above the frustum ?
+        if (a_proj.y < -pcam->width/2 &&
+            b_proj.y < -pcam->width/2 &&
+            c_proj.y < -pcam->width/2) 
+            continue;
+
+        // Are all three vertices above the frustum ?
+        if (a_proj.y > pcam->width/2 &&
+            b_proj.y > pcam->width/2 &&
+            c_proj.y > pcam->width/2) 
+            continue;
+
+        // The triangle is inside the frustum, add it
+        pres = add_triangle(pres, curr_tri);
+    }
+    return pres;
 }

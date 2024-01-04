@@ -73,11 +73,14 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
     transform_mesh(pcam->transform_mat, pmesh_transformed);
     // Culling
     TriangleMesh* pculled_tri;
+    TriangleMesh* pfrustum_culled;
+    // Frustum culling (always)
+    pfrustum_culled = frustum_cull(pmesh_transformed, pcam);
     if (do_cull){
-        pculled_tri = bface_cull(pcam->transform_mat, pmesh_transformed);
-        free(pmesh_transformed);
+        pculled_tri = bface_cull(pfrustum_culled);
+        free(pfrustum_culled);
     } else {
-        pculled_tri = pmesh_transformed;
+        pculled_tri = pfrustum_culled;
     }
     
     Edge3D edges[3];
