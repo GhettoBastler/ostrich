@@ -11,6 +11,7 @@ typedef struct {
     float width, height;
     float focal_length;
     float transform_mat[16];
+    float orbit_radius;
 } Camera;
 
 Point2D project_point(Point3D point, Camera* pcam);

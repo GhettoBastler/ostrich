@@ -61,7 +61,7 @@ typedef struct {
 
 
 // FUNCTIONS
-TriangleMesh* new_triangle_mesh();
+TriangleMesh* new_triangle_mesh(int size);
 TriangleMesh* prism(Polygon* pbase, float height);
 Polygon* new_polygon(Point2D* vertices, int size);
 Polygon* new_regular_polygon(float radius, int n_sides);
@@ -69,5 +69,6 @@ void free_polygon(Polygon* ppoly);
 TriangleMesh* triangulate(Polygon* ppoly);
 TriangleMesh* triangulated_regular_polygon(float radius, int n_sides);
 TriangleMesh* box(float a, float b, float c);
+ProjectedMesh* new_projected_mesh(int size);
 
 #endif

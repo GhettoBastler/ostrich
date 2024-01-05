@@ -1,4 +1,4 @@
-#define EPSILON 0.0005
+#define EPSILON 0.0005 // Arbitrary value to avoid lines intersecting with their own faces
 
 #include <math.h>
 #include <stdlib.h>
@@ -10,10 +10,12 @@
 
 
 int comp_tri_z(const void* ptri_a, const void* ptri_b);
+void z_sort_triangles(TriangleMesh* pmesh);
 void clip_line(Edge3D* pedge, float ratio, bool reverse);
 bool facing_camera(Triangle tri);
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri);
-float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse);
+float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length,
+                                  float ratio, bool reverse);
 
 
 void clip_line(Edge3D* pedge, float ratio, bool reverse){
@@ -22,6 +24,7 @@ void clip_line(Edge3D* pedge, float ratio, bool reverse){
     else
         pedge->b = pt_add(pedge->a, pt_mul(ratio, pt_diff(pedge->b, pedge->a)));
 }
+
 
 void clip_frustum(Edge3D* pedge, Camera* pcam){
     Point3D diff;
@@ -90,8 +93,8 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
         }
     }
     if (ratio > 0 && ratio < 1){
-        obj_ratio = obj_ratio_from_screen_ratio(*pedge, edge_proj, pcam->focal_length, ratio, true);
-        // clip_line(pedge, ratio, true);
+        obj_ratio = obj_ratio_from_screen_ratio(*pedge, edge_proj, pcam->focal_length,
+                                                ratio, true);
         clip_line(pedge, obj_ratio, true);
         // Recalculating difference with the new A coordinates
         diff = pt_diff(pedge->b, pedge->a);
@@ -120,8 +123,8 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
         }
     }
     if (ratio > 0 && ratio < 1){
-        obj_ratio = obj_ratio_from_screen_ratio(*pedge, edge_proj, pcam->focal_length, ratio, false);
-        // clip_line(pedge, ratio, false);
+        obj_ratio = obj_ratio_from_screen_ratio(*pedge, edge_proj, pcam->focal_length,
+                                                ratio, false);
         clip_line(pedge, obj_ratio, false);
     }
 }
@@ -163,9 +166,6 @@ TriangleMesh* bface_cull(TriangleMesh* ptri){
             pres = add_triangle(pres, curr_tri);
         }
     }
-
-    // Z-sort triangles
-    qsort(pres->triangles, pres->size, sizeof(Triangle), comp_tri_z);
     return pres;
 }
 
@@ -178,6 +178,10 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
     float q = dot_product(normal, tri.a) / dot_product(normal, point);
 
     *inter = pt_mul(q, point);
+
+    // Is the ray intersecting with a triangle behind the camera ?
+    if (inter->z < 0)
+        return false;
 
     return (
         (
@@ -209,10 +213,8 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int sta
             return true;
 
         if (ray_tri_intersect(&intersect, pt_obj, curr_tri)){
-            if (intersect.z > 0){ // Is the ray intersecting with a triangle in front of the camera ?
-                if (intersect.z + EPSILON < pt_obj.z){ // Adding an arbitrary value to make sure that edges don't intersect their own faces
-                    return false;
-                }
+            if (intersect.z + EPSILON < pt_obj.z){
+                return false;
             }
         }
     }
@@ -233,7 +235,8 @@ BoundingBox bbox_from_edge(Edge3D edge){
     return res;
 }
 
-float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length, float ratio, bool reverse){
+float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length,
+                                  float ratio, bool reverse){
     float res;
     if (reverse){
         Point3D tmp3 = edge3D.a;
@@ -246,14 +249,46 @@ float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_leng
     
     // Convert to ratio in object space
     // Check denominators to avoid infinitely large ratios 
-    float denom_x = ((edge3D.b.x - edge3D.a.x)*focal_length - (edge3D.b.z - edge3D.a.z)*(edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x))),
-          denom_y = ((edge3D.b.y - edge3D.a.y)*focal_length - (edge3D.b.z - edge3D.a.z)*(edge2D.a.y + ratio * (edge2D.b.y - edge2D.a.y)));
+    float denom_x = (
+        (
+            edge3D.b.x - edge3D.a.x
+        ) * focal_length - (
+            edge3D.b.z - edge3D.a.z
+        ) * (
+            edge2D.a.x + ratio * (
+                edge2D.b.x - edge2D.a.x
+            )
+        )
+    ),
+          denom_y = (
+        (
+            edge3D.b.y - edge3D.a.y
+        ) * focal_length - (
+            edge3D.b.z - edge3D.a.z
+        ) * (
+            edge2D.a.y + ratio * (
+                edge2D.b.y - edge2D.a.y
+            )
+        )
+    );
     if (denom_x != 0)
         // Line is horizontal use denom_x
-        res = (edge3D.a.z * (edge2D.a.x + ratio * (edge2D.b.x - edge2D.a.x)) - edge3D.a.x * focal_length)/denom_x;
+        res = (
+                edge3D.a.z * (
+                    edge2D.a.x + ratio * (
+                        edge2D.b.x - edge2D.a.x
+                    )
+                ) - edge3D.a.x * focal_length
+            )/denom_x;
     else if (denom_y != 0)
         // Line is vertical use denom_y
-        res = (edge3D.a.z * (edge2D.a.y + ratio * (edge2D.b.y - edge2D.a.y)) - edge3D.a.y * focal_length)/denom_y;
+        res = (
+                edge3D.a.z * (
+                    edge2D.a.y + ratio * (
+                        edge2D.b.y - edge2D.a.y
+                    )
+                ) - edge3D.a.y * focal_length
+            )/denom_y;
     else
         // Line is a point
         res = 0;
@@ -307,4 +342,8 @@ TriangleMesh* frustum_cull(TriangleMesh* ptri, Camera* pcam){
         pres = add_triangle(pres, curr_tri);
     }
     return pres;
+}
+
+void z_sort_triangles(TriangleMesh* pmesh){
+    qsort(pmesh->triangles, pmesh->size, sizeof(Triangle), comp_tri_z);
 }

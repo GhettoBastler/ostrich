@@ -7,8 +7,9 @@
 #include "utils.h"
 #include "vect.h"
 
-TriangleMesh* new_triangle_mesh(){
-    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh));
+TriangleMesh* new_triangle_mesh(int size){
+    TriangleMesh* pres = (TriangleMesh*) malloc(sizeof(TriangleMesh) +
+                                                size * sizeof(Triangle));
     check_allocation(pres, "Couldn\'t allocate memory for the mesh\n");
     pres->size = 0;
     return pres;
@@ -428,4 +429,12 @@ TriangleMesh* triangulated_regular_polygon(float radius, int n_sides){
 TriangleMesh* prism(Polygon* pbase, float height){
     TriangleMesh* pprism = extrude(pbase, height);
     return pprism;
+}
+
+ProjectedMesh* new_projected_mesh(int size){
+    ProjectedMesh* pres = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) +
+                                                  size * sizeof(ProjectedEdge) * 3);
+    check_allocation(pres, "Couldn\'t allocate memory for the projected mesh\n");
+    pres->size = 0;
+    return pres;
 }

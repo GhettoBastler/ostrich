@@ -14,6 +14,7 @@ Camera make_camera(float width, float height, float focal_length){
     cam.focal_length = focal_length;
     cam.width = width;
     cam.height = height;
+    cam.orbit_radius = 0;
 
     for (int i = 0; i < 16; i++)
         cam.transform_mat[i] = 0;
@@ -116,5 +117,7 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
         }
     }
     pbuffer->size = n;
+    // Z-sort
+    z_sort_triangles(pculled_tri);
     return pculled_tri;
 }

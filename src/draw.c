@@ -4,7 +4,8 @@
 #include "vect.h"
 #include "cull_clip.h"
 
-void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden, Camera* pcam){
+void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
+               bool draw_hidden, Camera* pcam){
 
     Edge2D centered = edge.edge2D;
     centered.a.x = (centered.a.x + pcam->width/2)*SCALE;
@@ -56,7 +57,8 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool 
     for (;;){
         screen_ratio = sqrt(pow(x0 - x_init, 2) + pow(y0 - y_init, 2)) / span;
         // Convert to ratio in object space
-        obj_ratio = obj_ratio_from_screen_ratio(edge.edge3D, edge.edge2D, pcam->focal_length, screen_ratio, false);
+        obj_ratio = obj_ratio_from_screen_ratio(edge.edge3D, edge.edge2D,
+                                                pcam->focal_length, screen_ratio, false);
         if (x0 >= 0 && x0 < WIDTH && y0 >= 0 && y0 < HEIGHT)
             if (draw_hidden)
                 ppixels[x0 + WIDTH * y0] = LINE_COLOR_1;

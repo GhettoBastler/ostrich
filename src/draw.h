@@ -10,6 +10,7 @@
 #include "primitives.h"
 #include "camera.h"
 
-void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh, bool draw_hidden, Camera* pcam);
+void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
+               bool draw_hidden, Camera* pcam);
 
 #endif

@@ -11,125 +11,69 @@
 #include "ui.h"
 #include "engine.h"
 
+#define KBSTATE_SIZE 256
 #define FPS 60
 #define EXPORT_PATH "export.bmp"
 
 
 static EngineState engine_state = {false, false, false, false, true};
 
+// Rendering
+static SDL_Window* pwindow = NULL;
+static SDL_Renderer* prenderer = NULL;
+static SDL_Texture* ptexture = NULL;
+static Uint32* ppixels = NULL;
 
-void update_texture(Uint32* ppixels, ProjectedMesh* pmesh, SDL_Texture* ptexture, TriangleMesh* ptri_mesh, bool draw_hidden, Camera* pcam){
-    int pitch = WIDTH * sizeof(Uint32);
-    SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
-    //Clear pixels
-    for (int i = 0; i < HEIGHT * WIDTH; i++){
-        ppixels[i] = BG_COLOR;
-    }
-    //Draw lines
-    for (int i = 0; i < pmesh->size; i++){
-        draw_line(ppixels, pmesh->edges[i], ptri_mesh, draw_hidden, pcam);
-    }
-    SDL_UnlockTexture(ptexture);
-}
+// Model
+static TriangleMesh* pscene = NULL;
+static ProjectedMesh* pbuffer = NULL;
 
-void draw(SDL_Texture* ptexture, SDL_Renderer* prenderer, EngineState engine_state){
-    SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
-    draw_ui(prenderer, engine_state);
-    SDL_RenderPresent(prenderer);
-}
+// Camera
+static Camera cam;
+static Point3D rotation, translation;
 
-void export(SDL_Renderer* prenderer){
-    //https://discourse.libsdl.org/t/save-image-from-render/21009/2
-    SDL_Surface* psshot = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, 32, 0, 0, 0, 0);
-    if (psshot == NULL){
-        fprintf(stderr, "Couldn't create a surface to export image\n");
-    } else {
-        SDL_RenderReadPixels(prenderer, NULL, 0, psshot->pixels, psshot->pitch);
-        SDL_SaveBMP(psshot, EXPORT_PATH);
-        printf("File exported as %s\n", EXPORT_PATH);
-        SDL_FreeSurface(psshot);
-    }
-}
+// Keyboard
+static Uint8 old_kbstate[KBSTATE_SIZE];
+static const Uint8* kbstate;
+
+// Mouse
+static Uint32 mousestate;
+static int prev_x, prev_y;
+static int mouse_x, mouse_y;
+
+// FPS capping
+static Uint32 time_start;
+
+// Event loop
+static bool is_stopped = false;
+static SDL_Event event;
+
+
+void update_texture(TriangleMesh* pmesh);
+void put_on_screen();
+void export(SDL_Renderer* prenderer);
+void load_scene();
+void project();
+void init_rendering();
+void process_keys();
+void process_mouse();
+void cap_fps();
+
 
 int main(int argc, char **argv){
-    // SDL initialization
-    SDL_Window* pwindow = NULL;
-    SDL_Renderer* prenderer = NULL;
-    SDL_Texture* ptexture = NULL;
-
-    if (SDL_Init(SDL_INIT_VIDEO) != 0){
-        fprintf(stderr, "SDL failed to initialize: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    pwindow = SDL_CreateWindow("SDL Example",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            WIDTH,
-            HEIGHT,
-            0);
-
-    check_allocation(pwindow, "SDL window failed to initialize\n");
-
-    prenderer = SDL_CreateRenderer(pwindow, -1, 0);
-    check_allocation(prenderer, "SDL renderer failed to initialize\n");
-
-    ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
-    check_allocation(ptexture, "SDL texture failed to initialize\n");
-
-    Uint32* ppixels = (Uint32*) malloc(WIDTH * HEIGHT * sizeof(Uint32));
-    check_allocation(ppixels, "Couldn\'t allocate memory for frame buffer\n");
-
-    // UI
+    init_rendering();
     init_ui(HEIGHT, WIDTH, prenderer);
+    load_scene();
 
-
-    // Keyboard
-    const Uint8* kbstate = SDL_GetKeyboardState(NULL);
+    kbstate = SDL_GetKeyboardState(NULL);
+    cam = make_camera((float)WIDTH/SCALE, (float)HEIGHT/SCALE, 800/SCALE);
  
-    // Mouse
-    Uint32 mousestate;
-    int mouse_x, mouse_y;
-
-    // Initializing main loop
-    // Creating scene
-    TriangleMesh* pscene = tri_make_scene();
-    TriangleMesh* pculled_tri;
-
-    // Initializing camera
-    Camera cam = make_camera((float)WIDTH/SCALE, (float)HEIGHT/SCALE, 800/SCALE);
-    float orbit_radius = 0;
-    bool orbit_pressed = false;
-    bool b_key_pressed = false;
-    //bool orbit = false;
-    bool shift_pressed = false;
-
-    // Creating a buffer for the 2D projection
-    ProjectedMesh* pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
-    check_allocation(pbuffer, "Couldn\'t allocate memory for 2D projection buffer\n");
-
     // Main loop
-    Uint32 time_start, delta;
-    SDL_Event event;
-
-    bool captured;
-    bool is_stopped = false;
-    int prev_x, prev_y;
-
-    pculled_tri = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
-    update_texture(ppixels, pbuffer, ptexture, pculled_tri, true, &cam);
-    free(pculled_tri);
-
-    Point3D rotation, translation;
-    engine_state.hlr = false;
-    engine_state.do_hlr = false;
-
-    draw(ptexture, prenderer, engine_state);
+    engine_state.reproject = true;
 
     while (!is_stopped){
         translation.x = translation.y = translation.z = 0;
         rotation.x = rotation.y = rotation.z = 0;
-        engine_state.reproject = false;
         time_start = SDL_GetTicks();
         
         //Processing inputs
@@ -150,113 +94,14 @@ int main(int argc, char **argv){
                     engine_state.reproject = true;
                     break;
             }
-
         }
-
-        // Mouse
-        mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
-        // Dirty check to check in which part of the window is the mouse
-        if (mouse_y < HEIGHT - BAR_HEIGHT) {
-            // Top part
-            if (mousestate & SDL_BUTTON(1)){
-                if (shift_pressed){
-                    translation.x = (float)(mouse_x - prev_x)/2;
-                    translation.y = (float)(mouse_y - prev_y)/2;
-                } else {
-                    rotation.y = -(float)(mouse_x - prev_x)/500;
-                    rotation.x = (float)(mouse_y - prev_y)/500;
-                }
-                engine_state.reproject = true;
-            } else if (mousestate & SDL_BUTTON(3)){
-                rotation.z = (float)(mouse_x - prev_x)/500;
-                engine_state.reproject = true;
-            }
-
-            prev_x = mouse_x;
-            prev_y = mouse_y;
-        } else {
-            // Bottom part
-            process_ui_click(mouse_x, mouse_y, mousestate, &engine_state);
-            //if (engine_state.do_hlr) engine_state.reproject = true;
-        }
-
-        // Keyboard
-
-        if (kbstate[SDL_SCANCODE_W]) {
-            translation.z = -1;
-            orbit_radius += -1;
-            engine_state.reproject = true;
-        } else if (kbstate[SDL_SCANCODE_S]) {
-            translation.z = 1;
-            orbit_radius += 1;
-            engine_state.reproject = true;
-        }
-        if (kbstate[SDL_SCANCODE_A]) {
-            translation.x = 1;
-            engine_state.reproject = true;
-        } else if (kbstate[SDL_SCANCODE_D]) {
-            translation.x = -1;
-            engine_state.reproject = true;
-        }
-        if (kbstate[SDL_SCANCODE_Q]) {
-            translation.y = 1;
-            engine_state.reproject = true;
-        } else if (kbstate[SDL_SCANCODE_E]) {
-            translation.y = -1;
-            engine_state.reproject = true;
-        }
-        if (kbstate[SDL_SCANCODE_O]) {
-            if (!orbit_pressed){
-                orbit_pressed = true;
-                engine_state.orbit = !engine_state.orbit;
-                printf("Orbit mode toggled\n");
-            }
-        } else {
-            orbit_pressed = false;
-        }
-
-        if (kbstate[SDL_SCANCODE_B]) {
-            if (!b_key_pressed){
-                b_key_pressed = true;
-                engine_state.bface_cull = !engine_state.bface_cull;
-                engine_state.reproject = true;
-            }
-        } else {
-            b_key_pressed = false;
-        }
-
-        if (kbstate[SDL_SCANCODE_R]) {
-            // Activate back-face culling
-            engine_state.bface_cull = true;
-            engine_state.do_hlr = true;
-            engine_state.reproject = true;
-        }
-
-        if (kbstate[SDL_SCANCODE_SPACE]) {
-            if (!captured){
-                export(prenderer);
-                captured = true;
-            }
-        } else {
-            captured = false;
-        }
-        if (kbstate[SDL_SCANCODE_T]) {
-            // Reloading file
-            printf("Reloading input file\n");
-            free(pscene);
-            free(pbuffer);
-            pscene = tri_make_scene();
-            pbuffer = (ProjectedMesh*) malloc(sizeof(ProjectedMesh) + pscene->size * sizeof(ProjectedEdge) * 3);
-            engine_state.reproject = true;
-        }
-        shift_pressed = kbstate[SDL_SCANCODE_LSHIFT];
+        process_mouse();
+        process_keys();
 
         //Projecting
         if (engine_state.reproject){
-            update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, orbit_radius);
-            pculled_tri = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
-            update_texture(ppixels, pbuffer, ptexture, pculled_tri, !engine_state.do_hlr, &cam);
-            free(pculled_tri);
+            update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, cam.orbit_radius);
+            project();
             if (engine_state.do_hlr){
                 engine_state.hlr = true;
                 engine_state.do_hlr = false;
@@ -265,26 +110,194 @@ int main(int argc, char **argv){
             }
             engine_state.reproject = false;
         }
+        engine_state.reproject = false;
 
         //Drawing
-        draw(ptexture, prenderer, engine_state);
+        put_on_screen();
 
         //FPS caping
-        delta = SDL_GetTicks() - time_start;
-        if (delta == 0 || 1000 / delta > FPS) {
-            SDL_Delay((1000 / FPS) - delta);
-        }
+        cap_fps();
     }
+    printf("Exiting...\n");
 
     // Freeing
-    free(ppixels);
     free(pbuffer);
     free(pscene);
-    //destroy_ui();
 
     SDL_DestroyTexture(ptexture);
     SDL_DestroyRenderer(prenderer);
-    SDL_DestroyWindow(pwindow);
-    SDL_Quit();
+    SDL_DestroyWindow(pwindow); SDL_Quit();
     return 0;
 }
+
+void update_texture(TriangleMesh* pmesh){
+    int pitch = WIDTH * sizeof(Uint32);
+    SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
+    //Clear pixels
+    for (int i = 0; i < HEIGHT * WIDTH; i++){
+        ppixels[i] = BG_COLOR;
+    }
+    //Draw lines
+    for (int i = 0; i < pbuffer->size; i++){
+        draw_line(ppixels, pbuffer->edges[i], pmesh, !engine_state.do_hlr, &cam);
+    }
+    SDL_UnlockTexture(ptexture);
+}
+
+void put_on_screen(){
+    SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
+    draw_ui(prenderer, engine_state);
+    SDL_RenderPresent(prenderer);
+}
+
+void export(SDL_Renderer* prenderer){
+    //https://discourse.libsdl.org/t/save-image-from-render/21009/2
+    SDL_Surface* psshot = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, 32, 0, 0, 0, 0);
+    if (psshot == NULL){
+        fprintf(stderr, "Couldn't create a surface to export image\n");
+    } else {
+        SDL_RenderReadPixels(prenderer, NULL, 0, psshot->pixels, psshot->pitch);
+        SDL_SaveBMP(psshot, EXPORT_PATH);
+        printf("File exported as %s\n", EXPORT_PATH);
+        SDL_FreeSurface(psshot);
+    }
+}
+
+void load_scene(){
+    if (pscene != NULL)
+        free(pscene);
+    if (pbuffer != NULL)
+        free(pbuffer);
+    pscene = tri_make_scene();
+    // Initializing a buffer for the 2D projection
+    pbuffer = new_projected_mesh(pscene->size);
+}
+
+void project(){
+    TriangleMesh* pmesh = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
+    update_texture(pmesh);
+    free(pmesh);
+}
+
+void init_rendering(){
+    if (SDL_Init(SDL_INIT_VIDEO) != 0){
+        fprintf(stderr, "SDL failed to initialize: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    pwindow = SDL_CreateWindow("SDL Example",
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            WIDTH,
+            HEIGHT,
+            0);
+
+    check_allocation(pwindow, "SDL window failed to initialize\n");
+
+    prenderer = SDL_CreateRenderer(pwindow, -1, 0);
+    check_allocation(prenderer, "SDL renderer failed to initialize\n");
+
+    ptexture = SDL_CreateTexture(prenderer, SDL_PIXELFORMAT_ARGB8888,
+                                 SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+    check_allocation(ptexture, "SDL texture failed to initialize\n");
+}
+
+void process_keys(){
+    if (kbstate[SDL_SCANCODE_W]) {
+        // Move forward
+        translation.z = -1;
+        cam.orbit_radius += -1;
+        engine_state.reproject = true;
+    } else if (kbstate[SDL_SCANCODE_S]) {
+        // Move backward
+        translation.z = 1;
+        cam.orbit_radius += 1;
+        engine_state.reproject = true;
+    }
+    if (kbstate[SDL_SCANCODE_A]) {
+        // Move left
+        translation.x = 1;
+        engine_state.reproject = true;
+    } else if (kbstate[SDL_SCANCODE_D]) {
+        // Move right
+        translation.x = -1;
+        engine_state.reproject = true;
+    }
+    if (kbstate[SDL_SCANCODE_Q]) {
+        // Move up
+        translation.y = 1;
+        engine_state.reproject = true;
+    } else if (kbstate[SDL_SCANCODE_E]) {
+        // Move down
+        translation.y = -1;
+        engine_state.reproject = true;
+    }
+    if (kbstate[SDL_SCANCODE_O] && !old_kbstate[SDL_SCANCODE_O]) {
+        // Toggle orbit mode
+        engine_state.orbit = !engine_state.orbit;
+        printf("Orbit mode toggled\n");
+    }
+
+    if (kbstate[SDL_SCANCODE_B] && !old_kbstate[SDL_SCANCODE_B]) {
+        // Toggle back-face culling
+        engine_state.bface_cull = !engine_state.bface_cull;
+        engine_state.reproject = true;
+    }
+
+    if (kbstate[SDL_SCANCODE_R] && !old_kbstate[SDL_SCANCODE_R]) {
+        // Trigger hidden-line removal
+        engine_state.bface_cull = true;
+        engine_state.do_hlr = true;
+        engine_state.reproject = true;
+    }
+
+    if (kbstate[SDL_SCANCODE_SPACE] && !old_kbstate[SDL_SCANCODE_SPACE]) {
+        // Trigger screenshot
+        export(prenderer);
+    }
+
+    if (kbstate[SDL_SCANCODE_T] && !old_kbstate[SDL_SCANCODE_T]) {
+        // Reload file
+        printf("Reloading input file\n");
+        load_scene();
+        engine_state.reproject = true;
+    }
+
+    // Save the current state of the keyboard
+    memcpy(old_kbstate, kbstate, KBSTATE_SIZE * sizeof(Uint8));
+}
+
+void process_mouse(){
+    // Mouse
+    mousestate = SDL_GetMouseState(&mouse_x, &mouse_y);
+    // Dirty check to check in which part of the window is the mouse
+    if (mouse_y < HEIGHT - BAR_HEIGHT) {
+        // Top part
+        if (mousestate & SDL_BUTTON(1)){
+            if (kbstate[SDL_SCANCODE_LSHIFT]) {
+                translation.x = (float)(mouse_x - prev_x)/2;
+                translation.y = (float)(mouse_y - prev_y)/2;
+            } else {
+                rotation.y = -(float)(mouse_x - prev_x)/500;
+                rotation.x = (float)(mouse_y - prev_y)/500;
+            }
+            engine_state.reproject = true;
+        } else if (mousestate & SDL_BUTTON(3)){
+            rotation.z = (float)(mouse_x - prev_x)/500;
+            engine_state.reproject = true;
+        }
+
+        prev_x = mouse_x;
+        prev_y = mouse_y;
+    } else {
+        // Bottom part
+        process_ui_click(mouse_x, mouse_y, mousestate, &engine_state);
+    }
+}
+
+void cap_fps(){
+    Uint32 delta = SDL_GetTicks() - time_start;
+    if (delta == 0 || 1000 / delta > FPS) {
+        SDL_Delay((1000 / FPS) - delta);
+    }
+};
