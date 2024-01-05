@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -9,16 +8,9 @@
 static WorkStack wstack = {.top = 0};
 static ObjectStack ostack = {.top = 0};
 
-TriangleMesh* parse_file(){
+TriangleMesh* mesh_from_file(FILE* pfile){
     // Seed random
     srand(time(NULL));
-    // Open input file
-    FILE* pfile = fopen(INPUT_FILE, "r");
-
-    if (pfile == NULL){
-        printf("No such file\n");
-        exit(1);
-    }
     // Rewind in case we already read the file before
     wstack.top = 0;
     ostack.top = 0;

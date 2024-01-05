@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include "transforms.h"
 #include "primitives.h"
-#include "scene.h"
+#include "interpreter.h"
 #include "camera.h"
 #include "vect.h"
 #include "draw.h"
@@ -25,6 +25,8 @@ static SDL_Texture* ptexture = NULL;
 static Uint32* ppixels = NULL;
 
 // Model
+static char* input_file_path;
+static FILE* pfile = NULL;
 static TriangleMesh* pscene = NULL;
 static ProjectedMesh* pbuffer = NULL;
 
@@ -61,6 +63,10 @@ void cap_fps();
 
 
 int main(int argc, char **argv){
+    // Read file path from argument
+    input_file_path = argv[1];
+
+    // Initializing
     init_rendering();
     init_ui(HEIGHT, WIDTH, prenderer);
     load_scene();
@@ -168,7 +174,14 @@ void load_scene(){
         free(pscene);
     if (pbuffer != NULL)
         free(pbuffer);
-    pscene = tri_make_scene();
+    // Open input file
+    pfile = fopen(input_file_path, "r");
+
+    if (pfile == NULL){
+        printf("No such file\n");
+        exit(1);
+    }
+    pscene = mesh_from_file(pfile);
     // Initializing a buffer for the 2D projection
     pbuffer = new_projected_mesh(pscene->size);
 }

@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+#include <stdio.h>
 #include "primitives.h"
 
 #define STACK_SIZE 512
@@ -19,7 +20,7 @@ typedef struct {
 
 static const char* delimiter = " \n";
 
-TriangleMesh* parse_file();
+TriangleMesh* mesh_from_file(FILE* pfile);
 void push_onto_work_stack(float elem);
 void push_onto_obj_stack(TriangleMesh* elem);
 float pop_from_work_stack();
