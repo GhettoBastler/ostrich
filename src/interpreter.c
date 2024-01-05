@@ -86,6 +86,10 @@ void parse_instruction(char* token){
         do_mul();
     } else if (strcmp(token, "div") == 0){
         do_div();
+    } else if (strcmp(token, "dup_work") == 0){
+        do_dup_work();
+    } else if (strcmp(token, "dup_obj") == 0){
+        do_dup_obj();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -241,4 +245,16 @@ void do_div(){
     float b = pop_from_work_stack();
     float a = pop_from_work_stack();
     push_onto_work_stack(a / b);
+}
+
+void do_dup_work(){
+    float a = pop_from_work_stack();
+    push_onto_work_stack(a);
+    push_onto_work_stack(a);
+}
+
+void do_dup_obj(){
+    TriangleMesh* a = pop_from_obj_stack();
+    push_onto_obj_stack(a);
+    push_onto_obj_stack(a);
 }

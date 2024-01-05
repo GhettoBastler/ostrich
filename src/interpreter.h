@@ -44,5 +44,7 @@ void do_add();
 void do_sub();
 void do_mul();
 void do_div();
+void do_dup_work();
+void do_dup_obj();
 
 #endif
