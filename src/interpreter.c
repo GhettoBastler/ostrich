@@ -78,6 +78,14 @@ void parse_instruction(char* token){
         do_rot_obj();
     } else if (strcmp(token, "rand") == 0){
         do_rand();
+    } else if (strcmp(token, "add") == 0){
+        do_add();
+    } else if (strcmp(token, "sub") == 0){
+        do_sub();
+    } else if (strcmp(token, "mul") == 0){
+        do_mul();
+    } else if (strcmp(token, "div") == 0){
+        do_div();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -209,4 +217,28 @@ void do_rand(){
     float min = pop_from_work_stack();
     float res = min + ((float) rand() / (float) (RAND_MAX / (max - min)));
     push_onto_work_stack(res);
+}
+
+void do_add(){
+    float b = pop_from_work_stack();
+    float a = pop_from_work_stack();
+    push_onto_work_stack(a + b);
+}
+
+void do_sub(){
+    float b = pop_from_work_stack();
+    float a = pop_from_work_stack();
+    push_onto_work_stack(a - b);
+}
+
+void do_mul(){
+    float b = pop_from_work_stack();
+    float a = pop_from_work_stack();
+    push_onto_work_stack(b * a);
+}
+
+void do_div(){
+    float b = pop_from_work_stack();
+    float a = pop_from_work_stack();
+    push_onto_work_stack(a / b);
 }
