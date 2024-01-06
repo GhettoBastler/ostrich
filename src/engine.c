@@ -7,7 +7,6 @@
 #include "interpreter.h"
 #include "camera.h"
 #include "vect.h"
-#include "draw.h"
 #include "ui.h"
 #include "engine.h"
 
