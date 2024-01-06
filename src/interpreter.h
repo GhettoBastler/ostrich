@@ -33,6 +33,7 @@ void do_box();
 void do_prism();
 void do_rotate();
 void do_translate();
+void do_reflect();
 void do_merge();
 void do_clone();
 void do_swap_obj();

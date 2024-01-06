@@ -90,6 +90,8 @@ void parse_instruction(char* token){
         do_dup_work();
     } else if (strcmp(token, "dup_obj") == 0){
         do_dup_obj();
+    } else if (strcmp(token, "reflect") == 0){
+        do_reflect();
     } else {
         printf("%s: Unknown instruction. Exiting\n", token);
         exit(1);
@@ -257,4 +259,14 @@ void do_dup_obj(){
     TriangleMesh* a = pop_from_obj_stack();
     push_onto_obj_stack(a);
     push_onto_obj_stack(a);
+}
+
+void do_reflect(){
+    float z = pop_from_work_stack();
+    float y = pop_from_work_stack();
+    float x = pop_from_work_stack();
+    Point3D normal = {x, y, z};
+    TriangleMesh* mesh = pop_from_obj_stack();
+    reflect_mesh(mesh, normal);
+    push_onto_obj_stack(mesh);
 }

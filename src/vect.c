@@ -87,3 +87,11 @@ void multiply_matrix(float* matB, float* matA){
 bool pt_is_null(Point3D pt){
     return (pt.x == 0 && pt.y == 0 && pt.z == 0);
 }
+
+float pt_len(Point3D pt){
+    return sqrtf(dot_product(pt, pt));
+}
+
+Point3D normalize(Point3D vect){
+    return pt_mul(1/pt_len(vect), vect);
+}

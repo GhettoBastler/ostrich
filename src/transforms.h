@@ -14,6 +14,7 @@ void calculate_rotation_matrix(float* matrix, Point3D rotation);
 void calculate_translation_matrix(float* matrix, Point3D translation);
 void translate_mesh(TriangleMesh* pmesh, Point3D translation);
 void rotate_mesh(TriangleMesh* pmesh, Point3D rotation);
+void reflect_mesh(TriangleMesh* pmesh, Point3D normal);
 void transform_mesh(float* matrix, TriangleMesh* pmesh);
 TriangleMesh* copy_mesh(TriangleMesh* pmesh);
 

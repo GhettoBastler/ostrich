@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "primitives.h"
 #include "camera.h"
+#include "vect.h"
 
 
 TriangleMesh* add_triangle(TriangleMesh* pmesh, Triangle tri){
@@ -194,4 +195,17 @@ TriangleMesh* copy_mesh(TriangleMesh* pmesh){
     check_allocation(pcopy, "Couldn't allocate memory to copy the mesh\n");
     memcpy(pcopy, pmesh, size_in_memory);
     return pcopy;
+}
+
+void reflect_mesh(TriangleMesh* pmesh, Point3D normal){
+    // Normalizing vector
+    Point3D unit_norm = normalize(normal);
+    float matrix[16] = {
+        1 - 2*unit_norm.x*unit_norm.x, -2*unit_norm.x*unit_norm.y, -2*unit_norm.x*unit_norm.z, 0,
+        -2*unit_norm.x*unit_norm.y, 1 - 2*unit_norm.y*unit_norm.y, -2*unit_norm.y*unit_norm.z, 0,
+        -2*unit_norm.x*unit_norm.z, -2*unit_norm.y*unit_norm.z, 1-2*unit_norm.z*unit_norm.z, 0,
+        0, 0, 0, 1,
+    };
+    transform_mesh(matrix, pmesh);
+    flip_mesh(pmesh);
 }
