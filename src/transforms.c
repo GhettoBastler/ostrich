@@ -304,3 +304,24 @@ TriangleMesh* frustum_cull(TriangleMesh* ptri, Camera* pcam){
 void z_sort_triangles(TriangleMesh* pmesh){
     qsort(pmesh->triangles, pmesh->size, sizeof(Triangle), comp_tri_z);
 }
+
+TriangleMesh* transform_and_cull(TriangleMesh* pmesh, Camera* pcam, bool do_bface_cull){
+    // Creating a copy of the mesh for transform
+    TriangleMesh* pmesh_transformed = copy_mesh(pmesh);
+    // 3D transform
+    transform_mesh(pcam->transform_mat, pmesh_transformed);
+    // Culling
+    TriangleMesh* pculled_tri;
+    TriangleMesh* pfrustum_culled;
+    // Frustum culling (always)
+    pfrustum_culled = frustum_cull(pmesh_transformed, pcam);
+    if (do_bface_cull){
+        pculled_tri = bface_cull(pfrustum_culled);
+        free(pfrustum_culled);
+    } else {
+        pculled_tri = pfrustum_culled;
+    }
+    z_sort_triangles(pculled_tri);
+    return pculled_tri;
+}
+

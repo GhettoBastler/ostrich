@@ -49,7 +49,6 @@ static bool is_stopped = false;
 static SDL_Event event;
 
 
-TriangleMesh* transform_and_cull(TriangleMesh* pmesh, Camera* pcam);
 void put_on_screen();
 void export(SDL_Renderer* prenderer);
 void load_scene();
@@ -104,8 +103,10 @@ int main(int argc, char **argv){
 
         //Projecting
         if (engine_state.reproject){
-            update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, cam.orbit_radius);
-            TriangleMesh* ptransformed = transform_and_cull(pscene, &cam);
+            update_transform_matrix(cam.transform_mat, rotation, translation,
+                                    engine_state.orbit, cam.orbit_radius);
+            TriangleMesh* ptransformed = transform_and_cull(
+                    pscene, &cam, engine_state.bface_cull);
             render(ptransformed);
             free(ptransformed);
             if (engine_state.do_hlr){
@@ -173,26 +174,6 @@ void render(TriangleMesh* pmesh){
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
     render_mesh(pmesh, ppixels, &cam, engine_state.do_hlr);
     SDL_UnlockTexture(ptexture);
-}
-
-TriangleMesh* transform_and_cull(TriangleMesh* pmesh, Camera* pcam){
-    // Creating a copy of the mesh for transform
-    TriangleMesh* pmesh_transformed = copy_mesh(pmesh);
-    // 3D transform
-    transform_mesh(pcam->transform_mat, pmesh_transformed);
-    // Culling
-    TriangleMesh* pculled_tri;
-    TriangleMesh* pfrustum_culled;
-    // Frustum culling (always)
-    pfrustum_culled = frustum_cull(pmesh_transformed, pcam);
-    if (engine_state.bface_cull){
-        pculled_tri = bface_cull(pfrustum_culled);
-        free(pfrustum_culled);
-    } else {
-        pculled_tri = pfrustum_culled;
-    }
-    z_sort_triangles(pculled_tri);
-    return pculled_tri;
 }
 
 void init_rendering(){

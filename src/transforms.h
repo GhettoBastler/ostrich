@@ -2,13 +2,13 @@
 #define TRANSFORMS_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <math.h>
 #include "primitives.h"
 #include "camera.h"
 
-void z_sort_triangles(TriangleMesh* pmesh);
-TriangleMesh* bface_cull(TriangleMesh* ptri);
-TriangleMesh* frustum_cull(TriangleMesh* ptri, Camera* pcam);
+TriangleMesh* transform_and_cull(TriangleMesh* pmesh, Camera* pcam, bool do_bface_cull);
+
 TriangleMesh* add_triangle(TriangleMesh* pmesh, Triangle tri);
 TriangleMesh* merge_tri_meshes(TriangleMesh* pmesh1, TriangleMesh* pmesh2);
 void flip_triangle(Triangle* ptri);
