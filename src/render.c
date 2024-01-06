@@ -11,21 +11,34 @@
 #include "transforms.h"
 #include "vect.h"
 #include "render.h"
+#include "utils.h"
 
 
+typedef struct {
+    Point3D min, max;
+} BoundingBox;
+
+
+// Projection
 ProjectedMesh* project_tri_mesh(TriangleMesh* ptri_mesh, Camera* pcam);
 ProjectedEdge project_edge(Edge3D edge, Camera* pcam);
-Point2D project_point(Point3D point, Camera* pcam);
+// Clipping
 void clip_frustum(Edge3D* pedge, Camera* pcam);
 void clip_line(Edge3D* pedge, float ratio, bool reverse);
+// HLR
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri);
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int start_idx);
 float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length,
                                   float ratio, bool reverse);
+// Pixel painting
 void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
                bool draw_hidden, Camera* pcam);
+// Bounding box
+BoundingBox bbox_from_edge(Edge3D edge);
+BoundingBox bbox_from_triangle(Triangle triangle);
 
 
+// Renders a mesh onto a pixel array, with or without HLR
 void render_mesh(TriangleMesh* pmesh, uint32_t* ppixels, Camera* pcam, bool do_hlr){
     for (int i = 0; i < HEIGHT * WIDTH; i++){
         ppixels[i] = BG_COLOR;
@@ -38,14 +51,7 @@ void render_mesh(TriangleMesh* pmesh, uint32_t* ppixels, Camera* pcam, bool do_h
 }
 
 
-// 2D projection
-Point2D project_point(Point3D point, Camera* pcam){
-    float x = point.x * (pcam->focal_length / (point.z));
-    float y = point.y * (pcam->focal_length / (point.z));
-    Point2D res = {x, y};
-    return res;
-}
-
+// Projection
 ProjectedEdge project_edge(Edge3D edge, Camera* pcam){
     ProjectedEdge res;
     Point2D a = project_point(edge.a, pcam);
@@ -56,6 +62,7 @@ ProjectedEdge project_edge(Edge3D edge, Camera* pcam){
 
     return res;
 }
+
 
 ProjectedMesh* project_tri_mesh(TriangleMesh* ptri_mesh, Camera* pcam){
     ProjectedMesh* pbuffer = new_projected_mesh(ptri_mesh->size);
@@ -95,12 +102,15 @@ ProjectedMesh* project_tri_mesh(TriangleMesh* ptri_mesh, Camera* pcam){
     return pbuffer;
 }
 
+
+// Line clipping
 void clip_line(Edge3D* pedge, float ratio, bool reverse){
     if (reverse)
         pedge->a = pt_add(pedge->b, pt_mul(ratio, pt_diff(pedge->a, pedge->b)));
     else
         pedge->b = pt_add(pedge->a, pt_mul(ratio, pt_diff(pedge->b, pedge->a)));
 }
+
 
 void clip_frustum(Edge3D* pedge, Camera* pcam){
     Point3D diff;
@@ -205,6 +215,8 @@ void clip_frustum(Edge3D* pedge, Camera* pcam){
     }
 }
 
+
+// HLR
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
     Point3D ab = pt_diff(tri.b, tri.a),
             bc = pt_diff(tri.c, tri.b),
@@ -232,6 +244,7 @@ bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri){
     );
 }
 
+
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int start_idx){
     Point3D pt_obj = pt_add(pt_mul(ratio, edge.b),
                             pt_mul((1-ratio), edge.a));
@@ -256,6 +269,7 @@ bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int sta
     }
     return true;
 }
+
 
 float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length,
                                   float ratio, bool reverse){
@@ -318,6 +332,8 @@ float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_leng
     return res;
 }
 
+
+// Pixel painting
 void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
                bool draw_hidden, Camera* pcam){
 
@@ -390,4 +406,20 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
             y0 += sy;
         }
     }
+}
+
+
+// Bounding box
+BoundingBox bbox_from_triangle(Triangle triangle){
+    BoundingBox res;
+    res.min = pt_min(pt_min(triangle.a, triangle.b), triangle.c);
+    res.max = pt_max(pt_max(triangle.a, triangle.b), triangle.c);
+    return res;
+}
+
+BoundingBox bbox_from_edge(Edge3D edge){
+    BoundingBox res;
+    res.min = pt_min(edge.a, edge.b);
+    res.max = pt_max(edge.a, edge.b);
+    return res;
 }

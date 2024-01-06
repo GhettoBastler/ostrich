@@ -10,10 +10,10 @@
 #include "primitives.h"
 #include "transforms.h"
 #include "vect.h"
+#include "utils.h"
 
 int comp_tri_z(const void* ptri_a, const void* ptri_b);
 void z_sort_triangles(TriangleMesh* pmesh);
-void clip_line(Edge3D* pedge, float ratio, bool reverse);
 bool facing_camera(Triangle tri);
 
 
@@ -55,6 +55,7 @@ void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, 
     multiply_matrix(new_mat, tmp_mat);
     multiply_matrix(mat, new_mat);
 }
+
 bool facing_camera(Triangle tri){
     Point3D vect_1 = pt_diff(tri.b, tri.a),
             vect_2 = pt_diff(tri.a, tri.c);
@@ -94,19 +95,7 @@ TriangleMesh* bface_cull(TriangleMesh* ptri){
     }
     return pres;
 }
-BoundingBox bbox_from_triangle(Triangle triangle){
-    BoundingBox res;
-    res.min = pt_min(pt_min(triangle.a, triangle.b), triangle.c);
-    res.max = pt_max(pt_max(triangle.a, triangle.b), triangle.c);
-    return res;
-}
 
-BoundingBox bbox_from_edge(Edge3D edge){
-    BoundingBox res;
-    res.min = pt_min(edge.a, edge.b);
-    res.max = pt_max(edge.a, edge.b);
-    return res;
-}
 TriangleMesh* frustum_cull(TriangleMesh* ptri, Camera* pcam){
     TriangleMesh* pres = new_triangle_mesh(0);
     Triangle curr_tri;
