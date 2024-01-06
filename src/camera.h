@@ -15,9 +15,6 @@ typedef struct {
     float orbit_radius;
 } Camera;
 
-void z_sort_triangles(TriangleMesh* pmesh);
-TriangleMesh* bface_cull(TriangleMesh* ptri);
-TriangleMesh* frustum_cull(TriangleMesh* ptri, Camera* pcam);
 Camera make_camera(float width, float height, float focal_length);
 void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius);
 
