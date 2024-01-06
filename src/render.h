@@ -7,6 +7,6 @@
 
 #include <stdint.h>
 
-void render_mesh(TriangleMesh* pmesh, uint32_t* ppixels, Camera* pcam, bool do_bface_cull, bool do_hlr);
+void render_mesh(TriangleMesh* pmesh, uint32_t* ppixels, Camera* pcam, bool do_hlr);
 
 #endif

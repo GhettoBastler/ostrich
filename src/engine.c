@@ -22,13 +22,11 @@ static EngineState engine_state = {false, false, false, false, true};
 static SDL_Window* pwindow = NULL;
 static SDL_Renderer* prenderer = NULL;
 static SDL_Texture* ptexture = NULL;
-//static Uint32* ppixels = NULL;
 
 // Model
 static char* input_file_path;
 static FILE* pfile = NULL;
 static TriangleMesh* pscene = NULL;
-static ProjectedMesh* pbuffer = NULL;
 
 // Camera
 static Camera cam;
@@ -51,10 +49,11 @@ static bool is_stopped = false;
 static SDL_Event event;
 
 
+TriangleMesh* transform_and_cull(TriangleMesh* pmesh, Camera* pcam);
 void put_on_screen();
 void export(SDL_Renderer* prenderer);
 void load_scene();
-void project();
+void render(TriangleMesh* pmesh);
 void init_rendering();
 void process_keys();
 void process_mouse();
@@ -106,7 +105,9 @@ int main(int argc, char **argv){
         //Projecting
         if (engine_state.reproject){
             update_transform_matrix(cam.transform_mat, rotation, translation, engine_state.orbit, cam.orbit_radius);
-            project();
+            TriangleMesh* ptransformed = transform_and_cull(pscene, &cam);
+            render(ptransformed);
+            free(ptransformed);
             if (engine_state.do_hlr){
                 engine_state.hlr = true;
                 engine_state.do_hlr = false;
@@ -126,7 +127,6 @@ int main(int argc, char **argv){
     printf("Exiting...\n");
 
     // Freeing
-    free(pbuffer);
     free(pscene);
 
     SDL_DestroyTexture(ptexture);
@@ -157,8 +157,6 @@ void export(SDL_Renderer* prenderer){
 void load_scene(){
     if (pscene != NULL)
         free(pscene);
-    if (pbuffer != NULL)
-        free(pbuffer);
     // Open input file
     pfile = fopen(input_file_path, "r");
 
@@ -167,17 +165,34 @@ void load_scene(){
         exit(1);
     }
     pscene = mesh_from_file(pfile);
-    // Initializing a buffer for the 2D projection
-    pbuffer = new_projected_mesh(pscene->size);
 }
 
-void project(){
-    //TriangleMesh* pmesh = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
+void render(TriangleMesh* pmesh){
     int pitch = WIDTH * sizeof(Uint32);
     Uint32* ppixels = NULL;
     SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
-    render_mesh(pscene, ppixels, &cam, engine_state.bface_cull, engine_state.do_hlr);
+    render_mesh(pmesh, ppixels, &cam, engine_state.do_hlr);
     SDL_UnlockTexture(ptexture);
+}
+
+TriangleMesh* transform_and_cull(TriangleMesh* pmesh, Camera* pcam){
+    // Creating a copy of the mesh for transform
+    TriangleMesh* pmesh_transformed = copy_mesh(pmesh);
+    // 3D transform
+    transform_mesh(pcam->transform_mat, pmesh_transformed);
+    // Culling
+    TriangleMesh* pculled_tri;
+    TriangleMesh* pfrustum_culled;
+    // Frustum culling (always)
+    pfrustum_culled = frustum_cull(pmesh_transformed, pcam);
+    if (engine_state.bface_cull){
+        pculled_tri = bface_cull(pfrustum_culled);
+        free(pfrustum_culled);
+    } else {
+        pculled_tri = pfrustum_culled;
+    }
+    z_sort_triangles(pculled_tri);
+    return pculled_tri;
 }
 
 void init_rendering(){

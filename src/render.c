@@ -12,28 +12,29 @@
 #include "vect.h"
 #include "render.h"
 
-Point2D project_point(Point3D point, Camera* pcam);
+
+ProjectedMesh* project_tri_mesh(TriangleMesh* ptri_mesh, Camera* pcam);
 ProjectedEdge project_edge(Edge3D edge, Camera* pcam);
-TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam, bool do_cull);
+Point2D project_point(Point3D point, Camera* pcam);
 void clip_frustum(Edge3D* pedge, Camera* pcam);
+void clip_line(Edge3D* pedge, float ratio, bool reverse);
 bool ray_tri_intersect(Point3D* inter, Point3D point, Triangle tri);
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* ptri_mesh, int start_idx);
 float obj_ratio_from_screen_ratio(Edge3D edge3D, Edge2D edge2D, float focal_length,
                                   float ratio, bool reverse);
 void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
                bool draw_hidden, Camera* pcam);
-void clip_line(Edge3D* pedge, float ratio, bool reverse);
 
-void render_mesh(TriangleMesh* pmesh, uint32_t* ppixels, Camera* pcam, bool do_bface_cull, bool do_hlr){
+
+void render_mesh(TriangleMesh* pmesh, uint32_t* ppixels, Camera* pcam, bool do_hlr){
     for (int i = 0; i < HEIGHT * WIDTH; i++){
         ppixels[i] = BG_COLOR;
     }
-    ProjectedMesh* pproj = new_projected_mesh(pmesh->size);
-    TriangleMesh* pculled = project_tri_mesh(pproj, pmesh, pcam, do_bface_cull);
+    ProjectedMesh* pproj = project_tri_mesh(pmesh, pcam);
     for (int i = 0; i < pproj->size; i++){
-        draw_line(ppixels, pproj->edges[i], pculled, !do_hlr, pcam);
+        draw_line(ppixels, pproj->edges[i], pmesh, !do_hlr, pcam);
     }
-    free(pculled);
+    free(pproj);
 }
 
 
@@ -56,42 +57,27 @@ ProjectedEdge project_edge(Edge3D edge, Camera* pcam){
     return res;
 }
 
-TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, Camera* pcam, bool do_cull){
-    // Creating a copy of the mesh for transform
-    TriangleMesh* pmesh_transformed = copy_mesh(ptri_mesh);
-    // 3D transform
-    transform_mesh(pcam->transform_mat, pmesh_transformed);
-    // Culling
-    TriangleMesh* pculled_tri;
-    TriangleMesh* pfrustum_culled;
-    // Frustum culling (always)
-    pfrustum_culled = frustum_cull(pmesh_transformed, pcam);
-    if (do_cull){
-        pculled_tri = bface_cull(pfrustum_culled);
-        free(pfrustum_culled);
-    } else {
-        pculled_tri = pfrustum_culled;
-    }
-    
+ProjectedMesh* project_tri_mesh(TriangleMesh* ptri_mesh, Camera* pcam){
+    ProjectedMesh* pbuffer = new_projected_mesh(ptri_mesh->size);
     Edge3D edges[3];
     ProjectedEdge curr_proj_edge;
 
     int n = 0;
-    for (int i = 0; i < pculled_tri->size; i++){
+    for (int i = 0; i < ptri_mesh->size; i++){
         // Convert each triangle into three edges
         // AB
-        edges[0].a = pculled_tri->triangles[i].a;
-        edges[0].b = pculled_tri->triangles[i].b;
+        edges[0].a = ptri_mesh->triangles[i].a;
+        edges[0].b = ptri_mesh->triangles[i].b;
         // BC
-        edges[1].a = pculled_tri->triangles[i].b;
-        edges[1].b = pculled_tri->triangles[i].c;
+        edges[1].a = ptri_mesh->triangles[i].b;
+        edges[1].b = ptri_mesh->triangles[i].c;
         // CA
-        edges[2].a = pculled_tri->triangles[i].c;
-        edges[2].b = pculled_tri->triangles[i].a;
+        edges[2].a = ptri_mesh->triangles[i].c;
+        edges[2].b = ptri_mesh->triangles[i].a;
 
         for (int j = 0; j < 3; j++){
             // Add only the visible edges
-            if (pculled_tri->triangles[i].visible[j]) {
+            if (ptri_mesh->triangles[i].visible[j]) {
                 // Clip the line if it goes outside the frustum
                 clip_frustum(&edges[j], pcam);
                 // If there is nothing left
@@ -106,9 +92,7 @@ TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* ptri_mesh, 
         }
     }
     pbuffer->size = n;
-    // Z-sort
-    z_sort_triangles(pculled_tri);
-    return pculled_tri;
+    return pbuffer;
 }
 
 void clip_line(Edge3D* pedge, float ratio, bool reverse){

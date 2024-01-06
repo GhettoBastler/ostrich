@@ -34,7 +34,7 @@ void draw_line(uint32_t* ppixels, ProjectedEdge edge, TriangleMesh* pmesh,
 Point2D project_point(Point3D point, Camera* pcam);
 Camera make_camera(float width, float height, float focal_length);
 void update_transform_matrix(float* mat, Point3D rotation, Point3D translation, bool orbit, float orbit_radius);
-TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* pmesh, Camera* pcam, bool do_cull);
+// TriangleMesh* project_tri_mesh(ProjectedMesh* pbuffer, TriangleMesh* pmesh, Camera* pcam, bool do_cull);
 bool point_is_visible(Edge3D edge, float ratio, TriangleMesh* pmesh, int start_idx);
 
 #endif
