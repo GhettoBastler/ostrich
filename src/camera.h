@@ -4,9 +4,6 @@
 #include <stdint.h>
 #include "primitives.h"
 
-#define LINE_COLOR_1 0xFFF4115D
-#define LINE_COLOR_2 0xFF000000
-#define BG_COLOR 0xFFFFFFFF
 #define WIDTH 720
 #define HEIGHT 480
 #define SCALE 80

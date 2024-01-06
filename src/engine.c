@@ -9,6 +9,7 @@
 #include "vect.h"
 #include "ui.h"
 #include "engine.h"
+#include "render.h"
 
 #define KBSTATE_SIZE 256
 #define FPS 60
@@ -21,7 +22,7 @@ static EngineState engine_state = {false, false, false, false, true};
 static SDL_Window* pwindow = NULL;
 static SDL_Renderer* prenderer = NULL;
 static SDL_Texture* ptexture = NULL;
-static Uint32* ppixels = NULL;
+//static Uint32* ppixels = NULL;
 
 // Model
 static char* input_file_path;
@@ -50,7 +51,6 @@ static bool is_stopped = false;
 static SDL_Event event;
 
 
-void update_texture(TriangleMesh* pmesh);
 void put_on_screen();
 void export(SDL_Renderer* prenderer);
 void load_scene();
@@ -135,20 +135,6 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void update_texture(TriangleMesh* pmesh){
-    int pitch = WIDTH * sizeof(Uint32);
-    SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
-    //Clear pixels
-    for (int i = 0; i < HEIGHT * WIDTH; i++){
-        ppixels[i] = BG_COLOR;
-    }
-    //Draw lines
-    for (int i = 0; i < pbuffer->size; i++){
-        draw_line(ppixels, pbuffer->edges[i], pmesh, !engine_state.do_hlr, &cam);
-    }
-    SDL_UnlockTexture(ptexture);
-}
-
 void put_on_screen(){
     SDL_RenderCopy(prenderer, ptexture, NULL, NULL);
     draw_ui(prenderer, engine_state);
@@ -186,9 +172,12 @@ void load_scene(){
 }
 
 void project(){
-    TriangleMesh* pmesh = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
-    update_texture(pmesh);
-    free(pmesh);
+    //TriangleMesh* pmesh = project_tri_mesh(pbuffer, pscene, &cam, engine_state.bface_cull);
+    int pitch = WIDTH * sizeof(Uint32);
+    Uint32* ppixels = NULL;
+    SDL_LockTexture(ptexture, NULL, (void**) &ppixels, &pitch);
+    render_mesh(pscene, ppixels, &cam, engine_state.bface_cull, engine_state.do_hlr);
+    SDL_UnlockTexture(ptexture);
 }
 
 void init_rendering(){
