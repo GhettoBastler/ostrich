@@ -32,7 +32,7 @@ You can read the full log on [my website](https://ghettobastler.com/december_adv
 ## Building
 
 ```
-make ostrich
+make build
 ```
 
 ## Usage
