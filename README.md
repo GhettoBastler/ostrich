@@ -15,12 +15,6 @@ It features:
 - Image export
 - Model generation using a custom scripting language
 
-This is a learning project I made for [December Adventures](https://eli.li/december-adventure) 2023. I wanted to practice coding in C, so I started writing a 3D projector inspired by [moogle](https://wiki.xxiivv.com/site/moogle.html) and [pinhole](https://git.sr.ht/~bellinitte/pinhole).
-
-The resulting program implements various optimization techniques, as well as [back-face culling](https://en.wikipedia.org/wiki/Back-face_culling) and [hidden-line removal](https://en.wikipedia.org/wiki/Hidden-line_removal) for rendering solid models. On the last few days I tried to implement a custom scripting language for generating 3D models *à la OpenSCAD*, but the result is very limited. There's also some code for importing STL files, but it ended up not using it.
-
-You can read the full log on [my website](https://ghettobastler.com/december_adventure_2023.html).
-
 ## Origin
 
 This is a learning project I made for [December Adventures](https://eli.li/december-adventure) 2023. I wanted to practice coding in C, so I started writing a 3D projector inspired by [moogle](https://wiki.xxiivv.com/site/moogle.html) and [pinhole](https://git.sr.ht/~bellinitte/pinhole).
