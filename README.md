@@ -61,12 +61,12 @@ The interpreter recognizes 16 keywords and uses [Reverse Polish Notation](https:
 
 ## Examples
 
-![](script_1.jpg)
+![](example_1.jpg)
 ```
 15 5 20 prism
 ```
 
-![](script_2.jpg)
+![](example_2.jpg)
 ```
 15 5 20 prism
 clone
@@ -74,7 +74,7 @@ clone
 merge
 ```
 
-![](script_3.jpg)
+![](example_3.jpg)
 ```
 15 3 10 prism
 clone
