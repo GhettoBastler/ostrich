@@ -1,0 +1,17 @@
+15 3 10 prism
+clone
+0 0 15 rotate
+0 0 25 translate
+clone
+0 0 15 rotate
+0 0 25 translate
+clone
+0 0 15 rotate
+0 0 25 translate
+clone
+0 0 15 rotate
+0 0 25 translate
+merge
+merge
+merge
+merge

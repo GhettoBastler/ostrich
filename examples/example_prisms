@@ -1,0 +1,97 @@
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+
+10 50 rand dup_work 5 6 rot_work rot_work prism -2 div -5 -5 rot_work rot_work translate
+-5 -5 -5 translate
+60 0 0 translate
+merge
+
+0 0 15 rotate
+

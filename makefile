@@ -1,4 +1,4 @@
-engine: clean
+build: clean
 	gcc src/engine.c \
 	src/camera.c \
 	src/interpreter.c \
@@ -8,13 +8,14 @@ engine: clean
 	src/ui.c \
 	src/vect.c \
 	src/utils.c \
-	-lSDL2 -lm -o bin/engine
+	-lSDL2 -lm -o bin/ostrich
+
 clean:
 	rm -rf bin/
 	mkdir bin
 
-run: engine
-	./bin/engine
+run: build
+	./bin/ostrich
 
 profiling: clean
 	gcc src/engine.c \
@@ -26,7 +27,7 @@ profiling: clean
 	src/ui.c \
 	src/vect.c \
 	src/utils.c \
-	-lSDL2 -lm -o bin/engine_prof -pg
+	-lSDL2 -lm -o bin/ostric_prof -pg
 
 debug: clean
 	gcc src/engine.c \
@@ -38,4 +39,4 @@ debug: clean
 	src/ui.c \
 	src/vect.c \
 	src/utils.c \
-	-lSDL2 -lm -o bin/engine_debug -g
+	-lSDL2 -lm -o bin/ostric_debug -g
